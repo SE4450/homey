@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  express:
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+        EXPRESS_PORT: ${EXPRESS_PORT}
+        SSL_COMMON_NAME: ${SSL_COMMON_NAME}
+    image: express:latest
+    restart: always
+    ports:
+      - "${EXPRESS_PORT}:${EXPRESS_PORT}"
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+  postgres:
+    image: postgres:17-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./dumps/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_DB=${DB_NAME}  

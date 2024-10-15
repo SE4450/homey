@@ -10,12 +10,12 @@ COPY . .
 ENV SSL_COMMON_NAME=$SSL_COMMON_NAME
 ENV PORT=$PORT
 
-RUN chmod +x ./setup.sh && ./setup.sh
-RUN chmod +x ./wait-for-db.sh
+RUN chmod +x ./docker/scripts/setup.sh && ./docker/scripts/setup.sh
+RUN chmod +x ./docker/scripts/wait-for-db.sh
 
 EXPOSE ${PORT}
 
 CMD ["node", "index.js"]
-ENTRYPOINT ["./wait-for-db.sh"]
+ENTRYPOINT ["./docker/scripts/wait-for-db.sh"]
 
 

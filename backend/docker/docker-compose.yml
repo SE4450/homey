@@ -2,8 +2,8 @@ version: "3.9"
 services:
   express:
     build:
-      context: .
-      dockerfile: dockerfile
+      context: ..
+      dockerfile: ./docker/dockerfile
       args:
         EXPRESS_PORT: ${EXPRESS_PORT}
         SSL_COMMON_NAME: ${SSL_COMMON_NAME}
@@ -17,6 +17,7 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
+      - EXPRESS_PORT=${EXPRESS_PORT}
   postgres:
     image: postgres:17-alpine
     restart: always

@@ -1,29 +1,32 @@
 const User = require("../models/userModel.js");
-const bcrypt = require('bcrypt');
-const { Sequelize } = require("sequelize");
+const bcrypt = require("bcrypt");
+const { ValidationError } = require("sequelize");
 
 exports.getUsers = async (req, res) => {
     try {
+        delete req.query.password;
+        delete req.query.email;
+
         const users = await User.findAll({ attributes: { exclude: ["password", "email"] }, where: req.query });
-        if (users.length = 0) {
-            res.status(404).json({
+        if (users.length == 0) {
+            return res.status(404).json({
                 status: "error",
-                message: "User(s) not found",
+                message: "No user(s) found",
                 data: [],
-                errors: [`No users found that match properties in ${JSON.stringify(req.query)}`]
+                errors: [`No user(s) found with data ${JSON.stringify(req.query)}`]
             });
         }
         res.status(200).json({
             status: "success",
-            message: "User(s) Found",
-            data: [users],
+            message: `${users.length} user(s) found`,
+            data: users,
             errors: []
         });
     } catch (err) {
-        if (err instanceof Sequelize.ValidationError) {
+        if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Unable to get user(s) due to validation error",
+                message: "Unable to get user(s) due to validation error(s)",
                 data: [],
                 errors: err.errors.map(err => err.message)
             });
@@ -43,29 +46,29 @@ exports.getUserById = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 status: "error",
-                message: "User not found",
+                message: `No user found`,
                 data: [],
-                errors: [`No users with id ${req.params.id}`]
+                errors: [`User ${req.params.id} does not exist`]
             });
         }
         res.status(200).json({
             status: "success",
-            message: "User found",
+            message: `User ${req.params.id} found`,
             data: [user],
             errors: []
         });
     } catch (err) {
-        if (err instanceof Sequelize.ValidationError) {
+        if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Unable to get user due to validation error",
+                message: `Unable to get user ${req.params.id} due to validation error(s)`,
                 data: [],
                 errors: err.errors.map(err => err.message)
             });
         }
         res.status(500).json({
             status: "error",
-            message: "An unexpected error occured while trying to get user",
+            message: `An unexpected error occured while trying to get user ${req.params.id}`,
             data: [],
             errors: [`${err.message}`]
         });
@@ -87,15 +90,15 @@ exports.createUser = async (req, res) => {
 
         res.status(201).json({
             status: "success",
-            message: "User created",
-            data: user,
+            message: `User ${user.id} created`,
+            data: [user],
             errors: []
         });
     } catch (err) {
-        if (err instanceof Sequelize.ValidationError) {
+        if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Unable to create user due to validation error(s)",
+                message: `Unable to create user due to validation error(s)`,
                 data: [],
                 errors: err.errors.map(err => err.message)
             });

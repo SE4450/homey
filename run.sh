@@ -7,7 +7,7 @@ cleanup() {
 
 trap cleanup SIGINT
 
-(cd ./frontend && npx expo start) &
+(cd ./frontend && npm install && npx expo start) &
 docker-compose -f ./backend/docker/docker-compose.yml up --build &
 
 wait

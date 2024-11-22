@@ -19,8 +19,8 @@ app.use((req, res) => {
 });
 
 const options = {
-    key: fs.readFileSync("/etc/ssl/private/key.pem"),
-    cert: fs.readFileSync("/etc/ssl/certs/cert.pem")
+    key: fs.readFileSync("./key.pem"),
+    cert: fs.readFileSync("./cert.pem")
 }
 
 const server = https.createServer(options, app);

@@ -6,7 +6,6 @@ services:
       dockerfile: ./docker/dockerfile
       args:
         EXPRESS_PORT: ${EXPRESS_PORT}
-        SSL_COMMON_NAME: ${SSL_COMMON_NAME}
     image: express:latest
     restart: always
     ports:

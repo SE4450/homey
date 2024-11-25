@@ -110,7 +110,7 @@ start_frontend() {
         npx expo install expo@latest
         npx expo install --fix
         npm install
-        npx expo start &
+        npx expo start --tunnel &
     )
     sleep 15
 }

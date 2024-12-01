@@ -5,6 +5,7 @@ const fs = require("fs");
 const https = require("https");
 const userRoutes = require("./routes/userRoutes.js");
 const listRoutes = require("./routes/listRoutes.js");
+const profileRoutes = require("./routes/profileRoutes.js");
 const { logger } = require("./middleware/logger.js");
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(logger);
 
 app.use("/api/users", userRoutes);
 app.use("/api/lists", listRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });

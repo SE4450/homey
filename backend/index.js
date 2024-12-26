@@ -18,14 +18,16 @@ app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });
 });
 
-const options = {
-    key: fs.readFileSync("./key.pem"),
-    cert: fs.readFileSync("./cert.pem")
-}
 
-const server = https.createServer(options, app);
 const port = process.env.EXPRESS_PORT || 3000;
 
-server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-});
+if (process.env.DEVELOPMENT == "true") {
+    app.listen(port, () => {
+        console.log(`HTTP listening on port ${port}`);
+    });
+} else {
+    const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt")}, app);
+    server.listen(port, () => {
+        console.log(`HTTPS listening on port ${port}`);
+    });
+}

@@ -104,8 +104,22 @@ ALTER TABLE ONLY public."Users"
 ALTER TABLE ONLY public."Users"
     ADD CONSTRAINT "Users_pkey" PRIMARY KEY (id);
 
-
 --
 -- PostgreSQL database dump complete
 --
 
+CREATE OR REPLACE FUNCTION public.delete_old_unverified_users()
+RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM public."Users"
+  WHERE "verified" = false
+    AND "createdAt" < NOW() - INTERVAL '1 hour';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER clean_up_unverified_users
+BEFORE INSERT
+ON public."Users"
+FOR EACH ROW
+EXECUTE FUNCTION public.delete_old_unverified_users();

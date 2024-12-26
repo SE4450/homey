@@ -62,7 +62,7 @@ setup_openssl() {
 
         "$(which openssl)" req -x509 -newkey rsa:4096 \
             -keyout "./backend/key.pem" \
-            -out "./backend/cert.pem" \
+            -out "./backend/cert.crt" \
             -sha256 -days 365 -nodes \
             -subj "$SUBJ"
     }
@@ -96,7 +96,12 @@ setup_openssl() {
     esac
 
     echo "OpenSSL setup completed successfully!"
-    generate_ssl_certificate
+    if [[ ! -f "./backend/cert.crt" || ! -f "./backend/key.pem" ]]; then
+        echo "Certificate or key file not found. Generating SSL certificate..."
+        generate_ssl_certificate
+    else
+        echo "SSL certificate already exists."
+    fi
 }
 
 # Trap signals and call cleanup on exit

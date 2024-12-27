@@ -1,6 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState } from "react";
 
+import StoreSearch from ".././components/StoreSearch";
+
 //stylesheet for the component
 const styles = StyleSheet.create({
     textAreaFormat : {
@@ -43,16 +45,16 @@ export default function Lists (props: {name: String, id: Number}) {
     //use states go here
     const [listItems, setListItems] = useState([] as Array<{item: String, AssignedTo: String}>);
     const [item, setItem] = useState("");
-    const [assignment, setAssignmnet] = useState("");
+    const [assignment, setAssignment] = useState("");
 
     //function to add an item to the list
     const addItem = async() => {
-        if(item != "") {
+        if(item != "" && assignment != "") {
             //add the new item and assignment to the table
             setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
         }
         else {
-            alert("You must enter an item");
+            alert("You must enter an item and an assignment");
         }
     }
 
@@ -72,7 +74,7 @@ export default function Lists (props: {name: String, id: Number}) {
             <TextInput style={styles.textAreaFormat} placeholder="Type New List Entry Here" onChangeText={text => setItem(text)}></TextInput>
 
             <Text>Assigned To: </Text>
-            <TextInput style={styles.textAreaFormat} placeholder="Type List Assignment Here" onChangeText={text => setAssignmnet(text)}></TextInput>
+            <TextInput style={styles.textAreaFormat} placeholder="Type List Assignment Here" onChangeText={text => setAssignment(text)}></TextInput>
             <Button title="Add Item To List" onPress={addItem} /> 
 
             
@@ -106,6 +108,9 @@ export default function Lists (props: {name: String, id: Number}) {
                 
 
             </View>
+
+            <StoreSearch />
+
         </ScrollView>
     )
 }

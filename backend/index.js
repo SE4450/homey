@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./db.js");
 const fs = require("fs");
 const https = require("https");
 const userRoutes = require("./routes/userRoutes.js");
@@ -18,7 +17,6 @@ app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });
 });
 
-
 const port = process.env.EXPRESS_PORT || 3000;
 
 if (process.env.DEVELOPMENT == "true") {
@@ -26,7 +24,7 @@ if (process.env.DEVELOPMENT == "true") {
         console.log(`HTTP listening on port ${port}`);
     });
 } else {
-    const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt")}, app);
+    const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt") }, app);
     server.listen(port, () => {
         console.log(`HTTPS listening on port ${port}`);
     });

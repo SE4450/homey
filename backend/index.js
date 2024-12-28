@@ -7,7 +7,7 @@ const userRoutes = require("./routes/userRoutes.js");
 const listRoutes = require("./routes/listRoutes.js");
 const storeRoutes = require("../routes/storeRoutes.js");
 const { logger } = require("./middleware/logger.js");
-
+const sequelize = require("./db.js");
 const app = express();
 
 app.use(cors());
@@ -30,6 +30,7 @@ const options = {
 const server = https.createServer(options, app);
 const port = process.env.EXPRESS_PORT || 3000;
 
-server.listen(port, () => {
+server.listen(port, async () => {
+    await sequelize.sync({force: false});
     console.log(`Listening on port ${port}`);
 });

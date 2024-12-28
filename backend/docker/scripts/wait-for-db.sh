@@ -1,5 +1,4 @@
 #!/bin/sh
-
 MAX_WAIT_TIME=120
 elapsed_time=0
 

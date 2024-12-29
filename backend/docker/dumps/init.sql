@@ -189,7 +189,6 @@ ALTER SEQUENCE public."Participants_id_seq" OWNER TO admin;
 
 ALTER SEQUENCE public."Participants_id_seq" OWNED BY public."Participants".id;
 
-
 --
 -- Name: Users; Type: TABLE; Schema: public; Owner: admin
 --

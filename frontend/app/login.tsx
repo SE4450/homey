@@ -31,8 +31,6 @@ const LoginScreen = () => {
 
         if (response) {
             await login(response.data[0].token);
-            console.log("good");
-            Alert.alert("Good", "success");
             router.push("/home");
         }
     };

@@ -13,5 +13,4 @@ router.post("/", createUser);
 
 router.post("/login", login);
 
-
 module.exports = router;

@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Exit on errors
 set -e
 
-# Function to clean up Docker containers and images
 cleanup() {
     echo "Cleaning up Docker containers and images..."
     
@@ -20,7 +18,6 @@ cleanup() {
 setup_openssl() {
     echo "Checking for OpenSSL..."
 
-    # Function to install OpenSSL on macOS
     install_openssl_mac() {
         echo "Checking for Homebrew..."
         if ! command -v brew >/dev/null 2>&1; then
@@ -38,7 +35,6 @@ setup_openssl() {
         echo "OpenSSL installation complete!"
     }
 
-    # Validate OpenSSL installation
     validate_openssl() {
         if ! command -v openssl >/dev/null 2>&1; then
             echo "OpenSSL is not installed or not in PATH."
@@ -49,7 +45,6 @@ setup_openssl() {
         return 0
     }
 
-    # Generate a self-signed SSL certificate
     generate_ssl_certificate() {
         echo "Generating a self-signed SSL certificate..."
         
@@ -67,11 +62,10 @@ setup_openssl() {
             -subj "$SUBJ"
     }
 
-    # Detect operating system and handle accordingly
     OS="$(uname -s)"
     case "$OS" in
         Darwin)
-            echo "Running on macOS."
+            echo "Running on macOS"
             validate_openssl || install_openssl_mac
             ;;
         MINGW*|CYGWIN*|MSYS*)
@@ -80,9 +74,7 @@ setup_openssl() {
             # Check if OpenSSL exists in Git Bash
             OPENSSL_PATH=$(which openssl)
             if [[ -z "$OPENSSL_PATH" || "$OPENSSL_PATH" != "/mingw64/bin/openssl" ]]; then
-                echo "OpenSSL not found or not in the expected path."
-                echo "Ensure Git Bash is correctly installed with OpenSSL."
-                echo "Reinstall Git for Windows if necessary: https://git-scm.com/"
+                echo "OpenSSL not found or not in the expected path"
                 exit 1
             fi
 
@@ -104,10 +96,8 @@ setup_openssl() {
     fi
 }
 
-# Trap signals and call cleanup on exit
 trap cleanup SIGINT SIGTERM EXIT
 
-# Start frontend setup in the background
 start_frontend() {
     echo "Starting frontend ..."
     (
@@ -115,22 +105,18 @@ start_frontend() {
         npx expo install expo@latest
         npx expo install --fix
         npm install
-        npx expo start --tunnel &
+        npx expo start &
     )
     sleep 15
 }
 
-# Start backend setup in the background
 start_backend() {
     echo "Starting backend ..."
     dos2unix ./backend/docker/scripts/wait-for-db.sh
-    docker --debug compose -f ./backend/docker/docker-compose.yml up --build
+    docker compose -f ./backend/docker/docker-compose.yml up --build
 }
 
-# Run OpenSSL setup before backend setup
 setup_openssl
-
-# Run frontend and backend setup in parallel
 start_frontend
 start_backend
 

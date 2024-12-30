@@ -1,16 +1,15 @@
 import { useState } from "react";
 import axios, { AxiosInstance } from "axios";
-import { BACKEND_API_ENDPOINT } from "@env";
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
 
 const useAxios = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter(); // Router for navigation
+  const router = useRouter();
 
   const axiosInstance: AxiosInstance = axios.create({
-    baseURL: BACKEND_API_ENDPOINT,
+    baseURL: process.env.EXPO_PUBLIC_API_URL
   });
 
   const formatErrors = (errors: string[]): string => {

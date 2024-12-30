@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-ARG PORT=3000
+ARG PORT=8080
 
 WORKDIR /backend
 

@@ -1,7 +1,9 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 
-import Lists from ".././components/Lists";
+import useAxios from "../app/hooks/useAxios";
+import { useAuth } from "../app/context/AuthContext";
+import Lists from "../components/Lists";
 
 const styles = StyleSheet.create({
     displayedLists: {
@@ -27,8 +29,11 @@ export default function ListDisplay() {
     //variable that will hold the names of all the user created lists
     const [lists, setLists] = useState([] as Array<{name: String, id: Number}>);
 
+    const { post, get } = useAxios();
+    const { userToken, userId } = useAuth();
+
     //sample data to test
-    let data = [{name: "list1", id: 1}, {name: "list2", id: 2}, {name: "list3", id: 3}];
+    //let data = [{name: "list1", id: 1}, {name: "list2", id: 2}, {name: "list3", id: 3}];
 
     useEffect(() => {
         usersLists();
@@ -37,8 +42,12 @@ export default function ListDisplay() {
     //function called in the useEffect to load all the users created lists
     const usersLists = async() => {
         //fetch request goes here
-        for(const list of data) {
-            setLists(l => [...l, {name: list.name, id: list.id}]);
+        const response = await get<any>(`/api/lists?userId=${userId}`);
+
+        if(response) {
+            for(const list of response.data) {
+                setLists(l => [...l, {name: list.listName, id: list.listId}]);
+            }
         }
     }
 

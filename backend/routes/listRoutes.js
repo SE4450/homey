@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { getLists, createList, deleteList, getItems, createItem, updateItem, deleteItem } = require("../controllers/listController.js");
+const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.get("/", getLists);
+router.get("/", authenticateUser("tenant"), getLists);
 
 router.post("/createList", createList);
 

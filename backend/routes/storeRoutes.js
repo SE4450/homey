@@ -5,3 +5,5 @@ const { getStoreEntries, createStoreEntry } = require("../controllers/storeContr
 router.get("/getEntries/:itemName", getStoreEntries);
 
 router.post("/createEntries", createStoreEntry);
+
+module.exports = router;

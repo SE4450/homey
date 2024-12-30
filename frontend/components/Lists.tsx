@@ -1,7 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import StoreSearch from ".././components/StoreSearch";
+import useAxios from "../app/hooks/useAxios";
+import StoreSearch from "../components/StoreSearch";
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -47,11 +48,37 @@ export default function Lists (props: {name: String, id: Number}) {
     const [item, setItem] = useState("");
     const [assignment, setAssignment] = useState("");
 
+    const { post, get } = useAxios();
+
+    //once the page loads we get all the items in the list
+    useEffect(() => {
+        getItems();
+    }, []);
+
+    //function to initalize the listItem array with anything in the database
+    const getItems = async() => {
+        //make a fetch request to get any items for the selected list
+        const body = { listId: props.id }
+        const response = await get<any>("/api/lists/items", body);
+
+        if(response) {
+            response.data.forEach((item: {listId: Number, rowId: Number, item: String, assignedTo: String, createdAt: String, updatedAt: String}) => {
+                setListItems(l => [...l, {item: item.item, AssignedTo: item.assignedTo}]);
+            });
+        }
+    }
+
     //function to add an item to the list
     const addItem = async() => {
         if(item != "" && assignment != "") {
-            //add the new item and assignment to the table
-            setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
+            //make a fetch request to add the new item to the database
+            const body = { listId: props.id, item: item, assignedTo: assignment };
+            const response = await post<any>("/api/lists/createItem", body);
+
+            if(response) {
+                //add the new item and assignment to the table
+                setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
+            }
         }
         else {
             alert("You must enter an item and an assignment");
@@ -60,10 +87,14 @@ export default function Lists (props: {name: String, id: Number}) {
 
     //function to delete a row from the list
     const deleteRow = async(deleteIndex: Number) => {
+        //call the fetch request to delete the selected row from the database
+        const body = { listId: props.id, rowNum: Number(deleteIndex) + 1 };
+        const response = await post<any>("/api/lists/deleteItem", body);
 
-        setListItems(listItems.filter((_, i) => i !== deleteIndex))
-        console.log(listItems);
-        alert("Row Deleted");
+        if(response) {
+            setListItems(listItems.filter((_, i) => i !== deleteIndex))
+            alert("Row Deleted");
+        }
     }
 
     return (

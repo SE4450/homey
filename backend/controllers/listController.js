@@ -5,7 +5,7 @@ const { ValidationError } = require("sequelize");
 //way to get all of the users lists
 exports.getLists = async (req, res) => {
     try {
-        //first get the lists for the user  query needs to be: ?userId= thid users id
+        //first get the lists for the user  query needs to be: ?userId= thid users id  example: http://10.0.0.236:8080/api/lists?userId=1
         const usersLists = await List.findAll({ where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
 
         if(usersLists.length == 0) {
@@ -189,11 +189,11 @@ exports.createItem = async (req, res) => {
 
 
 
-//option to assign someone to the item
+//option to assign someone to the item 
 exports.updateItem = async (req, res) => {
     try {
         const {  listId, item, assignedTo  } = req.body;
-        const listItem = Item; //this may need to be changes
+        let listItem = Item;
 
         if(item != null) {
             listItem = await Item.update({ item }, { where: { listId: listId, rowId: req.params.row }});

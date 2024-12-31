@@ -117,7 +117,7 @@ exports.deleteList = async (req, res) => {
 exports.getItems = async (req, res) => {
     try {
         //the listId needs to be sent in the body for this to work
-        const listItems = await Item.findAll({ listId: req.body.listId });
+        const listItems = await Item.findAll({ where: req.query});
 
         if(listItems.length == 0) {
             return res.status(404).json({

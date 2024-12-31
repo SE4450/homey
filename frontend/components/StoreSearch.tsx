@@ -1,6 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState } from "react";
 
+import useAxios from "../app/hooks/useAxios";
+
 //stylesheet for the component
 const styles = StyleSheet.create({
     textAreaFormat : {
@@ -17,17 +19,23 @@ export default function StoreSearch(){
     const [itemToCompare, setItemToCompare] = useState("");
     const [foundItems, setFoundItems] = useState([] as Array<{itemName: String, store: String, price: String}>);
 
+    const { post, get } = useAxios();
+
     //sample of what the items would look like
-    let items = [{itemName: "apples", store: "Loblaws", price: "$2.00"}, {itemName: "apples", store: "Costco", price: "$1.50"}, {itemName: "apples", store: "Farm boy", price: "$2.00"}, ]
+    //let items = [{itemName: "apples", store: "Loblaws", price: "$2.00"}, {itemName: "apples", store: "Costco", price: "$1.50"}, {itemName: "apples", store: "Farm boy", price: "$2.00"}, ]
 
     //return all the searched results from the database
     const compareItem = async() => {
         setFoundItems([]);
         if(itemToCompare != "") {
-            //ASSUME THE BACKEND DOES THE SEARCHING push every item the backend returned into an object
-            items.forEach(item => {
-                setFoundItems(i => [...i, {itemName: item.itemName, store: item.store, price: item.price}]);
-            });
+            const body = { itemName: itemToCompare.toLowerCase() }
+            const response = await get<any>(`/api/stores/getEntries`, body);
+
+            if(response) {
+                for(const item of response.data) {
+                    setFoundItems(i => [...i, {itemName: item.itemName, store: item.store, price: item.price}]);
+                }
+            }
         }
         else {
             alert("You must enter an item before searching");

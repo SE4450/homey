@@ -6,6 +6,13 @@ import { useAuth } from "../app/context/AuthContext";
 import Lists from "../components/Lists";
 
 const styles = StyleSheet.create({
+    textAreaFormat : {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+        backgroundColor: "white"
+    },
     displayedLists: {
         
     },
@@ -25,6 +32,7 @@ export default function ListDisplay() {
     const [listView, setListView] = useState(true);
     const [list, setList] = useState(false);
     const [listName, setListName] = useState("" as String);
+    const [createdList, setCreatedList] = useState("" as String);
     const [listID, setListID] = useState(0 as Number);
     //variable that will hold the names of all the user created lists
     const [lists, setLists] = useState([] as Array<{name: String, id: Number}>);
@@ -45,9 +53,21 @@ export default function ListDisplay() {
         const response = await get<any>(`/api/lists?userId=${userId}`);
 
         if(response) {
+            //clear the array
+            setLists([]);
             for(const list of response.data) {
                 setLists(l => [...l, {name: list.listName, id: list.listId}]);
             }
+        }
+    }
+
+    //function to create a new list
+    const createList = async() => {
+        const body = { userId: userId, listName: createdList }
+        const response = await post<any>("/api/lists/createList", body)
+
+        if(response) {
+            usersLists();
         }
     }
 
@@ -67,6 +87,9 @@ export default function ListDisplay() {
             {
                 listView && 
                 <View>
+                    <Text>New List Name:</Text>
+                    <TextInput style={styles.textAreaFormat} placeholder="Type New List Entry Here" onChangeText={text => setCreatedList(text)}></TextInput>
+                    <Pressable onPress={() => createList()}><Text>Create List</Text></Pressable>
                     {lists.map((list) => 
                         <View style={styles.displayedLists} key={list.name+"view"}>
                             <Pressable key={list.name+"button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>

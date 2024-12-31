@@ -15,6 +15,6 @@ router.post("/createItem", createItem);
 
 router.post("/updateItem/:row", updateItem);
 
-router.delete("/deleteItem", deleteItem);
+router.post("/deleteItem", deleteItem);
 
 module.exports = router;

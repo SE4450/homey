@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
 
 export default function Lists (props: {name: String, id: Number}) {
     //use states go here
-    const [listItems, setListItems] = useState([] as Array<{item: String, AssignedTo: String}>);
+    const [listItems, setListItems] = useState([] as Array<{item: String, AssignedTo: String, rowId: Number}>);
     const [item, setItem] = useState("");
     const [assignment, setAssignment] = useState("");
 
@@ -57,13 +57,15 @@ export default function Lists (props: {name: String, id: Number}) {
 
     //function to initalize the listItem array with anything in the database
     const getItems = async() => {
+        //clear the set list items
+        setListItems([]);
         //make a fetch request to get any items for the selected list
         const body = { listId: props.id }
         const response = await get<any>("/api/lists/items", body);
 
         if(response) {
             response.data.forEach((item: {listId: Number, rowId: Number, item: String, assignedTo: String, createdAt: String, updatedAt: String}) => {
-                setListItems(l => [...l, {item: item.item, AssignedTo: item.assignedTo}]);
+                setListItems(l => [...l, {item: item.item, AssignedTo: item.assignedTo, rowId: item.rowId}]);
             });
         }
     }
@@ -77,7 +79,8 @@ export default function Lists (props: {name: String, id: Number}) {
 
             if(response) {
                 //add the new item and assignment to the table
-                setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
+                //setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
+                getItems();
             }
         }
         else {
@@ -86,13 +89,14 @@ export default function Lists (props: {name: String, id: Number}) {
     }
 
     //function to delete a row from the list
-    const deleteRow = async(deleteIndex: Number) => {
+    const deleteRow = async(deleteRowId: Number) => {
         //call the fetch request to delete the selected row from the database
-        const body = { listId: props.id, rowNum: Number(deleteIndex) + 1 };
+        const body = { listId: props.id, rowNum: deleteRowId };
         const response = await post<any>("/api/lists/deleteItem", body);
 
         if(response) {
-            setListItems(listItems.filter((_, i) => i !== deleteIndex))
+            //setListItems(listItems.filter((_, i) => i !== deleteIndex))
+            getItems();
             alert("Row Deleted");
         }
     }
@@ -132,7 +136,7 @@ export default function Lists (props: {name: String, id: Number}) {
                             <View key={item.AssignedTo.concat(item.item+"viewnode")} style={styles.tableRow}>
                                 <Text key={item.AssignedTo.concat(item.item+"textnode")} style={styles.tableData}>{item.AssignedTo}</Text>
                             </View>
-                            <Pressable key={"deleteRow_"+index} onPress={() => {deleteRow(index)}}><Text style={styles.button}>Delete</Text></Pressable>
+                            <Pressable key={"deleteRow_"+index} onPress={() => {deleteRow(item.rowId)}}><Text style={styles.button}>Delete</Text></Pressable>
                         </View> 
                     )
                 }

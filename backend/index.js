@@ -3,6 +3,8 @@ const cors = require("cors");
 const fs = require("fs");
 const https = require("https");
 const userRoutes = require("./routes/userRoutes.js");
+const conversationRoutes = require("./routes/conversationRoutes.js");
+const messageRoutes = require("./routes/messageRoutes.js");
 const { logger } = require("./middleware/logger.js");
 const sequelize = require("./db.js");
 
@@ -13,6 +15,8 @@ app.use(express.json());
 app.use(logger);
 
 app.use("/api/users", userRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });

@@ -292,14 +292,6 @@ ALTER TABLE ONLY public."Users"
 
 
 --
--- Name: Users Users_email_key1; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Users"
-    ADD CONSTRAINT "Users_email_key1" UNIQUE (email);
-
-
---
 -- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -328,7 +320,6 @@ ALTER TABLE ONLY public."Users"
 --
 
 CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
-
 
 --
 -- Name: Messages Messages_conversationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin

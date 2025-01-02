@@ -1,6 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dropdown } from 'react-native-element-dropdown';
+
+import useAxios from "../app/hooks/useAxios";
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -38,7 +40,7 @@ const styles = StyleSheet.create({
     }
 });
 
-export default function Profile() {
+export default function Profile(props: {username: String, userId: any}) {
     //usestates
     const [displayProfile, setDisplayProfile] = useState(false);
     //useStates for dropdowns
@@ -53,21 +55,59 @@ export default function Profile() {
         { label: 'High', value: 'High' },
       ];
 
-    const updateProfile = async() => {
+    const { post, get } = useAxios();
 
-        alert("Profile updated");
+    //once the page loads the users current profile settings
+    useEffect(() => {
+        getProfile();
+    }, []);
+
+    const getProfile = async() => {
+        const body = { userId: props.userId };
+        const response = await get<any>("/api/profile", body);
+
+        if(response) {
+            if(response.data.cleaningHabits != null) {
+                setCleaningValue(response.data.cleaningHabits);
+            }
+            if(response.data.noiseLevel != null) {
+                setNoiseValue(response.data.noiseLevel);
+            }
+            if(response.data.sleepStart != null) {
+                setStartSleepValue(response.data.sleepStart);
+            }
+            if(response.data.sleepEnd != null) {
+                setEndSleepValue(response.data.sleepEnd);
+            }
+            if(response.data.alergies != null) {
+                setAllergiesValue(response.data.alergies);
+            }
+        }
+    }
+
+    const updateProfile = async() => {
+        const body = {  cleaningHabits: cleaningValue,
+                        noiseLevel: noiseValue,
+                        sleepStart: startSleepValue,
+                        sleepEnd: endSleepValue,
+                        alergies: allergiesValue  };
+        const response = await post<any>("/api/profile/updateProfile", body);
+
+        if(response) {
+            alert("Profile updated");
+        }
     }
 
     return(
         <ScrollView>
             <View>
-                <Button title="Profile" onPress={() => setDisplayProfile(!displayProfile)}></Button>
+                <Button title={props.username + " profile"} onPress={() => setDisplayProfile(!displayProfile)}></Button>
             </View>
 
             { displayProfile &&
                 <View style={styles.profilePopup}>
                     <View>
-                        <Text>Username</Text>
+                        <Text>{props.username}</Text>
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Cleaning Habits: </Text>

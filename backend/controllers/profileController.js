@@ -46,8 +46,11 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const {  cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  } = req.body;
-        const userProfile = Profile; //this may need to be changes
+        let userProfile = Profile;
 
+        userProfile = await Profile.update({ cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  }, { where: { id: req.params.id }});
+
+        /*
         if(cleaningHabits != null) {
             userProfile = await Profile.update({ cleaningHabits }, { where: { id: req.params.id }});
         }
@@ -63,6 +66,7 @@ exports.updateProfile = async (req, res) => {
         if(alergies != null) {
             userProfile = await Profile.update({ alergies }, { where: { id: req.params.id }});
         }
+        */
 
         res.status(201).json({
             status: "success",

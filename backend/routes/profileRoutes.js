@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getProfile, updateProfile} = require("../controller/profileController.js");
+const { getProfile, updateProfile} = require("../controllers/profileController.js");
 
 router.get("/", getProfile);
 

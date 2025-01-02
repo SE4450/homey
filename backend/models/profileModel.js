@@ -18,15 +18,15 @@ const Profile = sequelize.define("Profile", {
         allowNull: true,
     },
     sleepStart: {
-        Type: DataTypes.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
     },
     sleepEnd: {
-        Type: DataTypes.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
     },
     alergies:{
-        Type: DataTypes.STRING,
+        type: DataTypes.STRING,
         allowNull: true
     }
 });

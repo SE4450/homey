@@ -39,6 +39,15 @@ exports.sendMessage = async (req, res) => {
             content: content.trim()
         });
 
+        const io = req.app.get("io");
+        io.to(`conversation_${conversationId}`).emit("newMessage", {
+            id: newMessage.id,
+            conversationId,
+            senderId,
+            content: newMessage.content,
+            createdAt: newMessage.createdAt,
+        });
+
         res.status(201).json({
             status: "success",
             message: "Message sent successfully",
@@ -161,6 +170,9 @@ exports.markMessageAsRead = async (req, res) => {
             readBy.push(loggedInUserId);
             message.readBy = JSON.stringify(readBy);
             await message.save();
+
+            const io = req.app.get("io");
+            io.to(`conversation_${message.conversationId}`).emit("messageRead", { messageId, userId: loggedInUserId });
         }
 
         res.status(200).json({

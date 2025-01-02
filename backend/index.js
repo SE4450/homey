@@ -4,7 +4,6 @@ const db = require("./db.js");
 const fs = require("fs");
 const https = require("https");
 const userRoutes = require("./routes/userRoutes.js");
-const listRoutes = require("./routes/listRoutes.js");
 const profileRoutes = require("./routes/profileRoutes.js");
 const { logger } = require("./middleware/logger.js");
 
@@ -15,7 +14,6 @@ app.use(express.json());
 app.use(logger);
 
 app.use("/api/users", userRoutes);
-app.use("/api/lists", listRoutes);
 app.use("/api/profile", profileRoutes);
 
 app.use((req, res) => {

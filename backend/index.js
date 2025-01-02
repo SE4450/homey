@@ -6,6 +6,7 @@ const https = require("https");
 const userRoutes = require("./routes/userRoutes.js");
 const profileRoutes = require("./routes/profileRoutes.js");
 const { logger } = require("./middleware/logger.js");
+const sequelize = require("./db.js");
 
 const app = express();
 
@@ -20,14 +21,21 @@ app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });
 });
 
-const options = {
-    key: fs.readFileSync("/etc/ssl/private/key.pem"),
-    cert: fs.readFileSync("/etc/ssl/certs/cert.pem")
+const port = process.env.EXPRESS_PORT || 8080;
+
+if (process.env.DEVELOPMENT == "true") {
+    app.listen(port, async () => {
+        if (process.env.SYNC == "true") {
+            await sequelize.sync({ force: false });
+        }
+        console.log(`HTTP listening on port ${port}`);
+    });
+} else {
+    const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt") }, app);
+    server.listen(port, async () => {
+        if (process.env.SYNC == "true") {
+            await sequelize.sync({ force: false });
+        }
+        console.log(`HTTPS listening on port ${port}`);
+    });
 }
-
-const server = https.createServer(options, app);
-const port = process.env.EXPRESS_PORT || 3000;
-
-server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-});

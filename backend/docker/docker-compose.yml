@@ -6,7 +6,6 @@ services:
       dockerfile: ./docker/dockerfile
       args:
         EXPRESS_PORT: ${EXPRESS_PORT}
-        SSL_COMMON_NAME: ${SSL_COMMON_NAME}
     image: express:latest
     restart: always
     ports:
@@ -17,7 +16,13 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
+      - HOST=${HOST}
       - EXPRESS_PORT=${EXPRESS_PORT}
+      - DEVELOPMENT=${DEVELOPMENT}
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - SYNC=${SYNC}
   postgres:
     image: postgres:17-alpine
     restart: always
@@ -29,4 +34,4 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_DB=${DB_NAME}  
+      - POSTGRES_DB=${DB_NAME}

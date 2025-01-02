@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.0
--- Dumped by pg_dump version 17.0
+-- Dumped from database version 17.2
+-- Dumped by pg_dump version 17.2
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -29,6 +29,24 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
+
+--
+-- Name: delete_old_unverified_users(); Type: FUNCTION; Schema: public; Owner: admin
+--
+
+CREATE FUNCTION public.delete_old_unverified_users() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  DELETE FROM public."Users"
+  WHERE "verified" = false
+    AND "createdAt" < NOW() - INTERVAL '1 hour';
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.delete_old_unverified_users() OWNER TO admin;
 
 SET default_tablespace = '';
 
@@ -90,12 +108,6 @@ ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Use
 ALTER TABLE ONLY public."Users"
     ADD CONSTRAINT "Users_email_key" UNIQUE (email);
 
---
--- Name: Users Users_username_key; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Users"
-    ADD CONSTRAINT "Users_username_key" UNIQUE (username);
 
 --
 -- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
@@ -106,6 +118,20 @@ ALTER TABLE ONLY public."Users"
 
 
 --
--- PostgreSQL database dump complete
+-- Name: Users Users_username_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_username_key" UNIQUE (username);
+
+
+--
+-- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
+--
+
+CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
+
+
+--
+-- PostgreSQL database dump complete
+--

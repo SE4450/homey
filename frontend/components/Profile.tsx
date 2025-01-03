@@ -91,7 +91,7 @@ export default function Profile(props: {username: String, userId: any}) {
                         sleepStart: startSleepValue,
                         sleepEnd: endSleepValue,
                         alergies: allergiesValue  };
-        const response = await post<any>("/api/profile/updateProfile", body);
+        const response = await post<any>(`/api/profile/updateProfile?userId=${props.userId}`, body);
 
         if(response) {
             alert("Profile updated");

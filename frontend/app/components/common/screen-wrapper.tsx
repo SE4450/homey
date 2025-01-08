@@ -1,3 +1,4 @@
+import { COLORS } from "@/app/theme/theme";
 import React, { ReactNode } from "react";
 import { StyleSheet, View, Platform } from "react-native";
 
@@ -16,7 +17,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 10 : 0,
     paddingHorizontal: 24,
     paddingBottom: 32,
-    backgroundColor: "red",
+    backgroundColor: COLORS.BACKGROUND,
     minHeight: "100%",
   },
 });

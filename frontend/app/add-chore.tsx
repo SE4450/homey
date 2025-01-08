@@ -1,11 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import ScreenWrapper from "./components/common/screen-wrapper";
 
 const AddChore = () => {
   return (
-    <View>
-      <Text>AddChore</Text>
-    </View>
+    <ScreenWrapper>
+      <View>
+        <Text>AddChore</Text>
+      </View>
+    </ScreenWrapper>
   );
 };
 

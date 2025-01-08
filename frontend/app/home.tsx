@@ -37,6 +37,11 @@ export default function HomeScreen() {
         router.push("/login");
     };
 
+    const handleMessages = () => {
+        console.log(userToken);
+        router.push("./contacts");
+    };
+
     if (!userToken) {
         return <ActivityIndicator size="large" />;
     }
@@ -45,6 +50,7 @@ export default function HomeScreen() {
         <View>
             <Text>Welcome {user.firstName} {user.lastName}</Text>
             <Button title="Logout" onPress={handleLogout} />
+            <Button title="Messages" onPress={handleMessages} />
         </View>
     );
 }

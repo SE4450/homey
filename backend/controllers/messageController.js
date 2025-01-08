@@ -19,6 +19,7 @@ exports.sendMessage = async (req, res) => {
             where: { id: conversationId },
             include: {
                 model: Participant,
+                as: "participants",
                 where: { userId: senderId },
                 attributes: []
             }
@@ -37,15 +38,6 @@ exports.sendMessage = async (req, res) => {
             conversationId,
             senderId,
             content: content.trim()
-        });
-
-        const io = req.app.get("io");
-        io.to(`conversation_${conversationId}`).emit("newMessage", {
-            id: newMessage.id,
-            conversationId,
-            senderId,
-            content: newMessage.content,
-            createdAt: newMessage.createdAt,
         });
 
         res.status(201).json({
@@ -90,6 +82,7 @@ exports.getMessages = async (req, res) => {
             where: { id: conversationId },
             include: {
                 model: Participant,
+                as: "participants",
                 where: { userId: loggedInUserId },
                 attributes: []
             },
@@ -148,8 +141,10 @@ exports.markMessageAsRead = async (req, res) => {
             where: { id: messageId },
             include: {
                 model: Conversation,
+                as: "conversation",
                 include: {
                     model: Participant,
+                    as: "filterParticipants",
                     where: { userId: loggedInUserId },
                     attributes: []
                 },
@@ -170,9 +165,6 @@ exports.markMessageAsRead = async (req, res) => {
             readBy.push(loggedInUserId);
             message.readBy = JSON.stringify(readBy);
             await message.save();
-
-            const io = req.app.get("io");
-            io.to(`conversation_${message.conversationId}`).emit("messageRead", { messageId, userId: loggedInUserId });
         }
 
         res.status(200).json({

@@ -2,6 +2,7 @@ const User = require("./userModel");
 const Conversation = require("./conversationModel");
 const Participant = require("./participantModel");
 const Message = require("./messageModel");
+const Profile = require("./profileModel");
 
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
@@ -16,4 +17,4 @@ Participant.belongsTo(Conversation, { foreignKey: "conversationId", as: "convers
 User.hasMany(Participant, { foreignKey: "userId", as: "participants" });
 Participant.belongsTo(User, { foreignKey: "userId", as: "users" });
 
-module.exports = { User, Conversation, Participant, Message };
+module.exports = { User, Conversation, Participant, Message, Profile };

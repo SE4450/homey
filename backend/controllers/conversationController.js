@@ -138,24 +138,24 @@ exports.createDM = async (req, res) => {
                 status: "error",
                 message: "Missing userId in the request body",
                 data: [],
-                errors: ["UserId of the other participant is required"]
+                errors: ["UserId of the other participant is required"],
             });
         }
 
         const loggedInUserId = req.user.userId;
 
+        // Check if a conversation already exists between the two users
         const existingConversation = await Conversation.findOne({
             where: { type: "dm" },
             include: [
                 {
                     model: Participant,
                     as: "participants",
-                    where: { userId: [loggedInUserId, userId] },
+                    where: { userId: [loggedInUserId, userId] }
                 }
             ],
             group: ["Conversation.id"],
             having: sequelize.literal(`COUNT("participants"."id") = 2`),
-            logging: console.log
         });
 
         if (existingConversation) {
@@ -167,20 +167,18 @@ exports.createDM = async (req, res) => {
             });
         }
 
-        // Create a new DM conversation
         const newConversation = await Conversation.create({ type: "dm" });
 
-        // Add both users as participants
         await Participant.bulkCreate([
             { userId: loggedInUserId, conversationId: newConversation.id },
-            { userId, conversationId: newConversation.id }
+            { userId, conversationId: newConversation.id },
         ]);
 
         res.status(201).json({
             status: "success",
             message: "DM conversation created successfully",
             data: newConversation,
-            errors: []
+            errors: [],
         });
     } catch (err) {
         if (err instanceof ValidationError) {
@@ -188,18 +186,17 @@ exports.createDM = async (req, res) => {
                 status: "error",
                 message: "Unable to create DM due to validation error(s)",
                 data: [],
-                errors: err.errors.map(err => err.message)
+                errors: err.errors.map((err) => err.message),
             });
         }
         res.status(500).json({
             status: "error",
             message: "An unexpected error occurred while creating the DM",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };
-
 
 exports.createGroupChat = async (req, res) => {
     try {

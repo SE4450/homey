@@ -12,7 +12,6 @@ Message.belongsTo(Conversation, { foreignKey: "conversationId", as: "conversatio
 Conversation.hasMany(Participant, { foreignKey: "conversationId", as: "filterParticipants" });
 Conversation.hasMany(Participant, { foreignKey: "conversationId", as: "participants" });
 Participant.belongsTo(Conversation, { foreignKey: "conversationId", as: "conversation" });
-Participant.belongsTo(Conversation, { foreignKey: "conversationId", as: "participants" });
 
 User.hasMany(Participant, { foreignKey: "userId", as: "participants" });
 Participant.belongsTo(User, { foreignKey: "userId", as: "users" });

@@ -154,7 +154,7 @@ exports.createDM = async (req, res) => {
                 errors: ["Cannot create a DM with yourself"]
             });
         }
-        // Check if a DM conversation already exists
+
         const existingConversation = await sequelize.query(
             `
             SELECT "Conversation"."id"
@@ -184,10 +184,8 @@ exports.createDM = async (req, res) => {
             });
         }
 
-        // Create a new DM conversation
         const newConversation = await Conversation.create({ type: "dm" });
 
-        // Add both users as participants
         await Participant.bulkCreate([
             { userId: loggedInUserId, conversationId: newConversation.id },
             { userId, conversationId: newConversation.id },
@@ -197,7 +195,7 @@ exports.createDM = async (req, res) => {
             status: "success",
             message: "DM conversation created successfully",
             data: newConversation,
-            errors: [],
+            errors: []
         });
     } catch (err) {
         if (err instanceof ValidationError) {
@@ -205,14 +203,14 @@ exports.createDM = async (req, res) => {
                 status: "error",
                 message: "Unable to create DM due to validation error(s)",
                 data: [],
-                errors: err.errors.map((err) => err.message),
+                errors: err.errors.map((err) => err.message)
             });
         }
         res.status(500).json({
             status: "error",
             message: "An unexpected error occurred while creating the DM",
             data: [],
-            errors: [err.message],
+            errors: [err.message]
         });
     }
 };

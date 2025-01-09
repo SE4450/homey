@@ -85,14 +85,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: Items; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public."Items" (
-    "listId" integer NOT NULL,
-    "rowId" integer NOT NULL,
-    item character varying(255) NOT NULL,
-    "assignedTo" character varying(255),
 -- Name: Conversations; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -105,13 +97,6 @@ CREATE TABLE public."Conversations" (
 );
 
 
-ALTER TABLE public."Items" OWNER TO admin;
-
---
--- Name: Items_rowId_seq; Type: SEQUENCE; Schema: public; Owner: admin
---
-
-CREATE SEQUENCE public."Items_rowId_seq"
 ALTER TABLE public."Conversations" OWNER TO admin;
 
 --
@@ -127,23 +112,6 @@ CREATE SEQUENCE public."Conversations_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Items_rowId_seq" OWNER TO admin;
-
---
--- Name: Items_rowId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
---
-
-ALTER SEQUENCE public."Items_rowId_seq" OWNED BY public."Items"."rowId";
-
-
---
--- Name: Lists; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public."Lists" (
-    "listId" integer NOT NULL,
-    "userId" integer NOT NULL,
-    "listName" character varying(255) NOT NULL,
 ALTER SEQUENCE public."Conversations_id_seq" OWNER TO admin;
 
 --
@@ -190,6 +158,81 @@ ALTER SEQUENCE public."Expenses_id_seq" OWNER TO admin;
 --
 
 ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
+
+
+--
+-- Name: Items; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Items" (
+    "listId" integer NOT NULL,
+    "rowId" integer NOT NULL,
+    item character varying(255) NOT NULL,
+    "assignedTo" character varying(255),
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Items" OWNER TO admin;
+
+--
+-- Name: Items_rowId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Items_rowId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Items_rowId_seq" OWNER TO admin;
+
+--
+-- Name: Items_rowId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Items_rowId_seq" OWNED BY public."Items"."rowId";
+
+
+--
+-- Name: Lists; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Lists" (
+    "listId" integer NOT NULL,
+    "userId" integer NOT NULL,
+    "listName" character varying(255) NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Lists" OWNER TO admin;
+
+--
+-- Name: Lists_listId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Lists_listId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Lists_listId_seq" OWNER TO admin;
+
+--
+-- Name: Lists_listId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Lists_listId_seq" OWNED BY public."Lists"."listId";
 
 
 --
@@ -245,13 +288,6 @@ CREATE TABLE public."Participants" (
 );
 
 
-ALTER TABLE public."Lists" OWNER TO admin;
-
---
--- Name: Lists_listId_seq; Type: SEQUENCE; Schema: public; Owner: admin
---
-
-CREATE SEQUENCE public."Lists_listId_seq"
 ALTER TABLE public."Participants" OWNER TO admin;
 
 --
@@ -267,16 +303,6 @@ CREATE SEQUENCE public."Participants_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Lists_listId_seq" OWNER TO admin;
-
---
--- Name: Lists_listId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
---
-
-ALTER SEQUENCE public."Lists_listId_seq" OWNED BY public."Lists"."listId";
-
-
---
 ALTER SEQUENCE public."Participants_id_seq" OWNER TO admin;
 
 --
@@ -386,17 +412,6 @@ ALTER SEQUENCE public."stores_itemID_seq" OWNED BY public.stores."itemID";
 
 
 --
--- Name: Items rowId; Type: DEFAULT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Items" ALTER COLUMN "rowId" SET DEFAULT nextval('public."Items_rowId_seq"'::regclass);
-
-
---
--- Name: Lists listId; Type: DEFAULT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Lists" ALTER COLUMN "listId" SET DEFAULT nextval('public."Lists_listId_seq"'::regclass);
 -- Name: Conversations id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -408,6 +423,20 @@ ALTER TABLE ONLY public."Conversations" ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."Expenses_id_seq"'::regclass);
+
+
+--
+-- Name: Items rowId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Items" ALTER COLUMN "rowId" SET DEFAULT nextval('public."Items_rowId_seq"'::regclass);
+
+
+--
+-- Name: Lists listId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Lists" ALTER COLUMN "listId" SET DEFAULT nextval('public."Lists_listId_seq"'::regclass);
 
 
 --
@@ -439,19 +468,6 @@ ALTER TABLE ONLY public.stores ALTER COLUMN "itemID" SET DEFAULT nextval('public
 
 
 --
--- Name: Items Items_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Items"
-    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("listId", "rowId");
-
-
---
--- Name: Lists Lists_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Lists"
-    ADD CONSTRAINT "Lists_pkey" PRIMARY KEY ("listId", "userId");
 -- Name: Conversations Conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -465,6 +481,22 @@ ALTER TABLE ONLY public."Conversations"
 
 ALTER TABLE ONLY public."Expenses"
     ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Items Items_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Items"
+    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("listId", "rowId");
+
+
+--
+-- Name: Lists Lists_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Lists"
+    ADD CONSTRAINT "Lists_pkey" PRIMARY KEY ("listId", "userId");
 
 
 --
@@ -524,7 +556,6 @@ ALTER TABLE ONLY public.stores
 
 
 --
--- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
 -- Name: Expenses Expenses_owedTo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 

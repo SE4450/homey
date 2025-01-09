@@ -1,8 +1,9 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { Dropdown } from 'react-native-element-dropdown';
+import TextField from "../components/textField";
 
-import useAxios from "../app/hooks/useAxios";
+import useAxios from "../hooks/useAxios";
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -63,24 +64,24 @@ export default function Profile(props: {username: String, userId: any}) {
     }, []);
 
     const getProfile = async() => {
-        const body = { userId: props.userId };
+        const body = { id: props.userId };
         const response = await get<any>("/api/profile", body);
 
         if(response) {
-            if(response.data.cleaningHabits != null) {
-                setCleaningValue(response.data.cleaningHabits);
+            if(response.data[0].cleaningHabits != null) {
+                setCleaningValue(response.data[0].cleaningHabits);
             }
-            if(response.data.noiseLevel != null) {
-                setNoiseValue(response.data.noiseLevel);
+            if(response.data[0].noiseLevel != null) {
+                setNoiseValue(response.data[0].noiseLevel);
             }
-            if(response.data.sleepStart != null) {
-                setStartSleepValue(response.data.sleepStart);
+            if(response.data[0].sleepStart != null) {
+                setStartSleepValue(response.data[0].sleepStart);
             }
-            if(response.data.sleepEnd != null) {
-                setEndSleepValue(response.data.sleepEnd);
+            if(response.data[0].sleepEnd != null) {
+                setEndSleepValue(response.data[0].sleepEnd);
             }
-            if(response.data.alergies != null) {
-                setAllergiesValue(response.data.alergies);
+            if(response.data[0].alergies != null) {
+                setAllergiesValue(response.data[0].alergies);
             }
         }
     }
@@ -91,7 +92,7 @@ export default function Profile(props: {username: String, userId: any}) {
                         sleepStart: startSleepValue,
                         sleepEnd: endSleepValue,
                         alergies: allergiesValue  };
-        const response = await post<any>(`/api/profile/updateProfile?userId=${props.userId}`, body);
+        const response = await post<any>(`/api/profile/updateProfile/${props.userId}`, body);
 
         if(response) {
             alert("Profile updated");
@@ -119,15 +120,15 @@ export default function Profile(props: {username: String, userId: any}) {
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep Start: </Text>
-                        <TextInput style={styles.textAreaFormat} placeholder={startSleepValue} onChangeText={text => setStartSleepValue(text)}></TextInput>
+                        <TextField placeholder={startSleepValue} onChangeText={text => setStartSleepValue(text)}></TextField>
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep End: </Text>
-                        <TextInput style={styles.textAreaFormat} placeholder={endSleepValue} onChangeText={text => setEndSleepValue(text)}></TextInput>
+                        <TextField placeholder={endSleepValue} onChangeText={text => setEndSleepValue(text)}></TextField>
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Allergies: </Text>
-                        <TextInput style={styles.textAreaFormat} placeholder={allergiesValue} onChangeText={text => setAllergiesValue(text)}></TextInput>
+                        <TextField placeholder={allergiesValue} onChangeText={text => setAllergiesValue(text)}></TextField>
                     </View>
                     <Button title="Update Profile" onPress={updateProfile} /> 
                 </View>

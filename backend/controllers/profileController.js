@@ -42,15 +42,45 @@ exports.getProfile = async (req, res) => {
 
 
 
+//create the user profile
+exports.createProfile = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const usersProfile = await Profile.create({ id });
+
+        res.status(201).json({
+            status: "success",
+            message: "List created",
+            data: usersProfile,
+            errors: []
+        });
+
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unable to create the users profile due to validation errors",
+                data: [],
+                errors: err.errors.map(err => err.message)
+            });
+        }
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occured while trying to create the users profile of items",
+            data: [],
+            errors: [`${err.message}`]
+        });
+    }
+}
+
+
+
 //update the user profile
 exports.updateProfile = async (req, res) => {
     try {
         const {  cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  } = req.body;
         let userProfile = Profile;
 
-        userProfile = await Profile.update({ cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  }, { where: req.query });
-
-        /*
         if(cleaningHabits != null) {
             userProfile = await Profile.update({ cleaningHabits }, { where: { id: req.params.id }});
         }
@@ -66,12 +96,11 @@ exports.updateProfile = async (req, res) => {
         if(alergies != null) {
             userProfile = await Profile.update({ alergies }, { where: { id: req.params.id }});
         }
-        */
 
         res.status(201).json({
             status: "success",
             message: "updated the users profile in the list",
-            data: listItem,
+            data: userProfile,
             errors: []
         });
     } catch (err) {

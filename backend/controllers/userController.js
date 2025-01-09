@@ -1,4 +1,5 @@
 const User = require("../models/userModel.js");
+const Profile = require("../models/profileModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { ValidationError } = require("sequelize");
@@ -285,6 +286,9 @@ exports.verify = async (req, res) => {
 
         user.verified = true;
         await user.save();
+
+        let id = decoded.id;
+        await Profile.create({ id });
 
         res.status(200).json({
             status: "success",

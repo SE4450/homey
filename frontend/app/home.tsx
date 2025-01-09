@@ -45,8 +45,8 @@ export default function HomeScreen() {
     return (
         <View>
             <Text>Welcome {user.firstName} {user.lastName}</Text>
-            <Button title="Logout" onPress={handleLogout} />
             <Profile username={user.username} userId={userId}/>
+            <Button title="Logout" onPress={handleLogout} />
         </View>
     );
 }

@@ -1,258 +1,165 @@
 const List = require("../models/listModel.js");
-const Item = require("../models/itemModel.js");
+const shoppingItem = require("../models/shoppingItemModel.js");
+const expenseItem = require("../models/expenseItemModel.js");
+const choreItem = require("../models/choresItemModel.js");
 const { ValidationError } = require("sequelize");
 
-//way to get all of the users lists
-exports.getLists = async (req, res) => {
-    try {
-        //first get the lists for the user  query needs to be: ?userId= thid users id  example: http://10.0.0.236:8080/api/lists?userId=1
-        const usersLists = await List.findAll({ where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
+// Utility function to get the correct model
+const getModel = (type) => {
+    switch (type) {
+        case "Shopping":
+            return shoppingItem;
+        case "Expense":
+            return expenseItem;
+        case "Chores":
+            return choreItem;
+        default:
+            throw new Error("Invalid list type");
+    }
+};
 
-        if(usersLists.length == 0) {
+// Get all items in a list
+exports.getItems = async (req, res) => {
+    try {
+        const { type, listId } = req.query;
+        const model = getModel(type);
+        const listItems = await model.findAll({ where: { listId } });
+
+        if (listItems.length === 0) {
             return res.status(404).json({
                 status: "error",
-                message: "No lists exist for the given user",
+                message: `No items found for the ${type} list`,
                 data: [],
-                errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             });
         }
 
         res.status(200).json({
             status: "success",
-            message: `${usersLists.length} lists found`,
-            data: usersLists,
+            message: `${listItems.length} items found`,
+            data: listItems,
+        });
+    } catch (err) {
+        res.status(500).json({ status: "error", message: err.message });
+    }
+};
+
+// Create a new item
+const { ValidationError } = require("sequelize");
+const shoppingItem = require("../models/shoppingItemModel.js");
+const expenseItem = require("../models/expenseItemModel.js");
+const choreItem = require("../models/choresItemModel.js");
+
+// Utility function to get the correct model
+const getModel = (type) => {
+    switch (type) {
+        case "Shopping":
+            return shoppingItem;
+        case "Expense":
+            return expenseItem;
+        case "Chores":
+            return choreItem;
+        default:
+            throw new Error("Invalid list type");
+    }
+};
+
+exports.createItem = async (req, res) => {
+    try {
+        const { type, listId, ...data } = req.body;
+
+        if (!listId || !Object.keys(data).length) {
+            return res.status(400).json({
+                status: "error",
+                message: "Missing required fields",
+                data: [],
+                errors: ["listId and item details are required"]
+            });
+        }
+
+        const model = getModel(type);
+
+        const listItem = await model.create({
+            listId,
+            ...data
+        });
+
+        res.status(201).json({
+            status: "success",
+            message: `${type} item added successfully`,
+            data: listItem,
             errors: []
         });
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Unable to get lists due to validation errors",
+                message: "Unable to create item due to validation errors",
                 data: [],
                 errors: err.errors.map(err => err.message)
             });
         }
         res.status(500).json({
             status: "error",
-            message: "An unexpected error occured while trying to get the lists",
+            message: "An unexpected error occurred while trying to create the item",
             data: [],
             errors: [`${err.message}`]
         });
     }
-}
+};
 
 
 
-//option to create a new list
+// Update an item
+exports.updateItem = async (req, res) => {
+    try {
+        const { type, listId, ...updates } = req.body;
+        const { rowId } = req.params;
+        const model = getModel(type);
+
+        await model.update(updates, { where: { listId, rowId } });
+        res.status(200).json({ status: "success", message: "Item updated" });
+    } catch (err) {
+        res.status(500).json({ status: "error", message: err.message });
+    }
+};
+
+// Delete an item
+exports.deleteItem = async (req, res) => {
+    try {
+        const { type, listId, rowId } = req.body;
+        const model = getModel(type);
+
+        await model.destroy({ where: { listId, rowId } });
+        res.status(200).json({ status: "success", message: "Item deleted" });
+    } catch (err) {
+        res.status(500).json({ status: "error", message: err.message });
+    }
+};
+
+// Create a list
 exports.createList = async (req, res) => {
     try {
-        const {userId, listName} = req.body;
-
-        const userList = await List.create({
-            userId,
-            listName,
-        });
+        const { userId, listName } = req.body;
+        const newList = await List.create({ userId, listName });
 
         res.status(201).json({
             status: "success",
             message: "List created",
-            data: userList,
-            errors: []
+            data: newList,
         });
     } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to create list due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to create the list",
-            data: [],
-            errors: [`${err.message}`]
-        });
+        res.status(500).json({ status: "error", message: err.message });
     }
-}
+};
 
-
-//option to delete a list
+// Delete a list
 exports.deleteList = async (req, res) => {
     try {
-
         const { listId } = req.body;
+        await List.destroy({ where: { listId } });
 
-        const userList = List.destroy({ where: { listId: listId}});
-
-        res.status(201).json({
-            status: "success",
-            message: "List deleted",
-            data: userList,
-            errors: []
-        });
-
+        res.status(200).json({ status: "success", message: "List deleted" });
     } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to delete list due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to delete the list",
-            data: [],
-            errors: [`${err.message}`]
-        });
+        res.status(500).json({ status: "error", message: err.message });
     }
-}
-
-
-
-//option to get all items in a list
-exports.getItems = async (req, res) => {
-    try {
-        //the listId needs to be sent in the body for this to work
-        const listItems = await Item.findAll({ where: req.query});
-
-        if(listItems.length == 0) {
-            return res.status(404).json({
-                status: "error",
-                message: "No lists exist for the given user",
-                data: [],
-                errors: [`no lists found with data ${JSON.stringify(req.query)}`]
-            });
-        }
-
-        res.status(200).json({
-            status: "success",
-            message: `${listItems.length} items found for the list`,
-            data: listItems,
-            errors: []
-        });
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to get items due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to get the items",
-            data: [],
-            errors: [`${err.message}`]
-        });
-    }
-}
-
-//option to add an item to the list
-exports.createItem = async (req, res) => {
-    try {
-        const { listId, item, assignedTo } = req.body;
-
-        const listItem = await Item.create({
-            listId,
-            item,
-            assignedTo
-        });
-
-        res.status(201).json({
-            status: "success",
-            message: "item added to list",
-            data: listItem,
-            errors: []
-        });
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to create items due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to create the items",
-            data: [],
-            errors: [`${err.message}`]
-        });
-    }
-}
-
-
-
-//option to assign someone to the item 
-exports.updateItem = async (req, res) => {
-    try {
-        const {  listId, item, assignedTo  } = req.body;
-        let listItem = Item;
-
-        if(item != null) {
-            listItem = await Item.update({ item }, { where: { listId: listId, rowId: req.params.row }});
-        }
-        if(assignedTo != null) {
-            listItem = await Item.update({ assignedTo }, { where: { listId: listId, rowId: req.params.row }});
-        }
-
-        res.status(201).json({
-            status: "success",
-            message: "updated the items in the list",
-            data: listItem,
-            errors: []
-        });
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to add an assignment due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to update the assignment of items",
-            data: [],
-            errors: [`${err.message}`]
-        });
-    }
-}
-
-//option to remove an item from a list
-exports.deleteItem = async (req, res) => {
-    try {
-        const { listId, rowNum } = req.body;
-
-        let listItem = Item.destroy({ where: { listId: listId, rowId: rowNum }});
-
-        res.status(201).json({
-            status: "success",
-            message: "deleted the item in the list",
-            data: listItem,
-            errors: []
-        });
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Unable to delete the item due to validation errors",
-                data: [],
-                errors: err.errors.map(err => err.message)
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occured while trying to delete the item of items",
-            data: [],
-            errors: [`${err.message}`]
-        });
-    }
-}
+};

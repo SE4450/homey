@@ -3,6 +3,7 @@ import { View, Text, Button, ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
+import ShoppingList from "../components/ShoppingList";
 
 export default function HomeScreen() {
     const [user, setUser] = useState<any>({});
@@ -44,6 +45,7 @@ export default function HomeScreen() {
     return (
         <View>
             <Text>Welcome {user.firstName} {user.lastName}</Text>
+            <ShoppingList />
             <Button title="Logout" onPress={handleLogout} />
         </View>
     );

@@ -144,18 +144,18 @@ exports.createDM = async (req, res) => {
 
         const loggedInUserId = req.user.userId;
 
-        // Check if a conversation already exists between the two users
         const existingConversation = await Conversation.findOne({
             where: { type: "dm" },
             include: [
                 {
                     model: Participant,
                     as: "participants",
-                    where: { userId: [loggedInUserId, userId] }, // Match either user
+                    where: { userId: [loggedInUserId, userId] },
                 }
             ],
             group: ["Conversation.id"],
-            having: sequelize.literal("COUNT(participants.id) = 2"), // Ensure both users are part of the same conversation
+            having: sequelize.literal(`COUNT("participants"."id") = 2`),
+            logging: console.log
         });
 
         if (existingConversation) {

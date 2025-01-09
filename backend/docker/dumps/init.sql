@@ -80,24 +80,6 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
 
---
--- Name: delete_old_unverified_users(); Type: FUNCTION; Schema: public; Owner: admin
---
-
-CREATE FUNCTION public.delete_old_unverified_users() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  DELETE FROM public."Users"
-  WHERE "verified" = false
-    AND "createdAt" < NOW() - INTERVAL '1 hour';
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION public.delete_old_unverified_users() OWNER TO admin;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -137,6 +119,45 @@ ALTER SEQUENCE public."Conversations_id_seq" OWNER TO admin;
 --
 
 ALTER SEQUENCE public."Conversations_id_seq" OWNED BY public."Conversations".id;
+
+
+--
+-- Name: Expenses; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Expenses" (
+    id integer NOT NULL,
+    "expenseName" character varying(255) NOT NULL,
+    amount double precision NOT NULL,
+    "owedTo" integer NOT NULL,
+    "paidBy" integer NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Expenses" OWNER TO admin;
+
+--
+-- Name: Expenses_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Expenses_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Expenses_id_seq" OWNER TO admin;
+
+--
+-- Name: Expenses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
 
 
 --
@@ -284,6 +305,13 @@ ALTER TABLE ONLY public."Conversations" ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: Expenses id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."Expenses_id_seq"'::regclass);
+
+
+--
 -- Name: Messages id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -310,6 +338,14 @@ ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Use
 
 ALTER TABLE ONLY public."Conversations"
     ADD CONSTRAINT "Conversations_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Expenses Expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
 
 
 --
@@ -361,18 +397,19 @@ ALTER TABLE ONLY public."Users"
 
 
 --
--- Name: Users Users_username_key1; Type: CONSTRAINT; Schema: public; Owner: admin
+-- Name: Expenses Expenses_owedTo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
-ALTER TABLE ONLY public."Users"
-    ADD CONSTRAINT "Users_username_key1" UNIQUE (username);
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_owedTo_fkey" FOREIGN KEY ("owedTo") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
+-- Name: Expenses Expenses_paidBy_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
-CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_paidBy_fkey" FOREIGN KEY ("paidBy") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

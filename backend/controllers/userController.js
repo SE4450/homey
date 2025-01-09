@@ -1,4 +1,4 @@
-const User = require("../models/userModel.js");
+const { User, Profile } = require("../models/associations");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { ValidationError } = require("sequelize");
@@ -6,7 +6,6 @@ const transporter = require("../mail.js");
 const validator = require("validator");
 const passwordValidator = require("password-validator");
 const sequelize = require("../db.js");
-const emailExistence = require("email-existence");
 
 exports.getUsers = async (req, res) => {
     try {
@@ -285,6 +284,9 @@ exports.verify = async (req, res) => {
 
         user.verified = true;
         await user.save();
+
+        let id = decoded.id;
+        await Profile.create({ id });
 
         res.status(200).json({
             status: "success",

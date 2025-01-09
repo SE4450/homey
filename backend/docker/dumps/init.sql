@@ -18,6 +18,56 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: enum_Conversations_type; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Conversations_type" AS ENUM (
+    'dm',
+    'group'
+);
+
+
+ALTER TYPE public."enum_Conversations_type" OWNER TO admin;
+
+--
+-- Name: enum_Participants_role; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Participants_role" AS ENUM (
+    'tenant',
+    'landlord'
+);
+
+
+ALTER TYPE public."enum_Participants_role" OWNER TO admin;
+
+--
+-- Name: enum_Profiles_cleaningHabits; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Profiles_cleaningHabits" AS ENUM (
+    'Low',
+    'Medium',
+    'High'
+);
+
+
+ALTER TYPE public."enum_Profiles_cleaningHabits" OWNER TO admin;
+
+--
+-- Name: enum_Profiles_noiseLevel; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
+    'Low',
+    'Medium',
+    'High'
+);
+
+
+ALTER TYPE public."enum_Profiles_noiseLevel" OWNER TO admin;
+
+--
 -- Name: enum_Users_role; Type: TYPE; Schema: public; Owner: admin
 --
 
@@ -29,24 +79,6 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
-
---
--- Name: delete_old_unverified_users(); Type: FUNCTION; Schema: public; Owner: admin
---
-
-CREATE FUNCTION public.delete_old_unverified_users() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  DELETE FROM public."Users"
-  WHERE "verified" = false
-    AND "createdAt" < NOW() - INTERVAL '1 hour';
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION public.delete_old_unverified_users() OWNER TO admin;
 
 SET default_tablespace = '';
 
@@ -61,6 +93,13 @@ CREATE TABLE public."Items" (
     "rowId" integer NOT NULL,
     item character varying(255) NOT NULL,
     "assignedTo" character varying(255),
+-- Name: Conversations; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Conversations" (
+    id integer NOT NULL,
+    type public."enum_Conversations_type" NOT NULL,
+    name character varying(255),
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -73,6 +112,13 @@ ALTER TABLE public."Items" OWNER TO admin;
 --
 
 CREATE SEQUENCE public."Items_rowId_seq"
+ALTER TABLE public."Conversations" OWNER TO admin;
+
+--
+-- Name: Conversations_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Conversations_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -98,6 +144,102 @@ CREATE TABLE public."Lists" (
     "listId" integer NOT NULL,
     "userId" integer NOT NULL,
     "listName" character varying(255) NOT NULL,
+ALTER SEQUENCE public."Conversations_id_seq" OWNER TO admin;
+
+--
+-- Name: Conversations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Conversations_id_seq" OWNED BY public."Conversations".id;
+
+
+--
+-- Name: Expenses; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Expenses" (
+    id integer NOT NULL,
+    "expenseName" character varying(255) NOT NULL,
+    amount double precision NOT NULL,
+    "owedTo" integer NOT NULL,
+    "paidBy" integer NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Expenses" OWNER TO admin;
+
+--
+-- Name: Expenses_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Expenses_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Expenses_id_seq" OWNER TO admin;
+
+--
+-- Name: Expenses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
+
+
+--
+-- Name: Messages; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Messages" (
+    id integer NOT NULL,
+    "conversationId" integer NOT NULL,
+    "senderId" integer NOT NULL,
+    content text NOT NULL,
+    "readBy" json,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Messages" OWNER TO admin;
+
+--
+-- Name: Messages_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Messages_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Messages_id_seq" OWNER TO admin;
+
+--
+-- Name: Messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Messages_id_seq" OWNED BY public."Messages".id;
+
+
+--
+-- Name: Participants; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Participants" (
+    id integer NOT NULL,
+    "conversationId" integer NOT NULL,
+    "userId" integer NOT NULL,
+    role public."enum_Participants_role" DEFAULT 'tenant'::public."enum_Participants_role",
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -110,6 +252,13 @@ ALTER TABLE public."Lists" OWNER TO admin;
 --
 
 CREATE SEQUENCE public."Lists_listId_seq"
+ALTER TABLE public."Participants" OWNER TO admin;
+
+--
+-- Name: Participants_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Participants_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -126,6 +275,34 @@ ALTER SEQUENCE public."Lists_listId_seq" OWNER TO admin;
 
 ALTER SEQUENCE public."Lists_listId_seq" OWNED BY public."Lists"."listId";
 
+
+--
+ALTER SEQUENCE public."Participants_id_seq" OWNER TO admin;
+
+--
+-- Name: Participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Participants_id_seq" OWNED BY public."Participants".id;
+
+
+--
+-- Name: Profiles; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Profiles" (
+    id integer NOT NULL,
+    "cleaningHabits" public."enum_Profiles_cleaningHabits",
+    "noiseLevel" public."enum_Profiles_noiseLevel",
+    "sleepStart" character varying(255),
+    "sleepEnd" character varying(255),
+    alergies character varying(255),
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Profiles" OWNER TO admin;
 
 --
 -- Name: Users; Type: TABLE; Schema: public; Owner: admin
@@ -220,6 +397,31 @@ ALTER TABLE ONLY public."Items" ALTER COLUMN "rowId" SET DEFAULT nextval('public
 --
 
 ALTER TABLE ONLY public."Lists" ALTER COLUMN "listId" SET DEFAULT nextval('public."Lists_listId_seq"'::regclass);
+-- Name: Conversations id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Conversations" ALTER COLUMN id SET DEFAULT nextval('public."Conversations_id_seq"'::regclass);
+
+
+--
+-- Name: Expenses id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."Expenses_id_seq"'::regclass);
+
+
+--
+-- Name: Messages id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Messages" ALTER COLUMN id SET DEFAULT nextval('public."Messages_id_seq"'::regclass);
+
+
+--
+-- Name: Participants id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Participants" ALTER COLUMN id SET DEFAULT nextval('public."Participants_id_seq"'::regclass);
 
 
 --
@@ -250,6 +452,43 @@ ALTER TABLE ONLY public."Items"
 
 ALTER TABLE ONLY public."Lists"
     ADD CONSTRAINT "Lists_pkey" PRIMARY KEY ("listId", "userId");
+-- Name: Conversations Conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Conversations"
+    ADD CONSTRAINT "Conversations_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Expenses Expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Messages Messages_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Messages"
+    ADD CONSTRAINT "Messages_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Participants Participants_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Participants"
+    ADD CONSTRAINT "Participants_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Profiles Profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Profiles"
+    ADD CONSTRAINT "Profiles_pkey" PRIMARY KEY (id);
 
 
 --
@@ -286,11 +525,54 @@ ALTER TABLE ONLY public.stores
 
 --
 -- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
+-- Name: Expenses Expenses_owedTo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
-CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_owedTo_fkey" FOREIGN KEY ("owedTo") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Expenses Expenses_paidBy_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Expenses"
+    ADD CONSTRAINT "Expenses_paidBy_fkey" FOREIGN KEY ("paidBy") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Messages Messages_conversationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Messages"
+    ADD CONSTRAINT "Messages_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES public."Conversations"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Messages Messages_senderId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Messages"
+    ADD CONSTRAINT "Messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Participants Participants_conversationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Participants"
+    ADD CONSTRAINT "Participants_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES public."Conversations"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Participants Participants_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Participants"
+    ADD CONSTRAINT "Participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
 -- PostgreSQL database dump complete
 --
+

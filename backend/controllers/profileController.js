@@ -1,4 +1,4 @@
-const Profile = require("../models/profileModel.js");
+const { Profile } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 
 //get the user profile

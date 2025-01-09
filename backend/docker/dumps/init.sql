@@ -42,6 +42,32 @@ CREATE TYPE public."enum_Participants_role" AS ENUM (
 ALTER TYPE public."enum_Participants_role" OWNER TO admin;
 
 --
+-- Name: enum_Profiles_cleaningHabits; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Profiles_cleaningHabits" AS ENUM (
+    'Low',
+    'Medium',
+    'High'
+);
+
+
+ALTER TYPE public."enum_Profiles_cleaningHabits" OWNER TO admin;
+
+--
+-- Name: enum_Profiles_noiseLevel; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
+    'Low',
+    'Medium',
+    'High'
+);
+
+
+ALTER TYPE public."enum_Profiles_noiseLevel" OWNER TO admin;
+
+--
 -- Name: enum_Users_role; Type: TYPE; Schema: public; Owner: admin
 --
 
@@ -189,6 +215,25 @@ ALTER SEQUENCE public."Participants_id_seq" OWNER TO admin;
 
 ALTER SEQUENCE public."Participants_id_seq" OWNED BY public."Participants".id;
 
+
+--
+-- Name: Profiles; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Profiles" (
+    id integer NOT NULL,
+    "cleaningHabits" public."enum_Profiles_cleaningHabits",
+    "noiseLevel" public."enum_Profiles_noiseLevel",
+    "sleepStart" character varying(255),
+    "sleepEnd" character varying(255),
+    alergies character varying(255),
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Profiles" OWNER TO admin;
+
 --
 -- Name: Users; Type: TABLE; Schema: public; Owner: admin
 --
@@ -284,6 +329,14 @@ ALTER TABLE ONLY public."Participants"
 
 
 --
+-- Name: Profiles Profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Profiles"
+    ADD CONSTRAINT "Profiles_pkey" PRIMARY KEY (id);
+
+
+--
 -- Name: Users Users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -321,6 +374,7 @@ ALTER TABLE ONLY public."Users"
 
 CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
 
+
 --
 -- Name: Messages Messages_conversationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
@@ -356,3 +410,4 @@ ALTER TABLE ONLY public."Participants"
 --
 -- PostgreSQL database dump complete
 --
+

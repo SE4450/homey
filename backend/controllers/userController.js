@@ -1,5 +1,4 @@
-const Profile = require("../models/profileModel.js");
-const { User } = require("../models/associations");
+const { User, Profile } = require("../models/associations");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { ValidationError } = require("sequelize");

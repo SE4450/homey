@@ -28,12 +28,12 @@ const User = sequelize.define("User", {
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
     },
     role: {
         type: DataTypes.ENUM,
         values: ["admin", "landlord", "tenant"],
-        allowNull: false,
+        allowNull: false
     },
     verified: {
         type: DataTypes.BOOLEAN,

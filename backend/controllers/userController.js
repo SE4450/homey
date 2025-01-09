@@ -1,5 +1,5 @@
-const User = require("../models/userModel.js");
 const Profile = require("../models/profileModel.js");
+const { User } = require("../models/associations");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { ValidationError } = require("sequelize");
@@ -7,7 +7,6 @@ const transporter = require("../mail.js");
 const validator = require("validator");
 const passwordValidator = require("password-validator");
 const sequelize = require("../db.js");
-const emailExistence = require("email-existence");
 
 exports.getUsers = async (req, res) => {
     try {

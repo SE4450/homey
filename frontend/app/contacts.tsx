@@ -27,44 +27,46 @@ export default function ContactsScreen() {
         }
     }, [error]);
 
-    useEffect(() => {
-        const fetchConversations = async () => {
-            try {
-                const response = await get<any>("/api/conversations");
-                if (response) {
-                    const formattedConversations = response.data.map((conversation: any) => {
-                        const latestMessage = conversation.messages[0] || null;
+    const fetchConversations = async () => {
+        try {
+            setLoading(true);
+            const response = await get<any>("/api/conversations");
+            if (response) {
+                const formattedConversations = response.data.map((conversation: any) => {
+                    const latestMessage = conversation.messages[0] || null;
 
-                        const hasNewMessage =
-                            latestMessage &&
-                            latestMessage.senderId !== userId &&
-                            !latestMessage.readBy?.includes(userId);
+                    const hasNewMessage =
+                        latestMessage &&
+                        latestMessage.senderId !== userId &&
+                        !latestMessage.readBy?.includes(userId);
 
-                        return {
-                            id: conversation.id,
-                            name: conversation.participants
-                                .filter((p: any) => p.userId !== userId)
-                                .map((p: any) => `${p.users.firstName} ${p.users.lastName}`)
-                                .join(", "),
-                            latestMessage: latestMessage?.content || "No messages yet",
-                            date: new Date(latestMessage?.createdAt || Date.now()).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            }),
-                            imageUri:
-                                conversation.participants[0]?.user?.profilePicture ||
-                                "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
-                            hasNewMessage,
-                        };
-                    });
-                    setConversations(formattedConversations);
-                }
-            } catch (err) {
-                Alert.alert("Error", `Failed to fetch conversations for reason:\n\n${err}`);
-            } finally {
-                setLoading(false);
+                    return {
+                        id: conversation.id,
+                        name: conversation.participants
+                            .filter((p: any) => p.userId !== userId)
+                            .map((p: any) => `${p.users.firstName} ${p.users.lastName}`)
+                            .join(", "),
+                        latestMessage: latestMessage?.content || "No messages yet",
+                        date: new Date(latestMessage?.createdAt || Date.now()).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        }),
+                        imageUri:
+                            conversation.participants[0]?.user?.profilePicture ||
+                            "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
+                        hasNewMessage,
+                    };
+                });
+                setConversations(formattedConversations);
             }
-        };
+        } catch (err) {
+            Alert.alert("Error", `Failed to fetch conversations for reason:\n\n${err}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchConversations();
     }, []);
 
@@ -80,12 +82,16 @@ export default function ContactsScreen() {
             Alert.alert("Error", "Please enter a user ID to create a conversation.");
             return;
         }
-        const response = await post<any>("/api/conversations/dm", { userId: newUserId });
-        if (response) {
-            Alert.alert("Success", `Conversation created with user ID ${newUserId}`);
-            setNewUserId("");
+        try {
+            const response = await post<any>("/api/conversations/dm", { userId: newUserId });
+            if (response) {
+                Alert.alert("Success", `Conversation created with user ID ${newUserId}`);
+                setNewUserId("");
+                await fetchConversations();
+            }
+        } catch (err) {
+            Alert.alert("Error", `Failed to create conversation:\n${err}`);
         }
-
     };
 
     if (loading) {
@@ -125,25 +131,25 @@ export default function ContactsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f8f8f8",
+        backgroundColor: "#f8f8f8"
     },
     loadingIndicator: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "center"
     },
     separator: {
         height: 1,
-        backgroundColor: "#eee",
+        backgroundColor: "#eee"
     },
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        margin: 10,
+        margin: 10
     },
     textFieldContainer: {
         flex: 1,
-        marginRight: 10,
+        marginRight: 10
     },
     textField: {
         height: 40,
@@ -151,6 +157,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 8,
-        fontSize: 16,
-    },
+        fontSize: 16
+    }
 });

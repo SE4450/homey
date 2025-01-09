@@ -154,7 +154,7 @@ exports.createDM = async (req, res) => {
                     where: { userId: [loggedInUserId, userId] }
                 }
             ],
-            group: ["Conversation.id"],
+            group: ["conversation.id"],
             having: sequelize.literal(`COUNT("participants"."id") = 2`),
         });
 

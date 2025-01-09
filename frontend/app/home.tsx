@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
-import { useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
+import { Provider } from "react-redux";
 
 // Import the ScreenWrapper
 import ScreenWrapper from "./components/common/screen-wrapper";
+import { store } from "./redux/store";
 
 export default function HomeScreen() {
   const [user, setUser] = useState<any>({});
@@ -46,13 +48,15 @@ export default function HomeScreen() {
 
   return (
     // Wrap the entire view/content in ScreenWrapper
-    <ScreenWrapper>
-      <View>
-        <Text>
-          Welcome {user.firstName} {user.lastName}
-        </Text>
-        <Button title="Logout" onPress={handleLogout} />
-      </View>
-    </ScreenWrapper>
+    <Provider store={store}>
+      <ScreenWrapper>
+        <View>
+          <Text>
+            Welcome {user.firstName} {user.lastName}
+          </Text>
+          <Button title="Logout" onPress={handleLogout} />
+        </View>
+      </ScreenWrapper>
+    </Provider>
   );
 }

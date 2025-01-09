@@ -137,37 +137,40 @@ exports.createDM = async (req, res) => {
             return res.status(400).json({
                 status: "error",
                 message: "Missing userId in the request body",
+                data: [],
                 errors: ["UserId of the other participant is required"]
             });
         }
 
         const loggedInUserId = req.user.userId;
 
+        // Check if a conversation already exists between the two users
         const existingConversation = await Conversation.findOne({
             where: { type: "dm" },
             include: [
                 {
                     model: Participant,
-                    as: "filterParticipants",
-                    where: {
-                        userId: [loggedInUserId, userId],
-                    },
-                    required: true
+                    as: "participants",
+                    where: { userId: [loggedInUserId, userId] }, // Match either user
                 }
             ],
+            group: ["Conversation.id"],
+            having: sequelize.literal("COUNT(participants.id) = 2"), // Ensure both users are part of the same conversation
         });
 
         if (existingConversation) {
             return res.status(409).json({
                 status: "error",
-                message: "A DM conversation already exists between the users.",
+                message: "A DM conversation already exists between the users",
                 data: existingConversation,
                 errors: ["Duplicate DM conversation detected"],
             });
         }
 
+        // Create a new DM conversation
         const newConversation = await Conversation.create({ type: "dm" });
 
+        // Add both users as participants
         await Participant.bulkCreate([
             { userId: loggedInUserId, conversationId: newConversation.id },
             { userId, conversationId: newConversation.id }
@@ -196,6 +199,7 @@ exports.createDM = async (req, res) => {
         });
     }
 };
+
 
 exports.createGroupChat = async (req, res) => {
     try {

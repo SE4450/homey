@@ -38,7 +38,6 @@ export default function HomeScreen() {
     };
 
     const handleMessages = () => {
-        console.log(userToken);
         router.push("./contacts");
     };
 

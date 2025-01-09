@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, ActivityIndicator, Alert, Button } from "react-native";
+import {
+    View,
+    StyleSheet,
+    FlatList,
+    ActivityIndicator,
+    Alert,
+    Button,
+} from "react-native";
 import Contact from "./components/contact";
+import TextField from "./components/textField";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
@@ -8,6 +16,7 @@ import { useRouter } from "expo-router";
 export default function ContactsScreen() {
     const [conversations, setConversations] = useState<any>();
     const [loading, setLoading] = useState(true);
+    const [newUserId, setNewUserId] = useState("");
     const { get, post, error } = useAxios();
     const { userId } = useAuth();
     const router = useRouter();
@@ -25,21 +34,11 @@ export default function ContactsScreen() {
                 if (response) {
                     const formattedConversations = response.data.map((conversation: any) => {
                         const latestMessage = conversation.messages[0] || null;
-                        console.log(latestMessage);
-
-                        // Debugging logic for hasNewMessage
-                        console.log("Debugging conversation:", conversation);
-                        console.log("Latest message:", latestMessage);
-                        console.log("SenderId:", latestMessage?.senderId);
-                        console.log("ReadBy:", latestMessage?.readBy);
 
                         const hasNewMessage =
                             latestMessage &&
                             latestMessage.senderId !== userId &&
                             !latestMessage.readBy?.includes(userId);
-
-                        // Log the computed hasNewMessage value
-                        console.log("Has New Message:", hasNewMessage);
 
                         return {
                             id: conversation.id,
@@ -52,7 +51,9 @@ export default function ContactsScreen() {
                                 hour: "2-digit",
                                 minute: "2-digit",
                             }),
-                            imageUri: conversation.participants[0]?.user?.profilePicture || "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
+                            imageUri:
+                                conversation.participants[0]?.user?.profilePicture ||
+                                "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
                             hasNewMessage,
                         };
                     });
@@ -67,16 +68,24 @@ export default function ContactsScreen() {
         fetchConversations();
     }, []);
 
-
     const handlePress = (id: any, name: any) => {
         router.push({
             pathname: "/conversation",
-            params: { id, name }
+            params: { id, name },
         });
     };
 
     const createConversation = async () => {
-        await post<any>("/api/conversations/dm", { userId: 2 });
+        if (!newUserId) {
+            Alert.alert("Error", "Please enter a user ID to create a conversation.");
+            return;
+        }
+        const response = await post<any>("/api/conversations/dm", { userId: newUserId });
+        if (response) {
+            Alert.alert("Success", `Conversation created with user ID ${newUserId}`);
+            setNewUserId("");
+        }
+
     };
 
     if (loading) {
@@ -85,7 +94,15 @@ export default function ContactsScreen() {
 
     return (
         <View style={styles.container}>
-            <Button title="Create" onPress={createConversation} />
+            <View style={styles.inputContainer}>
+                <TextField
+                    placeholder="Enter User ID"
+                    value={newUserId}
+                    onChangeText={setNewUserId}
+                    customStyle={{ containerStyle: styles.textFieldContainer, inputStyle: styles.textField }}
+                />
+                <Button title="Create" onPress={createConversation} />
+            </View>
             <FlatList
                 data={conversations}
                 keyExtractor={(item) => item.id.toString()}
@@ -118,5 +135,22 @@ const styles = StyleSheet.create({
     separator: {
         height: 1,
         backgroundColor: "#eee",
+    },
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        margin: 10,
+    },
+    textFieldContainer: {
+        flex: 1,
+        marginRight: 10,
+    },
+    textField: {
+        height: 40,
+        borderColor: "gray",
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        fontSize: 16,
     },
 });

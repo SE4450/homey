@@ -51,6 +51,7 @@ export default function HomeScreen() {
             <Text>Welcome {user.firstName} {user.lastName}</Text>
             <Profile username={user.username} userId={userId}/>
             <Button title="Logout" onPress={handleLogout} />
+            <Button title="Expenses" onPress={() => router.push("./expenses")} />
             <Button title="Messages" onPress={handleMessages} />
         </View>
     );

@@ -146,6 +146,14 @@ exports.createDM = async (req, res) => {
 
         const loggedInUserId = req.user.userId;
 
+        if (userId == loggedInUserId) {
+            return res.status(409).json({
+                status: "error",
+                message: "A DM conversation already exists between the users",
+                data: [],
+                errors: ["Cannot create a DM with yourself"]
+            });
+        }
         // Check if a DM conversation already exists
         const existingConversation = await sequelize.query(
             `

@@ -146,23 +146,26 @@ exports.createDM = async (req, res) => {
 
         const loggedInUserId = req.user.userId;
 
-        const existingConversation = await Conversation.findOne({
-            where: { type: "dm" },
-            include: [
-                {
-                    model: Participant,
-                    as: "participants",
-                    required: true,
-                    where: { userId: loggedInUserId }
+        // Check if a DM conversation already exists
+        const existingConversation = await sequelize.query(
+            `
+            SELECT "Conversation"."id"
+            FROM "Conversations" AS "Conversation"
+            INNER JOIN "Participants" AS "P1" ON "Conversation"."id" = "P1"."conversationId"
+            INNER JOIN "Participants" AS "P2" ON "Conversation"."id" = "P2"."conversationId"
+            WHERE "Conversation"."type" = 'dm'
+              AND "P1"."userId" = :loggedInUserId
+              AND "P2"."userId" = :userId
+            LIMIT 1
+            `,
+            {
+                type: QueryTypes.SELECT,
+                replacements: {
+                    loggedInUserId,
+                    userId,
                 },
-                {
-                    model: Participant,
-                    as: "participants",
-                    required: true,
-                    where: { userId: userId }
-                }
-            ]
-        });
+            }
+        );
 
         if (existingConversation.length > 0) {
             return res.status(409).json({

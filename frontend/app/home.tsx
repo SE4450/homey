@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Button,
   ActivityIndicator,
   Alert,
   StyleSheet,
   Image,
   TouchableOpacity,
-} from "react-native"; // Added StyleSheet here
+  FlatList,
+} from "react-native";
 import useAxios from "./hooks/useAxios";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
@@ -18,7 +18,7 @@ import { Provider } from "react-redux";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import { store } from "./redux/store";
 import { COLORS } from "./theme/theme";
-import { IMAGES } from "./pictures/assets";
+import { IMAGES, RANDOM_THUMBNAIL } from "./pictures/assets";
 
 export default function HomeScreen() {
   const [user, setUser] = useState<any>({});
@@ -26,9 +26,29 @@ export default function HomeScreen() {
   const { get, error } = useAxios();
   const router = useRouter();
 
+  const MOCKDATA = [
+    {
+      id: 1,
+      banner: RANDOM_THUMBNAIL(),
+      choreName: "DISHES", // Renamed
+      ROOM: "KITCHEN", // Renamed
+    },
+    {
+      id: 2,
+      banner: RANDOM_THUMBNAIL(),
+      choreName: "CLEAN", // Renamed
+      ROOM: "LIVING ROOM", // Renamed
+    },
+    {
+      id: 3,
+      banner: RANDOM_THUMBNAIL(),
+      choreName: "CLEAN", // Renamed
+      ROOM: "DRIVEWAY", // Renamed
+    },
+  ];
+
   const styles = StyleSheet.create({
     homeHeader: {
-      // Assuming you have a homeHeader style
       padding: 20,
       backgroundColor: "#fff",
       alignItems: "center",
@@ -53,8 +73,8 @@ export default function HomeScreen() {
       paddingHorizontal: 25,
       paddingVertical: 12,
       borderRadius: 18,
-      top: 370,
-      left: 250,
+      top: 0,
+      left: 70,
     },
     banner: {
       width: "150%",
@@ -73,10 +93,38 @@ export default function HomeScreen() {
       fontWeight: "600",
       color: COLORS.TEXT,
     },
+    listWrapper: {
+      marginBottom: 120,
+      height: 420,
+    },
+    choreName: {
+      fontSize: 14,
+      fontWeight: "600",
+      marginLeft: 6,
+    },
+    room: {
+      fontSize: 10,
+      fontWeight: "600",
+      marginLeft: 6,
+    },
     subHeading: {
       fontSize: 18,
       fontWeight: "700",
       color: COLORS.TEXT,
+      marginBottom: 12,
+    },
+    choreBanner: {
+      height: 140,
+      width: 140,
+    },
+    choreCard: {
+      backgroundColor: COLORS.WHITE,
+      marginBottom: 12,
+      padding: 8,
+      borderRadius: 18,
+    },
+    choreList: {
+      justifyContent: "space-between",
     },
   });
 
@@ -112,7 +160,6 @@ export default function HomeScreen() {
   }
 
   return (
-    // Wrap the entire view/content in ScreenWrapper
     <Provider store={store}>
       <ScreenWrapper>
         <View style={styles.homeHeader}>
@@ -122,6 +169,7 @@ export default function HomeScreen() {
           <Text style={styles.heading}>Homeys</Text>
         </View>
         <View style={styles.bannerContainer}>
+          {/* Render the image */}
           <Image source={IMAGES.HOMEY_BANNER} style={styles.banner} />
           <TouchableOpacity onPress={() => router.push("/add-chore")}>
             <View style={styles.addChoreButton}>
@@ -130,8 +178,34 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.subHeading}>RECENT CHORES</Text>
-
+        <Text style={styles.subHeading}>ACTIVE CHORES</Text>
+        <View style={styles.listWrapper}>
+          <FlatList
+            data={MOCKDATA}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+            columnWrapperStyle={styles.choreList}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => router.push(`/chore-details?id=${item.id}`)}
+              >
+                <View style={styles.choreCard}>
+                  {/* Check if the image exists */}
+                  {item.banner ? (
+                    <Image source={item.banner} style={styles.choreBanner} />
+                  ) : (
+                    <Text>No Image Available</Text>
+                  )}
+                  {/* Render choreName */}
+                  <Text style={styles.choreName}>{item.choreName}</Text>
+                  {/* Render room */}
+                  <Text style={styles.room}>{item.ROOM}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
         <TouchableOpacity onPress={handleLogout}>
           <View style={styles.logoutButton}>
             <Text style={styles.addButtonText}>Logout</Text>

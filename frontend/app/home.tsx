@@ -3,6 +3,7 @@ import { View, Text, Button, ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
+import ListDisplay from "../pages/ListDisplay";
 
 export default function HomeScreen() {
     const [user, setUser] = useState<any>({});
@@ -45,6 +46,7 @@ export default function HomeScreen() {
         <View>
             <Text>Welcome {user.firstName} {user.lastName}</Text>
             <Button title="Logout" onPress={handleLogout} />
+            <ListDisplay />
         </View>
     );
 }

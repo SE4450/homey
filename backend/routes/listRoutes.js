@@ -3,18 +3,18 @@ const router = express.Router();
 const { getLists, createList, deleteList, getItems, createItem, updateItem, deleteItem } = require("../controllers/listController.js");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.get("/", authenticateUser("tenant"), getLists);
+router.get("/", authenticateUser(["tenant", "landlord"]), getLists);
 
-router.post("/createList", createList);
+router.post("/createList", authenticateUser(["tenant", "landlord"]), createList);
 
-router.delete("/deleteList", deleteList);
+router.delete("/deleteList", authenticateUser(["tenant", "landlord"]), deleteList);
 
-router.get("/items", getItems);
+router.get("/items", authenticateUser(["tenant", "landlord"]), getItems);
 
-router.post("/createItem", createItem);
+router.post("/createItem", authenticateUser(["tenant", "landlord"]), createItem);
 
-router.post("/updateItem/:row", updateItem);
+router.post("/updateItem/:row", authenticateUser(["tenant", "landlord"]), updateItem);
 
-router.post("/deleteItem", deleteItem);
+router.post("/deleteItem", authenticateUser(["tenant", "landlord"]), deleteItem);
 
 module.exports = router;

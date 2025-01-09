@@ -18,30 +18,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: enum_Profiles_cleaningHabits; Type: TYPE; Schema: public; Owner: admin
---
-
-CREATE TYPE public."enum_Profiles_cleaningHabits" AS ENUM (
-    'Low',
-    'Medium',
-    'High'
-);
-
-
-ALTER TYPE public."enum_Profiles_cleaningHabits" OWNER TO admin;
-
---
--- Name: enum_Profiles_noiseLevel; Type: TYPE; Schema: public; Owner: admin
---
-
-CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
-    'Low',
-    'Medium',
-    'High'
-);
-
-
-ALTER TYPE public."enum_Profiles_noiseLevel" OWNER TO admin;
 -- Name: enum_Conversations_type; Type: TYPE; Schema: public; Owner: admin
 --
 
@@ -101,16 +77,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: Profiles; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public."Profiles" (
-    id integer NOT NULL,
-    "cleaningHabits" public."enum_Profiles_cleaningHabits",
-    "noiseLevel" public."enum_Profiles_noiseLevel",
-    "sleepStart" character varying(255),
-    "sleepEnd" character varying(255),
-    alergies character varying(255),
 -- Name: Conversations; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -123,7 +89,6 @@ CREATE TABLE public."Conversations" (
 );
 
 
-ALTER TABLE public."Profiles" OWNER TO admin;
 ALTER TABLE public."Conversations" OWNER TO admin;
 
 --
@@ -295,11 +260,6 @@ ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Use
 
 
 --
--- Name: Profiles Profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Profiles"
-    ADD CONSTRAINT "Profiles_pkey" PRIMARY KEY (id);
 -- Name: Conversations Conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -396,4 +356,3 @@ ALTER TABLE ONLY public."Participants"
 --
 -- PostgreSQL database dump complete
 --
-

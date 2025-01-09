@@ -129,6 +129,8 @@ exports.getConversationById = async (req, res) => {
     }
 };
 
+const { QueryTypes } = require("sequelize");
+
 exports.createDM = async (req, res) => {
     try {
         const { userId } = req.body;
@@ -144,31 +146,40 @@ exports.createDM = async (req, res) => {
 
         const loggedInUserId = req.user.userId;
 
-        // Check if a conversation already exists between the two users
-        const existingConversation = await Conversation.findOne({
-            where: { type: "dm" },
-            include: [
-                {
-                    model: Participant,
-                    as: "participants",
-                    where: { userId: [loggedInUserId, userId] }
-                }
-            ],
-            group: ["conversation.id"],
-            having: sequelize.literal(`COUNT("participants"."id") = 2`),
-        });
+        // Check if a DM conversation already exists
+        const existingConversation = await sequelize.query(
+            `
+            SELECT "Conversation"."id"
+            FROM "Conversations" AS "Conversation"
+            INNER JOIN "Participants" AS "P1" ON "Conversation"."id" = "P1"."conversationId"
+            INNER JOIN "Participants" AS "P2" ON "Conversation"."id" = "P2"."conversationId"
+            WHERE "Conversation"."type" = 'dm'
+              AND "P1"."userId" = :loggedInUserId
+              AND "P2"."userId" = :userId
+            LIMIT 1
+            `,
+            {
+                type: QueryTypes.SELECT,
+                replacements: {
+                    loggedInUserId,
+                    userId,
+                },
+            }
+        );
 
-        if (existingConversation) {
+        if (existingConversation.length > 0) {
             return res.status(409).json({
                 status: "error",
                 message: "A DM conversation already exists between the users",
-                data: existingConversation,
+                data: existingConversation[0],
                 errors: ["Duplicate DM conversation detected"],
             });
         }
 
+        // Create a new DM conversation
         const newConversation = await Conversation.create({ type: "dm" });
 
+        // Add both users as participants
         await Participant.bulkCreate([
             { userId: loggedInUserId, conversationId: newConversation.id },
             { userId, conversationId: newConversation.id },

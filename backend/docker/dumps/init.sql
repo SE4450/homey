@@ -80,6 +80,24 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
 
+--
+-- Name: delete_old_unverified_users(); Type: FUNCTION; Schema: public; Owner: admin
+--
+
+CREATE FUNCTION public.delete_old_unverified_users() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  DELETE FROM public."Users"
+  WHERE "verified" = false
+    AND "createdAt" < NOW() - INTERVAL '1 hour';
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.delete_old_unverified_users() OWNER TO admin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -548,11 +566,26 @@ ALTER TABLE ONLY public."Users"
 
 
 --
+-- Name: Users Users_username_key1; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_username_key1" UNIQUE (username);
+
+
+--
 -- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
+
+
+--
+-- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
+--
+
+CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
 
 
 --

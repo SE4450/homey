@@ -19,6 +19,8 @@ import ScreenWrapper from "./components/common/screen-wrapper";
 import { store } from "./redux/store";
 import { COLORS } from "./theme/theme";
 import { IMAGES, RANDOM_THUMBNAIL } from "./pictures/assets";
+import ListDisplay from "../pages/ListDisplay";
+import Profile from "./components/Profile";
 
 export default function HomeScreen() {
   const [user, setUser] = useState<any>({});
@@ -154,6 +156,10 @@ export default function HomeScreen() {
     await logout();
     router.push("/login");
   };
+    
+  const handleMessages = () => {
+    router.push("./contacts");
+  };
 
   if (!userToken) {
     return <ActivityIndicator size="large" />;
@@ -177,7 +183,6 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-
         <Text style={styles.subHeading}>ACTIVE CHORES</Text>
         <View style={styles.listWrapper}>
           <FlatList
@@ -205,12 +210,14 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
           />
+        <View>
+            <Text>Welcome {user.firstName} {user.lastName}</Text>
+            <Profile username={user.username} userId={userId}/>
+            <Button title="Logout" onPress={handleLogout} />
+            <ListDisplay />
+            <Button title="Expenses" onPress={() => router.push("./expenses")} />
+            <Button title="Messages" onPress={handleMessages} />
         </View>
-        <TouchableOpacity onPress={handleLogout}>
-          <View style={styles.logoutButton}>
-            <Text style={styles.addButtonText}>Logout</Text>
-          </View>
-        </TouchableOpacity>
       </ScreenWrapper>
     </Provider>
   );

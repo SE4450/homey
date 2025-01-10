@@ -76,7 +76,29 @@ const useAxios = () => {
     }
   };
 
-  return { get, post, loading, error };
+  const patch = async <T extends unknown>(url: string, data: object): Promise<T | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await addAuthHeaders();
+      const response = await axiosInstance.patch<T>(url, data);
+      return response.data;
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.errors
+          ? `${err.response.data.message}\n\n` + formatErrors(err.response.data.errors)
+          : err.response?.data?.message || err.message;
+
+      setError(errorMessage);
+      await handleJwtError(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { get, post, patch, loading, error };
 };
 
 export default useAxios;

@@ -112,7 +112,7 @@ start_frontend() {
 
 start_backend() {
     echo "Starting backend ..."
-    dos2unix ./backend/docker/scripts/wait-for-db.sh
+    #dos2unix ./backend/docker/scripts/wait-for-db.sh
     docker compose -f ./backend/docker/docker-compose.yml up --build
 }
 

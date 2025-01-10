@@ -5,10 +5,7 @@ set -e
 cleanup() {
     echo "Cleaning up Docker containers and images..."
     
-    # Remove all running/stopped containers
     docker ps -aq | xargs -r docker rm -f
-
-    # Remove all dangling images
     docker images -q | xargs -r docker rmi -f
 
     echo "Cleanup complete."
@@ -71,7 +68,6 @@ setup_openssl() {
         MINGW*|CYGWIN*|MSYS*)
             echo "Running on Windows (Git Bash)."
 
-            # Check if OpenSSL exists in Git Bash
             OPENSSL_PATH=$(which openssl)
             if [[ -z "$OPENSSL_PATH" || "$OPENSSL_PATH" != "/mingw64/bin/openssl" ]]; then
                 echo "OpenSSL not found or not in the expected path"
@@ -102,17 +98,17 @@ start_frontend() {
     echo "Starting frontend ..."
     (
         cd ./frontend || exit
+        npm install
         npx expo install expo@latest
         npx expo install --fix
-        npm install
-        npx expo start &
+        npx expo start --tunnel &
     )
     sleep 15
 }
 
 start_backend() {
     echo "Starting backend ..."
-    #dos2unix ./backend/docker/scripts/wait-for-db.sh
+    dos2unix ./backend/docker/scripts/wait-for-db.sh
     docker compose -f ./backend/docker/docker-compose.yml up --build
 }
 

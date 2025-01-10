@@ -1,8 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 
-import useAxios from "../app/hooks/useAxios";
-import StoreSearch from "../components/StoreSearch";
+import useAxios from "../hooks/useAxios";
+import StoreSearch from "./StoreSearch";
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
 
 export default function Lists (props: {name: String, id: Number}) {
     //use states go here
-    const [listItems, setListItems] = useState([] as Array<{item: String, AssignedTo: String, rowId: Number}>);
+    const [listItems, setListItems] = useState([] as Array<{item: String, AssignedTo: String, itemId: Number}>);
     const [item, setItem] = useState("");
     const [assignment, setAssignment] = useState("");
 
@@ -64,8 +64,8 @@ export default function Lists (props: {name: String, id: Number}) {
         const response = await get<any>("/api/lists/items", body);
 
         if(response) {
-            response.data.forEach((item: {listId: Number, rowId: Number, item: String, assignedTo: String, createdAt: String, updatedAt: String}) => {
-                setListItems(l => [...l, {item: item.item, AssignedTo: item.assignedTo, rowId: item.rowId}]);
+            response.data.forEach((item: {listId: Number, itemId: Number, item: String, assignedTo: String, createdAt: String, updatedAt: String}) => {
+                setListItems(l => [...l, {item: item.item, AssignedTo: item.assignedTo, itemId: item.itemId}]);
             });
         }
     }
@@ -89,9 +89,9 @@ export default function Lists (props: {name: String, id: Number}) {
     }
 
     //function to delete a row from the list
-    const deleteRow = async(deleteRowId: Number) => {
+    const deleteRow = async(deleteItemId: Number) => {
         //call the fetch request to delete the selected row from the database
-        const body = { listId: props.id, rowNum: deleteRowId };
+        const body = { listId: props.id, rowNum: deleteItemId };
         const response = await post<any>("/api/lists/deleteItem", body);
 
         if(response) {
@@ -136,7 +136,7 @@ export default function Lists (props: {name: String, id: Number}) {
                             <View key={item.AssignedTo.concat(item.item+"viewnode")} style={styles.tableRow}>
                                 <Text key={item.AssignedTo.concat(item.item+"textnode")} style={styles.tableData}>{item.AssignedTo}</Text>
                             </View>
-                            <Pressable key={"deleteRow_"+index} onPress={() => {deleteRow(item.rowId)}}><Text style={styles.button}>Delete</Text></Pressable>
+                            <Pressable key={"deleteRow_"+index} onPress={() => {deleteRow(item.itemId)}}><Text style={styles.button}>Delete</Text></Pressable>
                         </View> 
                     )
                 }

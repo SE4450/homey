@@ -165,8 +165,8 @@ ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
 --
 
 CREATE TABLE public."Items" (
+    "itemId" integer NOT NULL,
     "listId" integer NOT NULL,
-    "rowId" integer NOT NULL,
     item character varying(255) NOT NULL,
     "assignedTo" character varying(255),
     "createdAt" timestamp with time zone NOT NULL,
@@ -177,10 +177,10 @@ CREATE TABLE public."Items" (
 ALTER TABLE public."Items" OWNER TO admin;
 
 --
--- Name: Items_rowId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+-- Name: Items_itemId_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
-CREATE SEQUENCE public."Items_rowId_seq"
+CREATE SEQUENCE public."Items_itemId_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -189,13 +189,13 @@ CREATE SEQUENCE public."Items_rowId_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Items_rowId_seq" OWNER TO admin;
+ALTER SEQUENCE public."Items_itemId_seq" OWNER TO admin;
 
 --
--- Name: Items_rowId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+-- Name: Items_itemId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
-ALTER SEQUENCE public."Items_rowId_seq" OWNED BY public."Items"."rowId";
+ALTER SEQUENCE public."Items_itemId_seq" OWNED BY public."Items"."itemId";
 
 
 --
@@ -426,10 +426,10 @@ ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."
 
 
 --
--- Name: Items rowId; Type: DEFAULT; Schema: public; Owner: admin
+-- Name: Items itemId; Type: DEFAULT; Schema: public; Owner: admin
 --
 
-ALTER TABLE ONLY public."Items" ALTER COLUMN "rowId" SET DEFAULT nextval('public."Items_rowId_seq"'::regclass);
+ALTER TABLE ONLY public."Items" ALTER COLUMN "itemId" SET DEFAULT nextval('public."Items_itemId_seq"'::regclass);
 
 
 --
@@ -488,7 +488,7 @@ ALTER TABLE ONLY public."Expenses"
 --
 
 ALTER TABLE ONLY public."Items"
-    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("listId", "rowId");
+    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("itemId");
 
 
 --

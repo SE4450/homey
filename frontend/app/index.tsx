@@ -2,8 +2,6 @@ import { View, StyleSheet } from "react-native";
 import React from "react";
 import LoginScreen from "./login";
 
-import Lists from ".././components/Lists"
-import ListDisplay from ".././pages/ListDisplay"
 //import Profile from ".././components/Profile"
 
 export default function Index() {

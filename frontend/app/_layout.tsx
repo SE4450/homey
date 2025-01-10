@@ -11,6 +11,7 @@ export default function RootLayout() {
         <Stack.Screen name="contacts" options={{ title: "Contacts" }} />
         <Stack.Screen name="conversation" options={{ title: "Conversation" }} />
         <Stack.Screen name="expenses" options={{ title: "Expenses" }} />
+        <Stack.Screen name="ListDisplay" options={{ title: "Shared Shopping Lists" }} />
       </Stack>
     </AuthProvider>
   );

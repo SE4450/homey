@@ -3,7 +3,6 @@ import { View, Text, Button, ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
-import ListDisplay from "../pages/ListDisplay";
 import Profile from "./components/Profile";
 
 export default function HomeScreen() {
@@ -52,7 +51,7 @@ export default function HomeScreen() {
             <Text>Welcome {user.firstName} {user.lastName}</Text>
             <Profile username={user.username} userId={userId}/>
             <Button title="Logout" onPress={handleLogout} />
-            <ListDisplay />
+            <Button title="Shared Shopping List" onPress={() => router.push("./ListDisplay")} />
             <Button title="Expenses" onPress={() => router.push("./expenses")} />
             <Button title="Messages" onPress={handleMessages} />
         </View>

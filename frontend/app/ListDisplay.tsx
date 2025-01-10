@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
-import Lists from "../components/Lists";
+import Lists from "./components/Lists";
 
 const styles = StyleSheet.create({
     textAreaFormat : {
@@ -17,8 +17,7 @@ const styles = StyleSheet.create({
         
     },
     listFormat : {
-        borderWidth: 5,
-        width: 250,
+        borderWidth: 2,
         backgroundColor: "white",
         
     },
@@ -63,12 +62,18 @@ export default function ListDisplay() {
 
     //function to create a new list
     const createList = async() => {
-        const body = { userId: userId, listName: createdList }
-        const response = await post<any>("/api/lists/createList", body)
+        if(createdList != "") {
+            const body = { userId: userId, listName: createdList }
+            const response = await post<any>("/api/lists/createList", body)
 
-        if(response) {
-            usersLists();
+            if(response) {
+                usersLists();
+            }
         }
+        else {
+            alert("You must add a name for a list");
+        }
+        
     }
 
     //function to display the selected list
@@ -82,14 +87,14 @@ export default function ListDisplay() {
 
 
     return(
-        <View>
+        <ScrollView>
 
             {
                 listView && 
                 <View>
                     <Text>New List Name:</Text>
                     <TextInput style={styles.textAreaFormat} placeholder="Type New List Entry Here" onChangeText={text => setCreatedList(text)}></TextInput>
-                    <Pressable onPress={() => createList()}><Text>Create List</Text></Pressable>
+                    <Button title="Create List" onPress={() => createList()}></Button>
                     {lists.map((list) => 
                         <View style={styles.displayedLists} key={list.name+"view"}>
                             <Pressable key={list.name+"button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>
@@ -105,6 +110,6 @@ export default function ListDisplay() {
                     <Lists name={listName} id={listID}/>
                 </View>
             }
-        </View>
+        </ScrollView>
     )
 }

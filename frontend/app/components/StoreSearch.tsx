@@ -1,7 +1,7 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState } from "react";
 
-import useAxios from "../app/hooks/useAxios";
+import useAxios from "../hooks/useAxios";
 
 //stylesheet for the component
 const styles = StyleSheet.create({

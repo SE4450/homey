@@ -100,7 +100,7 @@ export default function Profile(props: {username: String, userId: any}) {
     }
 
     return(
-        <ScrollView>
+        <View>
             <View>
                 <Button title={props.username + " profile"} onPress={() => setDisplayProfile(!displayProfile)}></Button>
             </View>
@@ -120,19 +120,19 @@ export default function Profile(props: {username: String, userId: any}) {
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep Start: </Text>
-                        <TextField placeholder={startSleepValue} onChangeText={text => setStartSleepValue(text)}></TextField>
+                        <TextInput style={styles.textAreaFormat} value={startSleepValue} onChangeText={text => setStartSleepValue(text)} />
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep End: </Text>
-                        <TextField placeholder={endSleepValue} onChangeText={text => setEndSleepValue(text)}></TextField>
+                        <TextInput style={styles.textAreaFormat} value={endSleepValue} onChangeText={text => setEndSleepValue(text)} />
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Allergies: </Text>
-                        <TextField placeholder={allergiesValue} onChangeText={text => setAllergiesValue(text)}></TextField>
+                        <TextInput style={styles.textAreaFormat} value={allergiesValue} onChangeText={text => setAllergiesValue(text)} />
                     </View>
                     <Button title="Update Profile" onPress={updateProfile} /> 
                 </View>
             }
-        </ScrollView>
+        </View>
     )
 }

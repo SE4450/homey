@@ -46,6 +46,7 @@ ALTER TYPE public."enum_Participants_role" OWNER TO admin;
 --
 
 CREATE TYPE public."enum_Profiles_cleaningHabits" AS ENUM (
+    '',
     'Low',
     'Medium',
     'High'
@@ -59,6 +60,7 @@ ALTER TYPE public."enum_Profiles_cleaningHabits" OWNER TO admin;
 --
 
 CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
+    '',
     'Low',
     'Medium',
     'High'

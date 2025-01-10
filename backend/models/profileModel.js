@@ -9,12 +9,12 @@ const Profile = sequelize.define("Profile", {
     },
     cleaningHabits: {
         type: DataTypes.ENUM,
-        values: ["Low", "Medium", "High"],
+        values: ["", "Low", "Medium", "High"],
         allowNull: true,
     },
     noiseLevel: {
         type: DataTypes.ENUM,
-        values: ["Low", "Medium", "High"],
+        values: ["", "Low", "Medium", "High"],
         allowNull: true,
     },
     sleepStart: {

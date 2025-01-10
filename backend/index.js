@@ -4,6 +4,8 @@ const fs = require("fs");
 const https = require("https");
 const http = require("http");
 const userRoutes = require("./routes/userRoutes.js");
+const listRoutes = require("./routes/listRoutes.js");
+const storeRoutes = require("./routes/storeRoutes.js");
 const profileRoutes = require("./routes/profileRoutes.js");
 const conversationRoutes = require("./routes/conversationRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
@@ -29,6 +31,8 @@ app.use(express.json());
 app.use(logger);
 
 app.use("/api/users", userRoutes);
+app.use("/api/lists", listRoutes);
+app.use("/api/stores", storeRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
@@ -40,9 +44,19 @@ app.use((req, res) => {
 
 const port = process.env.EXPRESS_PORT || 8080;
 
-server.listen(port, async () => {
-    if (process.env.SYNC === "true") {
-        await sequelize.sync({ force: false });
-    }
-    console.log(`${isDevelopment ? "HTTP" : "HTTPS"} server listening on port ${port}`);
-});
+if (process.env.DEVELOPMENT == "true") {
+    app.listen(port, async () => {
+        if (process.env.SYNC == "true") {
+            await sequelize.sync({ force: false });
+        }
+        console.log(`HTTP listening on port ${port}`);
+    });
+} else {
+    const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt") }, app);
+    server.listen(port, async () => {
+        if (process.env.SYNC == "true") {
+            await sequelize.sync({ force: false });
+        }
+        console.log(`HTTPS listening on port ${port}`);
+    });
+}

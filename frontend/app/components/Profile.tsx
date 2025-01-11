@@ -15,15 +15,17 @@ const styles = StyleSheet.create({
         backgroundColor: "white"
     },
     textAreaFormat : {
-        height: 33,
+        height: 20,
         width: 150,
-        margin: 12,
+        marginBottom: 12,
         borderWidth: 1,
         padding: 10,
         backgroundColor: "white"
+        
     },
     accountFormat : {
-        flexDirection: "row"
+        flexDirection: "row",
+        padding: 10
     },
 
     container: {
@@ -120,15 +122,15 @@ export default function Profile(props: {username: String, userId: any}) {
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep Start: </Text>
-                        <TextInput style={styles.textAreaFormat} value={startSleepValue} onChangeText={text => setStartSleepValue(text)} />
+                        <TextInput style={styles.textAreaFormat} placeholder={startSleepValue} placeholderTextColor="black" onChangeText={text => setStartSleepValue(text)} />
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Sleep End: </Text>
-                        <TextInput style={styles.textAreaFormat} value={endSleepValue} onChangeText={text => setEndSleepValue(text)} />
+                        <TextInput style={styles.textAreaFormat} placeholder={endSleepValue} placeholderTextColor="black" onChangeText={text => setEndSleepValue(text)} />
                     </View>
                     <View style={styles.accountFormat}>
                         <Text>Allergies: </Text>
-                        <TextInput style={styles.textAreaFormat} value={allergiesValue} onChangeText={text => setAllergiesValue(text)} />
+                        <TextInput style={styles.textAreaFormat} placeholder={allergiesValue} placeholderTextColor="black" onChangeText={text => setAllergiesValue(text)} />
                     </View>
                     <Button title="Update Profile" onPress={updateProfile} /> 
                 </View>

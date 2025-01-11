@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet, Text, Button } from "react-native";
+import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { Dropdown } from 'react-native-element-dropdown';
 import { useAuth } from "./context/AuthContext";
@@ -6,38 +6,41 @@ import { useLocalSearchParams } from "expo-router";
 import TextField from "./components/textField";
 import useAxios from "./hooks/useAxios";
 
+//stylesheet for the component
 const styles = StyleSheet.create({
-    profilePopup: {
+    profilePopup : {
         borderColor: "black",
         borderWidth: 1,
         padding: 10,
         position: "fixed",
         backgroundColor: "white"
     },
-    textAreaFormat: {
-        height: 33,
+    textAreaFormat : {
+        height: 20,
         width: 150,
-        margin: 12,
+        marginBottom: 12,
         borderWidth: 1,
         padding: 10,
         backgroundColor: "white"
+        
     },
-    accountFormat: {
-        flexDirection: "row"
+    accountFormat : {
+        flexDirection: "row",
+        padding: 10
     },
 
     container: {
-        backgroundColor: 'white',
-        padding: 16,
+      backgroundColor: 'white',
+      padding: 16,
     },
     dropdown: {
-        height: 30,
-        width: 150,
-        borderColor: 'gray',
-        borderWidth: 0.5,
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        backgroundColor: "white"
+      height: 30,
+      width:150,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      backgroundColor: "white"
     }
 });
 
@@ -117,15 +120,15 @@ export default function Profile() {
                 </View>
                 <View style={styles.accountFormat}>
                     <Text>Sleep Start: </Text>
-                    <TextField placeholder={startSleepValue} onChangeText={text => setStartSleepValue(text)}></TextField>
+                    <TextInput style={styles.textAreaFormat} placeholder={startSleepValue} placeholderTextColor="black" onChangeText={text => setStartSleepValue(text)} />
                 </View>
                 <View style={styles.accountFormat}>
                     <Text>Sleep End: </Text>
-                    <TextField placeholder={endSleepValue} onChangeText={text => setEndSleepValue(text)}></TextField>
+                    <TextInput style={styles.textAreaFormat} placeholder={endSleepValue} placeholderTextColor="black" onChangeText={text => setEndSleepValue(text)} />
                 </View>
                 <View style={styles.accountFormat}>
                     <Text>Allergies: </Text>
-                    <TextField placeholder={allergiesValue} onChangeText={text => setAllergiesValue(text)}></TextField>
+                    <TextInput style={styles.textAreaFormat} placeholder={allergiesValue} placeholderTextColor="black" onChangeText={text => setAllergiesValue(text)} />
                 </View>
                 <Button title="Update Profile" onPress={updateProfile} />
             </View>

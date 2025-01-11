@@ -2,15 +2,14 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
 
 const Item = sequelize.define("Item", {
-    listId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        allowNull: false,
-    },
-    rowId: {
+    itemId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+        allowNull: false,
+    },
+    listId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     item: {

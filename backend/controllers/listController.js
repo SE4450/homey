@@ -196,10 +196,10 @@ exports.updateItem = async (req, res) => {
         let listItem = Item;
 
         if(item != null) {
-            listItem = await Item.update({ item }, { where: { listId: listId, rowId: req.params.row }});
+            listItem = await Item.update({ item }, { where: { listId: listId, itemId: req.params.row }});
         }
         if(assignedTo != null) {
-            listItem = await Item.update({ assignedTo }, { where: { listId: listId, rowId: req.params.row }});
+            listItem = await Item.update({ assignedTo }, { where: { listId: listId, itemId: req.params.row }});
         }
 
         res.status(201).json({
@@ -231,7 +231,7 @@ exports.deleteItem = async (req, res) => {
     try {
         const { listId, rowNum } = req.body;
 
-        let listItem = Item.destroy({ where: { listId: listId, rowId: rowNum }});
+        let listItem = Item.destroy({ where: { listId: listId, itemId: rowNum }});
 
         res.status(201).json({
             status: "success",

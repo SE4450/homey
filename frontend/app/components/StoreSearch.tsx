@@ -1,7 +1,7 @@
 import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
 import { useState } from "react";
 
-import useAxios from "../app/hooks/useAxios";
+import useAxios from "../hooks/useAxios";
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -35,6 +35,9 @@ export default function StoreSearch(){
                 for(const item of response.data) {
                     setFoundItems(i => [...i, {itemName: item.itemName, store: item.store, price: item.price}]);
                 }
+            }
+            else {
+                alert(`${itemToCompare} was not found`);
             }
         }
         else {

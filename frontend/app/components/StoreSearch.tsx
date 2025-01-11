@@ -36,6 +36,9 @@ export default function StoreSearch(){
                     setFoundItems(i => [...i, {itemName: item.itemName, store: item.store, price: item.price}]);
                 }
             }
+            else {
+                alert(`${itemToCompare} was not found`);
+            }
         }
         else {
             alert("You must enter an item before searching");

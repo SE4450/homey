@@ -122,7 +122,7 @@ exports.getItems = async (req, res) => {
         if(listItems.length == 0) {
             return res.status(404).json({
                 status: "error",
-                message: "No lists exist for the given user",
+                message: "No items exist for the users given list",
                 data: [],
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             });

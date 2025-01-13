@@ -52,11 +52,13 @@ export default function Lists (props: {name: String, id: Number}) {
 
     //once the page loads we get all the items in the list
     useEffect(() => {
-        //getItems();
+        getItems();
+        /*
         if (error) {
             Alert.alert("Error", error);
         }
-    }, [error]);
+        */
+    }, []);
 
     //function to initalize the listItem array with anything in the database
     const getItems = async() => {
@@ -82,8 +84,8 @@ export default function Lists (props: {name: String, id: Number}) {
 
             if(response) {
                 //add the new item and assignment to the table
-                //setListItems(l => [...l, {item: item, AssignedTo: assignment}]);
-                getItems();
+                setListItems(l => [...l, {item: response.data.item, AssignedTo: response.data.assignedTo, itemId: response.data.itemId}]);
+                //getItems();
             }
         }
         else {

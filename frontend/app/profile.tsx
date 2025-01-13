@@ -16,11 +16,10 @@ const styles = StyleSheet.create({
         backgroundColor: "white"
     },
     textAreaFormat : {
-        height: 20,
+        height: 30,
         width: 150,
         marginBottom: 12,
         borderWidth: 1,
-        padding: 10,
         backgroundColor: "white"
         
     },

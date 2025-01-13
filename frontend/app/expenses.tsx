@@ -58,8 +58,8 @@ export default function ExpensesScreen() {
             const response = await post("/api/expenses", {
                 expenseName: name,
                 amount: parseFloat(amount),
-                owedTo: parseInt(payeeId, 10),
-                paidBy: userId,
+                owedTo: userId,
+                paidBy: parseInt(payeeId, 10),
             });
             if (response) {
                 Alert.alert("Success", "Expense added successfully");

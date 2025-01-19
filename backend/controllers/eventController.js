@@ -1,9 +1,9 @@
-const Event = require('./models/eventModel.js');
+const { Event } = require('../models/associations');
 const { ValidationError } = require("sequelize");
 
 exports.getEvents = async(req, res) => {
     try {
-        const houseEvents = Event.findAll( { where: req.query } );
+        const houseEvents = await Event.findAll( { where: req.query } );
 
         if(houseEvents.length == 0) {
             return res.status(404).json({
@@ -21,7 +21,7 @@ exports.getEvents = async(req, res) => {
             errors: []
         });
 
-    } catch {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -43,10 +43,9 @@ exports.getEvents = async(req, res) => {
 
 exports.createEvent = async (req, res) => {
     try {
-        const {eventId, userId, eventName, eventDate, eventTime} = req.body;
+        const {userId, eventName, eventDate, eventTime} = req.body;
 
         const newEvent = await Event.create({
-            eventId,
             userId,
             eventName,
             eventDate,
@@ -59,7 +58,7 @@ exports.createEvent = async (req, res) => {
             data: newEvent,
             errors: []
         });
-    } catch {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -101,7 +100,7 @@ exports.updateEvent = async (req, res) => {
             errors: []
         })
         
-    } catch {
+    } catch (err){
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -132,7 +131,7 @@ exports.deleteEvent = async (req, res) => {
             data: houseEvent,
             errors: []
         });
-    } catch {
+    } catch (err){
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",

@@ -124,6 +124,45 @@ ALTER SEQUENCE public."Conversations_id_seq" OWNED BY public."Conversations".id;
 
 
 --
+-- Name: Events; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Events" (
+    "eventId" integer NOT NULL,
+    "userId" integer NOT NULL,
+    "eventName" character varying(255) NOT NULL,
+    "eventDate" character varying(255) NOT NULL,
+    "eventTime" character varying(255) NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Events" OWNER TO admin;
+
+--
+-- Name: Events_eventId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Events_eventId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Events_eventId_seq" OWNER TO admin;
+
+--
+-- Name: Events_eventId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Events_eventId_seq" OWNED BY public."Events"."eventId";
+
+
+--
 -- Name: Expenses; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -421,6 +460,13 @@ ALTER TABLE ONLY public."Conversations" ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: Events eventId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Events" ALTER COLUMN "eventId" SET DEFAULT nextval('public."Events_eventId_seq"'::regclass);
+
+
+--
 -- Name: Expenses id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -475,6 +521,14 @@ ALTER TABLE ONLY public.stores ALTER COLUMN "itemID" SET DEFAULT nextval('public
 
 ALTER TABLE ONLY public."Conversations"
     ADD CONSTRAINT "Conversations_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Events Events_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Events"
+    ADD CONSTRAINT "Events_pkey" PRIMARY KEY ("eventId");
 
 
 --
@@ -555,6 +609,14 @@ ALTER TABLE ONLY public."Users"
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
+
+
+--
+-- Name: Events Events_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Events"
+    ADD CONSTRAINT "Events_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

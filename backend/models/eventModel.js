@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
+const User = require("./userModel");
 
 const Event = sequelize.define("Event", {
     eventId : {

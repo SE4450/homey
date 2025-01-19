@@ -12,6 +12,7 @@ const messageRoutes = require("./routes/messageRoutes.js");
 const { logger } = require("./middleware/logger.js");
 const sequelize = require("./db.js");
 const expenseRoutes = require("./routes/expenseRoutes.js");
+const eventRoutes = require("./routes/eventRoutes.js");
 
 const app = express();
 const isDevelopment = process.env.DEVELOPMENT === "true";
@@ -37,6 +38,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/events", eventRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });

@@ -196,10 +196,10 @@ exports.updateItem = async (req, res) => {
         let listItem = Item;
 
         if(item != null) {
-            listItem = await Item.update({ item }, { where: { listId: listId, itemId: req.params.row }});
+            listItem = await Item.update({ item: item }, { where: { listId: listId, itemId: req.params.row }});
         }
         if(assignedTo != null) {
-            listItem = await Item.update({ assignedTo }, { where: { listId: listId, itemId: req.params.row }});
+            listItem = await Item.update({ assignedTo: assignedTo }, { where: { listId: listId, itemId: req.params.row }});
         }
 
         res.status(201).json({

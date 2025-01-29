@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { getInventory, createInventory, updateQuantity } = require("../controllers/inventoryController.js");
+const { getInventory, createInventory, removeQuantity } = require("../controllers/inventoryController.js");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
 router.get("/", authenticateUser(["tenant", "landlord"]), getInventory);
 
-router.post("/", authenticateUser(["tenant", "landlord"]), createInventory);
+router.post("/createInventory", authenticateUser(["tenant", "landlord"]), createInventory);
 
-router.post("/updateQuantity", authenticateUser(["tenant", "landlord"]), updateQuantity);
+router.post("/removeQuantity", authenticateUser(["tenant", "landlord"]), removeQuantity);
 
 module.exports = router;

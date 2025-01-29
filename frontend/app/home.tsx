@@ -78,6 +78,7 @@ export default function HomeScreen() {
           { title: "Expenses", path: "/expenses" },
           { title: "Chores", path: "/chores" },
           { title: "Messages", path: "/contacts" },
+          { title: "Inventory", path: "/inventory"},
         ].map((item, index) => (
           <TouchableOpacity
             key={index}

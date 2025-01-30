@@ -10,14 +10,16 @@ type DropdownProps = {
         selectedOptionStyle?: object;
     };
     onOptionSelect: (selected: string) => void;
+    placeholder?: string;  //this line was added
 };
 
 const Dropdown: React.FC<DropdownProps> = ({
     options,
     customStyle = {},
-    onOptionSelect
+    onOptionSelect,
+    placeholder,  //this was added for a placeholder value
 }) => {
-    const [selectedOption, setSelectedOption] = useState(options[0]);
+    const [selectedOption, setSelectedOption] = useState(placeholder);  //options[0] -> This was originally in the useState
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleOptionSelect = (option: string) => {

@@ -19,6 +19,10 @@ const Item = sequelize.define("Item", {
     assignedTo: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    purchased: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 });
 

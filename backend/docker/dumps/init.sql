@@ -209,6 +209,7 @@ CREATE TABLE public."Items" (
     "listId" integer NOT NULL,
     item character varying(255) NOT NULL,
     "assignedTo" character varying(255),
+    purchased integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );

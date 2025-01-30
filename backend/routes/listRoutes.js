@@ -7,7 +7,7 @@ router.get("/", authenticateUser(["tenant", "landlord"]), getLists);
 
 router.post("/createList", authenticateUser(["tenant", "landlord"]), createList);
 
-router.delete("/deleteList", authenticateUser(["tenant", "landlord"]), deleteList);
+router.post("/deleteList", authenticateUser(["tenant", "landlord"]), deleteList);
 
 router.get("/items", authenticateUser(["tenant", "landlord"]), getItems);
 

@@ -6,27 +6,25 @@ import { useAuth } from "../app/context/AuthContext";
 
 
 const styles = StyleSheet.create({
-    textAreaFormat : {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-        backgroundColor: "white"
-    },
     button: {
-        fontSize: 11
+        fontSize: 25,
+        paddingLeft: 15,
+        paddingRight: 15
     },
     /* CSS for the table */
     table: {
-        margin: 15
+        margin: 15,
+        alignItems: "center",
     },
     tableHead: {
         flexDirection: "row",
-        backgroundColor: "blue",
+        backgroundColor: "#4CAF50",
         padding: 10
     },
     tableRow: {
-        width: "35%"
+        width: "35%",
+        flexDirection: "row",
+        alignItems: "center",
     },
     tableCaption: {
         color: "white",
@@ -34,10 +32,10 @@ const styles = StyleSheet.create({
     },
     tableBody: {
         flexDirection: "row",
-        padding: 10
+        padding: 10,
     },
     tableData: {
-        fontSize: 11
+        fontSize: 15
     }
 });
 
@@ -67,21 +65,20 @@ export default function Inventory() {
 
     //function to get the house inventory
     const getItems = async() => {
-        //clear the set list items
-        setInventoryItems([]);
         //make a fetch request to get any items for the selected list
         const body = { houseId: userId } //this will need to be changed to the houseId when we have it
         const response = await get<any>("/api/inventory", body);
 
         if(response) {
+            //clear the set list items
+            setInventoryItems([]);
             response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
-                console.log(`ITEM NAME: ${item.itemName}`);
                 setInventoryItems(l => [...l, {itemId: item.itemId, itemName: item.itemName, quantity: item.quantity}]);
             });
         }
     }
 
-
+    /*
     //function to add an item to the list
     const addItem = async() => {
         if(item != "") {
@@ -91,14 +88,23 @@ export default function Inventory() {
 
             if(response) {
                 getItems();
-                /*
-                //add the new item and assignment to the table
-                setInventoryItems(l => [...l, {itemId: response.data.itemId, itemName: response.data.itemName, quantity: response.data.quantity}]);
-                */
             }
         }
         else {
             alert("You must enter an item");
+        }
+    }
+    */
+
+    //function to add an item to the list
+    const addItem = async(itemName: String) => {
+        
+        //make a fetch request to add the new item to the database
+        const body = { houseId: userId, itemName: itemName };
+        const response = await post<any>("/api/inventory/createInventory", body);
+
+        if(response) {
+            getItems();
         }
     }
 
@@ -112,16 +118,18 @@ export default function Inventory() {
         const response = await post<any>("/api/inventory/removeQuantity", body);
 
         if(response) {
-            getItems();
+            //if the inventory is now empty alert the user
+            if(response.message.includes("There is only one more ")) {
+                Alert.alert("Inventory Low", response.message);
+            }
+            //getItems();
+            setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf()-1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity } ));
         }
     }
 
-    return(
-        <View>
 
-            <Text>New Entry: </Text>
-            <TextInput style={styles.textAreaFormat} placeholder="Type New List Entry Here" onChangeText={text => setItem(text)}></TextInput>
-            <Button title="Add Item To List" onPress={addItem} /> 
+    return(
+        <ScrollView>
 
             <View style={styles.tableHead}>
             
@@ -142,12 +150,14 @@ export default function Inventory() {
                             <Text key={item.itemName+"textnode"} style={styles.tableData}>{item.itemName}</Text>
                         </View>
                         <View key={item.itemName+"quantityviewnode"} style={styles.tableRow}>
+                            <Pressable key={"incrementRow_"+index} onPress={() => {addItem(item.itemName)}}><Text style={styles.button}>+</Text></Pressable>
                             <Text key={item.itemName+"quantitytextnode"} style={styles.tableData}>{`${item.quantity}`}</Text>
+                            <Pressable key={"decrementRow_"+index} onPress={() => {removeItem(item.itemId, item.quantity)}}><Text style={styles.button}>-</Text></Pressable>
                         </View>
-                        <Pressable key={"deleteRow_"+index} onPress={() => {removeItem(item.itemId, item.quantity)}}><Text style={styles.button}>Decrement</Text></Pressable>
+                        
                     </View> 
                 )
             }
-        </View>
+        </ScrollView>
     )
 }

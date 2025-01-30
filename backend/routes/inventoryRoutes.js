@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { getInventory, createInventory, removeQuantity } = require("../controllers/inventoryController.js");
+const { getInventory, getLowItem, createInventory, removeQuantity } = require("../controllers/inventoryController.js");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
 router.get("/", authenticateUser(["tenant", "landlord"]), getInventory);
+
+router.get("/getLowItem", authenticateUser(["tenant", "landlord"]), getLowItem);
 
 router.post("/createInventory", authenticateUser(["tenant", "landlord"]), createInventory);
 

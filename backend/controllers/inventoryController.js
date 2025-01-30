@@ -5,14 +5,14 @@ const { ValidationError } = require("sequelize");
 exports.getInventory = async(req, res) => {
     try {
         //get the inventory based on the house id
-        const inventoryList = await Inventory.findAll({ order: ['createdAt'] }, { where: req.query });
+        const inventoryList = await Inventory.findAll({ order: ['createdAt'], where: req.query });
 
         if(inventoryList == 0) {
-            return res.status(404).json({
-                status: "error",
+            return res.status(204).json({
+                status: "success",
                 message: "No inventory exists for the given house",
-                data: [],
-                errors: [`no inventory found with data ${JSON.stringify(req.query)}`]
+                data: "empty",
+                errors: []  //`no inventory found with data ${JSON.stringify(req.query)}`
             });
         }
 
@@ -20,6 +20,46 @@ exports.getInventory = async(req, res) => {
             status: "success",
             message: `${inventoryList.length} inventory found`,
             data: inventoryList,
+            errors: []
+        });
+    } catch(err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unable to get inventory due to validation errors",
+                data: [],
+                errors: err.errors.map(err => err.message)
+            });
+        }
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occured while trying to get the inventory",
+            data: [],
+            errors: [`${err.message}`]
+        });
+    }
+}
+
+
+
+//endpoint to get all items that have a quantity less then 1
+exports.getLowItem = async(req, res) => {
+    try {
+        const inventoryItem = await Inventory.findAll({ order: ['createdAt'], where: req.query });
+
+        if(inventoryItem == 0) {
+            return res.status(204).json({
+                status: "success",
+                message: "No inventory exists for the given house",
+                data: "empty",
+                errors: []  //`no inventory found with data ${JSON.stringify(req.query)}`
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: `${inventoryItem.length} inventory found`,
+            data: inventoryItem,
             errors: []
         });
     } catch(err) {
@@ -126,8 +166,8 @@ exports.removeQuantity = async(req, res) => {
             const updatedInventory = await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
 
             //check to see if there is any of the inventory to delete
-            if(updatedInventory.quantity == 0) {
-                message = `There is no more ${updatedInventory.itemName}`;
+            if(inventoryItem.quantity == 2) {
+                message = `There is only one more ${inventoryItem.itemName}`;
             }
             res.status(201).json({
                 status: "success",

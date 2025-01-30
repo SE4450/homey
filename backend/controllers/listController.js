@@ -6,7 +6,7 @@ const { ValidationError } = require("sequelize");
 exports.getLists = async (req, res) => {
     try {
         //first get the lists for the user  query needs to be: ?userId= thid users id  example: http://10.0.0.236:8080/api/lists?userId=1
-        const usersLists = await List.findAll({ where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
+        const usersLists = await List.findAll({ order: ['createdAt'], where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
 
         if(usersLists.length == 0) {
             return res.status(404).json({
@@ -117,7 +117,7 @@ exports.deleteList = async (req, res) => {
 exports.getItems = async (req, res) => {
     try {
         //the listId needs to be sent in the body for this to work
-        const listItems = await Item.findAll({ where: req.query});
+        const listItems = await Item.findAll({ order: ['createdAt'], where: req.query});
 
         if(listItems.length == 0) {
             return res.status(404).json({
@@ -158,9 +158,10 @@ exports.createItem = async (req, res) => {
         const { listId, item, assignedTo } = req.body;
 
         const listItem = await Item.create({
-            listId,
-            item,
-            assignedTo
+            listId: listId,
+            item: item,
+            assignedTo: assignedTo,
+            purchased: 0
         });
 
         res.status(201).json({
@@ -192,14 +193,17 @@ exports.createItem = async (req, res) => {
 //option to assign someone to the item 
 exports.updateItem = async (req, res) => {
     try {
-        const {  listId, item, assignedTo  } = req.body;
+        const { rowNum, listId, item, assignedTo, purchased } = req.body;
         let listItem = Item;
 
         if(item != null) {
-            listItem = await Item.update({ item: item }, { where: { listId: listId, itemId: req.params.row }});
+            listItem = await Item.update({ item: item }, { where: { listId: listId, itemId: rowNum }});
         }
         if(assignedTo != null) {
-            listItem = await Item.update({ assignedTo: assignedTo }, { where: { listId: listId, itemId: req.params.row }});
+            listItem = await Item.update({ assignedTo: assignedTo }, { where: { listId: listId, itemId: rowNum }});
+        }
+        if(purchased != null) {
+            listItem = await Item.update({ purchased: purchased }, { where: { listId: listId, itemId: rowNum }});
         }
 
         res.status(201).json({

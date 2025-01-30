@@ -163,6 +163,44 @@ ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
 
 
 --
+-- Name: Inventories; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Inventories" (
+    "itemId" integer NOT NULL,
+    "houseId" integer NOT NULL,
+    "itemName" character varying(255) NOT NULL,
+    quantity integer NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Inventories" OWNER TO admin;
+
+--
+-- Name: Inventories_itemId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Inventories_itemId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Inventories_itemId_seq" OWNER TO admin;
+
+--
+-- Name: Inventories_itemId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Inventories_itemId_seq" OWNED BY public."Inventories"."itemId";
+
+
+--
 -- Name: Items; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -171,6 +209,7 @@ CREATE TABLE public."Items" (
     "listId" integer NOT NULL,
     item character varying(255) NOT NULL,
     "assignedTo" character varying(255),
+    purchased integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -428,6 +467,13 @@ ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."
 
 
 --
+-- Name: Inventories itemId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Inventories" ALTER COLUMN "itemId" SET DEFAULT nextval('public."Inventories_itemId_seq"'::regclass);
+
+
+--
 -- Name: Items itemId; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -483,6 +529,14 @@ ALTER TABLE ONLY public."Conversations"
 
 ALTER TABLE ONLY public."Expenses"
     ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Inventories Inventories_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Inventories"
+    ADD CONSTRAINT "Inventories_pkey" PRIMARY KEY ("itemId");
 
 
 --

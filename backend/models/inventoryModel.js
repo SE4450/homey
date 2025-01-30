@@ -1,29 +1,25 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
 
-const Item = sequelize.define("Item", {
+const Inventory = sequelize.define("Inventory", {
     itemId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
+        allowNull: false
     },
-    listId: {
+    houseId: {   //this needs to be modified when the house model is created to be a foreign key
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: false
     },
-    item: {
+    itemName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
     },
-    assignedTo: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    purchased: {
+    quantity: {
         type: DataTypes.INTEGER,
         allowNull: false
     }
 });
 
-module.exports = Item;
+module.exports = Inventory;

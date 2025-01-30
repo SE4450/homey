@@ -108,7 +108,7 @@ export default function ListDisplay() {
                 list &&
                 <View>
                     <Pressable onPress={() => displayList("", 0)}><Text>Back</Text></Pressable>
-                    <Lists name={listName} id={listID}/>
+                    <Lists name={listName} id={listID} houseId={userId}/>
                 </View>
             }
         </ScrollView>

@@ -84,7 +84,12 @@ exports.deleteList = async (req, res) => {
 
         const { listId } = req.body;
 
-        const userList = List.destroy({ where: { listId: listId}});
+        const userList = await List.destroy({ where: { listId: listId}});
+
+        if(userList) {
+            //clear out an items that are in the deleted list
+            await Item.destroy({ where: { listId: listId }});
+        }
 
         res.status(201).json({
             status: "success",
@@ -235,7 +240,7 @@ exports.deleteItem = async (req, res) => {
     try {
         const { listId, rowNum } = req.body;
 
-        let listItem = Item.destroy({ where: { listId: listId, itemId: rowNum }});
+        let listItem = await Item.destroy({ where: { listId: listId, itemId: rowNum }});
 
         res.status(201).json({
             status: "success",

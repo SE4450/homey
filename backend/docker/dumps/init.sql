@@ -46,6 +46,7 @@ ALTER TYPE public."enum_Participants_role" OWNER TO admin;
 --
 
 CREATE TYPE public."enum_Profiles_cleaningHabits" AS ENUM (
+    '',
     'Low',
     'Medium',
     'High'
@@ -59,6 +60,7 @@ ALTER TYPE public."enum_Profiles_cleaningHabits" OWNER TO admin;
 --
 
 CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
+    '',
     'Low',
     'Medium',
     'High'
@@ -79,24 +81,6 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
-
---
--- Name: delete_old_unverified_users(); Type: FUNCTION; Schema: public; Owner: admin
---
-
-CREATE FUNCTION public.delete_old_unverified_users() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  DELETE FROM public."Users"
-  WHERE "verified" = false
-    AND "createdAt" < NOW() - INTERVAL '1 hour';
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION public.delete_old_unverified_users() OWNER TO admin;
 
 SET default_tablespace = '';
 
@@ -179,26 +163,26 @@ ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
 
 
 --
--- Name: Items; Type: TABLE; Schema: public; Owner: admin
+-- Name: Inventories; Type: TABLE; Schema: public; Owner: admin
 --
 
-CREATE TABLE public."Items" (
-    "listId" integer NOT NULL,
-    "rowId" integer NOT NULL,
-    item character varying(255) NOT NULL,
-    "assignedTo" character varying(255),
+CREATE TABLE public."Inventories" (
+    "itemId" integer NOT NULL,
+    "houseId" integer NOT NULL,
+    "itemName" character varying(255) NOT NULL,
+    quantity integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
 
 
-ALTER TABLE public."Items" OWNER TO admin;
+ALTER TABLE public."Inventories" OWNER TO admin;
 
 --
--- Name: Items_rowId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+-- Name: Inventories_itemId_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
-CREATE SEQUENCE public."Items_rowId_seq"
+CREATE SEQUENCE public."Inventories_itemId_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -207,13 +191,52 @@ CREATE SEQUENCE public."Items_rowId_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Items_rowId_seq" OWNER TO admin;
+ALTER SEQUENCE public."Inventories_itemId_seq" OWNER TO admin;
 
 --
--- Name: Items_rowId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+-- Name: Inventories_itemId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
-ALTER SEQUENCE public."Items_rowId_seq" OWNED BY public."Items"."rowId";
+ALTER SEQUENCE public."Inventories_itemId_seq" OWNED BY public."Inventories"."itemId";
+
+
+--
+-- Name: Items; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Items" (
+    "itemId" integer NOT NULL,
+    "listId" integer NOT NULL,
+    item character varying(255) NOT NULL,
+    "assignedTo" character varying(255),
+    purchased integer NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Items" OWNER TO admin;
+
+--
+-- Name: Items_itemId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Items_itemId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Items_itemId_seq" OWNER TO admin;
+
+--
+-- Name: Items_itemId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Items_itemId_seq" OWNED BY public."Items"."itemId";
 
 
 --
@@ -444,10 +467,17 @@ ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."
 
 
 --
--- Name: Items rowId; Type: DEFAULT; Schema: public; Owner: admin
+-- Name: Inventories itemId; Type: DEFAULT; Schema: public; Owner: admin
 --
 
-ALTER TABLE ONLY public."Items" ALTER COLUMN "rowId" SET DEFAULT nextval('public."Items_rowId_seq"'::regclass);
+ALTER TABLE ONLY public."Inventories" ALTER COLUMN "itemId" SET DEFAULT nextval('public."Inventories_itemId_seq"'::regclass);
+
+
+--
+-- Name: Items itemId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Items" ALTER COLUMN "itemId" SET DEFAULT nextval('public."Items_itemId_seq"'::regclass);
 
 
 --
@@ -502,11 +532,19 @@ ALTER TABLE ONLY public."Expenses"
 
 
 --
+-- Name: Inventories Inventories_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Inventories"
+    ADD CONSTRAINT "Inventories_pkey" PRIMARY KEY ("itemId");
+
+
+--
 -- Name: Items Items_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public."Items"
-    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("listId", "rowId");
+    ADD CONSTRAINT "Items_pkey" PRIMARY KEY ("itemId");
 
 
 --
@@ -566,26 +604,11 @@ ALTER TABLE ONLY public."Users"
 
 
 --
--- Name: Users Users_username_key1; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Users"
-    ADD CONSTRAINT "Users_username_key1" UNIQUE (username);
-
-
---
 -- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
-
-
---
--- Name: Users clean_up_unverified_users; Type: TRIGGER; Schema: public; Owner: admin
---
-
-CREATE TRIGGER clean_up_unverified_users BEFORE INSERT ON public."Users" FOR EACH ROW EXECUTE FUNCTION public.delete_old_unverified_users();
 
 
 --

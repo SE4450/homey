@@ -82,19 +82,19 @@ exports.updateProfile = async (req, res) => {
         let userProfile = Profile;
 
         if(cleaningHabits != null) {
-            userProfile = await Profile.update({ cleaningHabits }, { where: { id: req.params.id }});
+            userProfile = await Profile.update({ cleaningHabits: cleaningHabits }, { where: { id: req.params.id }});
         }
         if(noiseLevel != null) {
-            userProfile = await Profile.update({ noiseLevel }, { where: { id: req.params.id }});
+            userProfile = await Profile.update({ noiseLevel: noiseLevel }, { where: { id: req.params.id }});
         }
         if(sleepStart != null) {
-            userProfile = await Profile.update({ sleepStart }, { where: { id: req.params.id }});
+            userProfile = await Profile.update({ sleepStart: sleepStart }, { where: { id: req.params.id }});
         }
         if(sleepEnd != null) {
-            userProfile = await Profile.update({ sleepEnd }, { where: { id: req.params.id }});
+            userProfile = await Profile.update({ sleepEnd: sleepEnd }, { where: { id: req.params.id }});
         }
         if(alergies != null) {
-            userProfile = await Profile.update({ alergies }, { where: { id: req.params.id }});
+            userProfile = await Profile.update({ alergies: alergies }, { where: { id: req.params.id }});
         }
 
         res.status(201).json({

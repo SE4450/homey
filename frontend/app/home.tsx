@@ -96,9 +96,10 @@ export default function HomeScreen() {
               inventoryAlert.map((item) => <Text key={item.itemName+"textnode"} style={styles.alertText}>{item.itemName}</Text>)
             }
           </View>
-        }
-        
+        }        
       </View>
+
+      {/*
       <View style={styles.buttonContainer}>
         {[
           { title: "Profile", path: "/profile", params: { username: user.username } },
@@ -123,6 +124,7 @@ export default function HomeScreen() {
           <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
         </TouchableOpacity>
       </View>
+      */}
     </ScrollView>
   );
 }
@@ -132,7 +134,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: COLORS.LIGHT_GRAY,
+    /*
     alignItems: "center",
+    justifyContent: "space-evenly"
+    */
   },
   header: {
     marginBottom: 30,
@@ -183,5 +188,5 @@ const styles = StyleSheet.create({
   },
   alertText: {
     fontSize: 20,
-  }
+  },
 });

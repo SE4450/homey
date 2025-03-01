@@ -4,7 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Stack>
+      <Stack screenOptions={{headerShown: false}}>
         <Stack.Screen name="index" options={{ title: "Sign In" }} />
         <Stack.Screen name="register" options={{ title: "Sign Up" }} />
         <Stack.Screen name="home" options={{ title: "Home" }} />
@@ -18,6 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="profile" options={{ title: "Profile" }} />
         <Stack.Screen name="listDisplay" options={{ title: "Lists" }} />
         <Stack.Screen name="inventory" options={{ title: "Inventory" }} />
+        <Stack.Screen name="navigation" options={{ title: "Navigation" }} />
       </Stack>
     </AuthProvider>
   );

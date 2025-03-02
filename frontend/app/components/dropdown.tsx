@@ -19,7 +19,16 @@ const Dropdown: React.FC<DropdownProps> = ({
     onOptionSelect,
     placeholder,  //this was added for a placeholder value
 }) => {
-    const [selectedOption, setSelectedOption] = useState(placeholder);  //options[0] -> This was originally in the useState
+    //set the inital value of the dropdown
+    let initalVal = "";
+    if(placeholder == null) {
+        initalVal = options[0];
+    }
+    else {
+        initalVal = placeholder;
+    }
+
+    const [selectedOption, setSelectedOption] = useState(initalVal);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleOptionSelect = (option: string) => {

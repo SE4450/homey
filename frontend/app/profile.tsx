@@ -1,10 +1,21 @@
-import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { Dropdown } from 'react-native-element-dropdown';
 import { useAuth } from "./context/AuthContext";
 import { useLocalSearchParams } from "expo-router";
 import TextField from "./components/textField";
 import useAxios from "./hooks/useAxios";
+import { useRouter } from "expo-router";
+
+const COLORS = {
+    PRIMARY: "#4CAF50",
+    SECONDARY: "#FF9800",
+    WHITE: "#FFFFFF",
+    BLACK: "#000000",
+    TEXT: "#333333",
+    LIGHT_GRAY: "#F5F5F5",
+    LOGOUT: "#D32F2F",
+  };
 
 //stylesheet for the component
 const styles = StyleSheet.create({
@@ -40,12 +51,27 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       paddingHorizontal: 8,
       backgroundColor: "white"
-    }
+    },
+    logoutContainer: {
+        width: "100%",
+        alignItems: "center",
+    },
+    button: {
+        width: "80%",
+        paddingVertical: 15,
+        borderRadius: 8,
+        marginBottom: 15,
+        alignItems: "center",
+      },
+      buttonText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: COLORS.WHITE,
+      },
 });
 
 export default function Profile() {
 
-    const [displayProfile, setDisplayProfile] = useState(false);
     const [cleaningValue, setCleaningValue] = useState("");
     const [noiseValue, setNoiseValue] = useState("");
     const [startSleepValue, setStartSleepValue] = useState("");
@@ -58,12 +84,28 @@ export default function Profile() {
     ];
 
     const { post, get } = useAxios();
-    const { userId } = useAuth();
-    const { username } = useLocalSearchParams();
+    const [user, setUser] = useState<any>({});
+    const { userId, logout } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         getProfile();
     }, []);
+
+    useEffect(() => {
+    const fetchUser = async () => {
+        const response = await get<any>(`/api/users/user/${userId}`);
+        if (response) {
+        setUser(response.data[0]);
+        }
+    };
+    fetchUser();
+    }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        router.push("/login");
+      };
 
     const getProfile = async () => {
         const body = { id: userId };
@@ -103,11 +145,13 @@ export default function Profile() {
         }
     }
 
+
+
     return (
         <ScrollView>
             <View style={styles.profilePopup}>
                 <View>
-                    <Text>{username}</Text>
+                    <Text>{user.username}</Text>
                 </View>
                 <View style={styles.accountFormat}>
                     <Text>Cleaning Habits: </Text>
@@ -131,6 +175,16 @@ export default function Profile() {
                 </View>
                 <Button title="Update Profile" onPress={updateProfile} />
             </View>
+
+            <View style={styles.logoutContainer}>
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
+                    onPress={handleLogout}
+                    >
+                    <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
+                </TouchableOpacity>
+            </View>
+
         </ScrollView>
     )
 }

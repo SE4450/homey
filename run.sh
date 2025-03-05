@@ -108,7 +108,9 @@ start_frontend() {
 
 start_backend() {
     echo "Starting backend ..."
-    dos2unix ./backend/docker/scripts/wait-for-db.sh
+    if [[ "$(uname)" != "Darwin" ]]; then
+        dos2unix ./backend/docker/scripts/wait-for-db.sh
+    fi
     docker compose -f ./backend/docker/docker-compose.yml up --build
 }
 

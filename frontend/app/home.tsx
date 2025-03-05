@@ -69,7 +69,6 @@ export default function HomeScreen() {
   };
 
   const lowInventoryAlert = async () => {
-
     setInventoryAlert([]);
 
     const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
@@ -101,7 +100,7 @@ export default function HomeScreen() {
               inventoryAlert.map((item) => <Text key={item.itemName+"textnode"} style={styles.alertText}>{item.itemName}</Text>)
             }
           </View>
-        }        
+        }
       </View>
 
       {/*

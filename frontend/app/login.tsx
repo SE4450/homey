@@ -41,7 +41,7 @@ const LoginScreen = () => {
 
         if (response) {
             await login(response.data[0].token);
-            router.push("/home");
+            router.push("/navigation");
         }
     };
 

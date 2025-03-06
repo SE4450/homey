@@ -10,25 +10,17 @@ type DropdownProps = {
         selectedOptionStyle?: object;
     };
     onOptionSelect: (selected: string) => void;
-    placeholder?: string;  //this line was added
+    placeholder?: string;
 };
 
 const Dropdown: React.FC<DropdownProps> = ({
     options,
     customStyle = {},
     onOptionSelect,
-    placeholder,  //this was added for a placeholder value
+    placeholder,
 }) => {
-    //set the inital value of the dropdown
-    let initalVal = "";
-    if(placeholder == null) {
-        initalVal = options[0];
-    }
-    else {
-        initalVal = placeholder;
-    }
-
-    const [selectedOption, setSelectedOption] = useState(initalVal);
+    const initialVal = placeholder ?? options[0] ?? "";
+    const [selectedOption, setSelectedOption] = useState(initialVal);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleOptionSelect = (option: string) => {

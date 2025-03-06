@@ -11,6 +11,7 @@ import {
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -28,6 +29,7 @@ export default function HomeScreen() {
   const { userToken, userId, logout } = useAuth();
   const { get, error } = useAxios();
   const router = useRouter();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (error) {
@@ -52,8 +54,10 @@ export default function HomeScreen() {
   }, [userToken]);
 
   useEffect(() => {
-    lowInventoryAlert();
-  }, []);
+    if(isFocused) {
+      lowInventoryAlert();
+    }
+  }, [isFocused]);
 
   const handleNavigation = (path: any, params = {}) => {
     router.push({ pathname: path, params });
@@ -65,11 +69,11 @@ export default function HomeScreen() {
   };
 
   const lowInventoryAlert = async () => {
+    setInventoryAlert([]);
 
     const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
 
     if(response) {
-      setInventoryAlert([]);
       response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
       setInventoryAlert(l => [...l, {itemName: item.itemName}])
       })
@@ -97,8 +101,9 @@ export default function HomeScreen() {
             }
           </View>
         }
-        
       </View>
+
+      {/*
       <View style={styles.buttonContainer}>
         {[
           { title: "Profile", path: "/profile", params: { username: user.username } },
@@ -123,6 +128,7 @@ export default function HomeScreen() {
           <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
         </TouchableOpacity>
       </View>
+      */}
     </ScrollView>
   );
 }
@@ -132,7 +138,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: COLORS.LIGHT_GRAY,
+    /*
     alignItems: "center",
+    justifyContent: "space-evenly"
+    */
   },
   header: {
     marginBottom: 30,
@@ -183,5 +192,5 @@ const styles = StyleSheet.create({
   },
   alertText: {
     fontSize: 20,
-  }
+  },
 });

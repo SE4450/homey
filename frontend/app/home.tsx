@@ -54,10 +54,8 @@ export default function HomeScreen() {
   }, [userToken]);
 
   useEffect(() => {
-    if(isFocused) {
-      lowInventoryAlert();
-    }
-  }, [isFocused]);
+    lowInventoryAlert();
+  }, []);
 
   const handleNavigation = (path: any, params = {}) => {
     router.push({ pathname: path, params });

@@ -18,7 +18,6 @@ export default function RootLayout() {
         <Stack.Screen name="profile" options={{ title: "Profile" }} />
         <Stack.Screen name="listDisplay" options={{ title: "Lists" }} />
         <Stack.Screen name="inventory" options={{ title: "Inventory" }} />
-        <Stack.Screen name="navigation" options={{ title: "Navigation" }} />
       </Stack>
     </AuthProvider>
   );

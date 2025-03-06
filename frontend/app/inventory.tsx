@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
+import { useIsFocused } from "@react-navigation/native";
 
 
 const styles = StyleSheet.create({
@@ -51,10 +52,15 @@ export default function Inventory() {
     //get the userId
     const { userToken, userId } = useAuth();
 
+    //variable to determine if we are in the screen
+    const isFocused = useIsFocused();
+
     //call for the inventory items
     useEffect(() => {
-        getItems();            
-    }, []);
+        if(isFocused) {
+            getItems();  
+        }       
+    }, [isFocused]);
 
     //useEffect that is triggered on errors
     useEffect(() => {

@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, Text, TextInput, Button, Pressable, Alert } from "react-native";
 import { useState, useEffect } from "react";
 
 import useAxios from "../app/hooks/useAxios";
@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
         
     },
     listFormat : {
+        width: 200,
         borderWidth: 2,
         backgroundColor: "white",
         
@@ -51,9 +52,10 @@ export default function ListDisplay() {
         //fetch request goes here
         const response = await get<any>(`/api/lists?userId=${userId}`);
 
+        //clear the array
+        setLists([]);
+
         if(response) {
-            //clear the array
-            setLists([]);
             for(const list of response.data) {
                 setLists(l => [...l, {name: list.listName, id: list.listId}]);
             }
@@ -69,6 +71,37 @@ export default function ListDisplay() {
             if(response) {
                 usersLists();
             }
+        }
+        else {
+            alert("You must add a name for a list");
+        }
+        setCreatedList("");
+        
+    }
+
+    //function for the delete alert
+    const deleteConfirmation = async(listId: Number, listName: String) => {
+        Alert.alert('Delete List', `Do you want to delete the list ${listName}`, [
+            {
+                text: "Yes",
+                onPress: () => deleteList(listId)
+            },
+            {
+                text: "No",
+            },
+        ])
+    }
+
+    //function to delete a list
+    const deleteList = async(listId: Number) => {
+
+        const body = { listId: listId }
+
+        const response = await post<any>("/api/lists/deleteList", body);
+
+        if(response) {
+            usersLists();
+            alert("The list has been deleted");
         }
         else {
             alert("You must add a name for a list");
@@ -98,7 +131,7 @@ export default function ListDisplay() {
                     <Button title="Create List" onPress={() => createList()}></Button>
                     {lists.map((list) => 
                         <View style={styles.displayedLists} key={list.name+"view"}>
-                            <Pressable key={list.name+"button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>
+                            <Pressable key={list.name+"button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)} onLongPress={() => deleteConfirmation(list.id, list.name)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>
                         </View>
                     )}
                 </View>

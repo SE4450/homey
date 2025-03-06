@@ -84,7 +84,12 @@ exports.deleteList = async (req, res) => {
 
         const { listId } = req.body;
 
-        const userList = List.destroy({ where: { listId: listId}});
+        const userList = await List.destroy({ where: { listId: listId}});
+
+        if(userList) {
+            //clear out an items that are in the deleted list
+            await Item.destroy({ where: { listId: listId }});
+        }
 
         res.status(201).json({
             status: "success",
@@ -157,19 +162,34 @@ exports.createItem = async (req, res) => {
     try {
         const { listId, item, assignedTo } = req.body;
 
-        const listItem = await Item.create({
-            listId: listId,
-            item: item,
-            assignedTo: assignedTo,
-            purchased: 0
-        });
+        //first check if the sent item is already in the list
+        const existingListItem = await Item.findAll({ where: { listId: listId, item: item }});
 
-        res.status(201).json({
-            status: "success",
-            message: "item added to list",
-            data: listItem,
-            errors: []
-        });
+        if(existingListItem.length != 0) {
+            return res.status(400).json({
+                status: "error",
+                message: "The item already exists in the list",
+                data: [],
+                errors:  [`The item already exists in the list`]
+            });
+        }
+
+        else {
+            const listItem = await Item.create({
+                listId: listId,
+                item: item,
+                assignedTo: assignedTo,
+                purchased: 0
+            });
+
+            res.status(201).json({
+                status: "success",
+                message: "item added to list",
+                data: listItem,
+                errors: []
+            });
+        }
+        
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
@@ -235,7 +255,7 @@ exports.deleteItem = async (req, res) => {
     try {
         const { listId, rowNum } = req.body;
 
-        let listItem = Item.destroy({ where: { listId: listId, itemId: rowNum }});
+        let listItem = await Item.destroy({ where: { listId: listId, itemId: rowNum }});
 
         res.status(201).json({
             status: "success",

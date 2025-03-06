@@ -139,6 +139,54 @@ exports.createInventory = async(req, res) => {
 }
 
 
+
+//delete an inventroy item
+exports.deleteInventoryItem = async(req, res) => {
+    try {
+        const { itemId, houseId } = req.body;
+
+        //check to make sure the item exists
+        const inventoryItem = await Inventory.findOne({ where: { houseId: houseId, itemId: itemId }});
+
+        if(inventoryItem == 0) {
+            return res.status(404).json({
+                status: "error",
+                message: "The inventory does not exist",
+                data: [],
+                errors: ["No inventroy exists"]
+            });
+        } 
+        else{
+            //if we find the inventory, delete it from the list
+            const newInventoryList = await Inventory.destroy({ where: { houseId: houseId, itemId: itemId }});
+
+            res.status(201).json({
+                status: "success",
+                message: "item deleted",
+                data: newInventoryList,
+                errors: []
+            });
+        }
+
+    } catch(err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unable to delete the inventory due to validation errors",
+                data: [],
+                errors: err.errors.map(err => err.message)
+            });
+        }
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occured while trying to delete new inventory",
+            data: [],
+            errors: [`${err.message}`]
+        });
+    }
+}
+
+
 //add new inventory quantity
 exports.removeQuantity = async(req, res) => {
     try {
@@ -163,7 +211,7 @@ exports.removeQuantity = async(req, res) => {
             let message = "item removed from the inventory";
 
             //reduce the quantity of the inventory
-            const updatedInventory = await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
+            await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
 
             //check to see if there is any of the inventory to delete
             if(inventoryItem.quantity == 2) {
@@ -172,7 +220,7 @@ exports.removeQuantity = async(req, res) => {
             res.status(201).json({
                 status: "success",
                 message: `${message}`,
-                data: updatedInventory,
+                data: inventoryItem,
                 errors: []
             });
         }      

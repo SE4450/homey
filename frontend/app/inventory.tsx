@@ -78,23 +78,7 @@ export default function Inventory() {
         }
     }
 
-    /*
-    //function to add an item to the list
-    const addItem = async() => {
-        if(item != "") {
-            //make a fetch request to add the new item to the database
-            const body = { houseId: userId, itemName: item };
-            const response = await post<any>("/api/inventory/createInventory", body);
 
-            if(response) {
-                getItems();
-            }
-        }
-        else {
-            alert("You must enter an item");
-        }
-    }
-    */
 
     //function to add an item to the list
     const addItem = async(itemName: String) => {
@@ -118,11 +102,14 @@ export default function Inventory() {
         const response = await post<any>("/api/inventory/removeQuantity", body);
 
         if(response) {
-            //if the inventory is now empty alert the user
+            //if the inventory is almost empty alert the user
             if(response.message.includes("There is only one more ")) {
                 Alert.alert("Inventory Low", response.message);
             }
-            //getItems();
+            //if the inventory is empty remove it from the displayed list
+            if(true) {
+                console.log(response.data[0]);  //hopefully this has the quantity of the returned item
+            }
             setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf()-1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity } ));
         }
     }

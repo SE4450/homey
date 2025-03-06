@@ -103,6 +103,11 @@ export default function ListDisplay() {
             usersLists();
             alert("The list has been deleted");
         }
+        else {
+            alert("You must add a name for a list");
+        }
+        setCreatedList("");
+        
     }
 
     //function to display the selected list

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
 
-
 const styles = StyleSheet.create({
     button: {
         fontSize: 25,
@@ -42,7 +41,7 @@ const styles = StyleSheet.create({
 
 export default function Inventory() {
     //variables
-    const [inventoryItems, setInventoryItems] = useState([] as Array<{itemId: Number, itemName: String, quantity: Number}>);
+    const [inventoryItems, setInventoryItems] = useState([] as Array<{ itemId: Number, itemName: String, quantity: Number }>);
     const [item, setItem] = useState("");
 
     //fetch requests
@@ -53,7 +52,7 @@ export default function Inventory() {
 
     //call for the inventory items
     useEffect(() => {
-        getItems();            
+        getItems();
     }, []);
 
     //useEffect that is triggered on errors
@@ -64,16 +63,16 @@ export default function Inventory() {
     }, [error]);
 
     //function to get the house inventory
-    const getItems = async() => {
+    const getItems = async () => {
         //make a fetch request to get any items for the selected list
         const body = { houseId: userId } //this will need to be changed to the houseId when we have it
         const response = await get<any>("/api/inventory", body);
 
-        if(response) {
+        if (response) {
             //clear the set list items
             setInventoryItems([]);
-            response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
-                setInventoryItems(l => [...l, {itemId: item.itemId, itemName: item.itemName, quantity: item.quantity}]);
+            response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
+                setInventoryItems(l => [...l, { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity }]);
             });
         }
     }
@@ -97,13 +96,13 @@ export default function Inventory() {
     */
 
     //function to add an item to the list
-    const addItem = async(itemName: String) => {
-        
+    const addItem = async (itemName: String) => {
+
         //make a fetch request to add the new item to the database
         const body = { houseId: userId, itemName: itemName };
         const response = await post<any>("/api/inventory/createInventory", body);
 
-        if(response) {
+        if (response) {
             getItems();
         }
     }
@@ -111,28 +110,28 @@ export default function Inventory() {
 
 
     //function to decrement the inventory
-    const removeItem = async(itemId: Number, quantity: Number) => {
+    const removeItem = async (itemId: Number, quantity: Number) => {
         const body = { itemId: itemId, houseId: userId, quantity: quantity }
 
         //call the post request
         const response = await post<any>("/api/inventory/removeQuantity", body);
 
-        if(response) {
+        if (response) {
             //if the inventory is now empty alert the user
-            if(response.message.includes("There is only one more ")) {
+            if (response.message.includes("There is only one more ")) {
                 Alert.alert("Inventory Low", response.message);
             }
             //getItems();
-            setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf()-1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity } ));
+            setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf() - 1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity }));
         }
     }
 
 
-    return(
+    return (
         <ScrollView>
 
             <View style={styles.tableHead}>
-            
+
                 <View style={styles.tableRow}>
                     <Text style={styles.tableCaption}>Item</Text>
                 </View>
@@ -143,19 +142,19 @@ export default function Inventory() {
             </View>
 
             {
-                inventoryItems.map((item, index) => 
-                    <View key={"viewnode_row"+index} style={styles.tableBody}>
+                inventoryItems.map((item, index) =>
+                    <View key={"viewnode_row" + index} style={styles.tableBody}>
 
-                        <View key={item.itemName+"viewnode"} style={styles.tableRow}>
-                            <Text key={item.itemName+"textnode"} style={styles.tableData}>{item.itemName}</Text>
+                        <View key={item.itemName + "viewnode"} style={styles.tableRow}>
+                            <Text key={item.itemName + "textnode"} style={styles.tableData}>{item.itemName}</Text>
                         </View>
-                        <View key={item.itemName+"quantityviewnode"} style={styles.tableRow}>
-                            <Pressable key={"incrementRow_"+index} onPress={() => {addItem(item.itemName)}}><Text style={styles.button}>+</Text></Pressable>
-                            <Text key={item.itemName+"quantitytextnode"} style={styles.tableData}>{`${item.quantity}`}</Text>
-                            <Pressable key={"decrementRow_"+index} onPress={() => {removeItem(item.itemId, item.quantity)}}><Text style={styles.button}>-</Text></Pressable>
+                        <View key={item.itemName + "quantityviewnode"} style={styles.tableRow}>
+                            <Pressable key={"incrementRow_" + index} onPress={() => { addItem(item.itemName) }}><Text style={styles.button}>+</Text></Pressable>
+                            <Text key={item.itemName + "quantitytextnode"} style={styles.tableData}>{`${item.quantity}`}</Text>
+                            <Pressable key={"decrementRow_" + index} onPress={() => { removeItem(item.itemId, item.quantity) }}><Text style={styles.button}>-</Text></Pressable>
                         </View>
-                        
-                    </View> 
+
+                    </View>
                 )
             }
         </ScrollView>

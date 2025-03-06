@@ -14,6 +14,7 @@ import Button from "./components/button";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 
 const LoginScreen = () => {
     const [username, setUsername] = useState("");
@@ -41,7 +42,12 @@ const LoginScreen = () => {
 
         if (response) {
             await login(response.data[0].token);
-            router.push("/home");
+            const decoded = jwtDecode<any>(response.data[0].token);
+            if (decoded.role == "landlord") {
+                router.push("/landlordHome");
+            } else {
+                router.push("/tenantHome");
+            }
         }
     };
 

@@ -22,9 +22,9 @@ const COLORS = {
   LOGOUT: "#D32F2F",
 };
 
-export default function HomeScreen() {
+export default function TenantHomeScreen() {
   const [user, setUser] = useState<any>({});
-  const [inventoryAlert, setInventoryAlert] = useState([] as Array<{itemName: String}>);
+  const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
   const { userToken, userId, logout } = useAuth();
   const { get, error } = useAxios();
   const router = useRouter();
@@ -68,10 +68,10 @@ export default function HomeScreen() {
 
     const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
 
-    if(response) {
+    if (response) {
       setInventoryAlert([]);
-      response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
-      setInventoryAlert(l => [...l, {itemName: item.itemName}])
+      response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
+        setInventoryAlert(l => [...l, { itemName: item.itemName }])
       })
     }
   }
@@ -87,17 +87,17 @@ export default function HomeScreen() {
           Welcome, {user.firstName} {user.lastName}
         </Text>
         <Text style={styles.heading}>Homeys</Text>
-        { 
+        {
           inventoryAlert.length != 0 &&
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
             <Text style={styles.alertHeader}>Low Inventory:</Text>
             {
-              inventoryAlert.map((item) => <Text key={item.itemName+"textnode"} style={styles.alertText}>{item.itemName}</Text>)
+              inventoryAlert.map((item) => <Text key={item.itemName + "textnode"} style={styles.alertText}>{item.itemName}</Text>)
             }
           </View>
         }
-        
+
       </View>
       <View style={styles.buttonContainer}>
         {[
@@ -106,7 +106,7 @@ export default function HomeScreen() {
           { title: "Expenses", path: "/expenses" },
           { title: "Chores", path: "/chores" },
           { title: "Messages", path: "/contacts" },
-          { title: "Inventory", path: "/inventory"},
+          { title: "Inventory", path: "/inventory" },
         ].map((item, index) => (
           <TouchableOpacity
             key={index}

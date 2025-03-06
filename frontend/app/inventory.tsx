@@ -69,9 +69,9 @@ export default function Inventory() {
         const body = { houseId: userId } //this will need to be changed to the houseId when we have it
         const response = await get<any>("/api/inventory", body);
 
+        //clear the set list items
+        setInventoryItems([]);
         if(response) {
-            //clear the set list items
-            setInventoryItems([]);
             response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
                 setInventoryItems(l => [...l, {itemId: item.itemId, itemName: item.itemName, quantity: item.quantity}]);
             });
@@ -107,10 +107,18 @@ export default function Inventory() {
                 Alert.alert("Inventory Low", response.message);
             }
             //if the inventory is empty remove it from the displayed list
-            if(true) {
-                console.log(response.data[0]);  //hopefully this has the quantity of the returned item
+            if(response.data.quantity == 1) {
+                const deleteItemBody = { itemId: itemId, houseId: userId };
+                const deleteInventoryResponse = await post<any>("/api/inventory/deleteItem", deleteItemBody);
+
+                if(deleteInventoryResponse) {
+                    getItems();
+                }
             }
-            setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf()-1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity } ));
+            else {
+                setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf()-1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity } ));
+            }
+            
         }
     }
 

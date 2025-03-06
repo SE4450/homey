@@ -211,7 +211,7 @@ exports.removeQuantity = async(req, res) => {
             let message = "item removed from the inventory";
 
             //reduce the quantity of the inventory
-            const updatedInventory = await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
+            await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
 
             //check to see if there is any of the inventory to delete
             if(inventoryItem.quantity == 2) {
@@ -220,7 +220,7 @@ exports.removeQuantity = async(req, res) => {
             res.status(201).json({
                 status: "success",
                 message: `${message}`,
-                data: updatedInventory,
+                data: inventoryItem,
                 errors: []
             });
         }      

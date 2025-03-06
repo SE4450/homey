@@ -162,19 +162,34 @@ exports.createItem = async (req, res) => {
     try {
         const { listId, item, assignedTo } = req.body;
 
-        const listItem = await Item.create({
-            listId: listId,
-            item: item,
-            assignedTo: assignedTo,
-            purchased: 0
-        });
+        //first check if the sent item is already in the list
+        const existingListItem = await Item.findAll({ where: { listId: listId, item: item }});
 
-        res.status(201).json({
-            status: "success",
-            message: "item added to list",
-            data: listItem,
-            errors: []
-        });
+        if(existingListItem.length != 0) {
+            return res.status(400).json({
+                status: "error",
+                message: "The item already exists in the list",
+                data: [],
+                errors:  [`The item already exists in the list`]
+            });
+        }
+
+        else {
+            const listItem = await Item.create({
+                listId: listId,
+                item: item,
+                assignedTo: assignedTo,
+                purchased: 0
+            });
+
+            res.status(201).json({
+                status: "success",
+                message: "item added to list",
+                data: listItem,
+                errors: []
+            });
+        }
+        
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({

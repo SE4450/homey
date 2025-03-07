@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
+import { useIsFocused } from "@react-navigation/native";
 
 const styles = StyleSheet.create({
     button: {
@@ -50,10 +51,15 @@ export default function Inventory() {
     //get the userId
     const { userToken, userId } = useAuth();
 
+    //variable to determine if we are in the screen
+    const isFocused = useIsFocused();
+
     //call for the inventory items
     useEffect(() => {
-        getItems();
-    }, []);
+        if (isFocused) {
+            getItems();
+        }
+    }, [isFocused]);
 
     //useEffect that is triggered on errors
     useEffect(() => {
@@ -68,32 +74,15 @@ export default function Inventory() {
         const body = { houseId: userId } //this will need to be changed to the houseId when we have it
         const response = await get<any>("/api/inventory", body);
 
+        //clear the set list items
+        setInventoryItems([]);
         if (response) {
-            //clear the set list items
-            setInventoryItems([]);
             response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
                 setInventoryItems(l => [...l, { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity }]);
             });
         }
     }
 
-    /*
-    //function to add an item to the list
-    const addItem = async() => {
-        if(item != "") {
-            //make a fetch request to add the new item to the database
-            const body = { houseId: userId, itemName: item };
-            const response = await post<any>("/api/inventory/createInventory", body);
-
-            if(response) {
-                getItems();
-            }
-        }
-        else {
-            alert("You must enter an item");
-        }
-    }
-    */
 
     //function to add an item to the list
     const addItem = async (itemName: String) => {
@@ -117,12 +106,23 @@ export default function Inventory() {
         const response = await post<any>("/api/inventory/removeQuantity", body);
 
         if (response) {
-            //if the inventory is now empty alert the user
+            //if the inventory is almost empty alert the user
             if (response.message.includes("There is only one more ")) {
                 Alert.alert("Inventory Low", response.message);
             }
-            //getItems();
-            setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf() - 1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity }));
+            //if the inventory is empty remove it from the displayed list
+            if (response.data.quantity == 1) {
+                const deleteItemBody = { itemId: itemId, houseId: userId };
+                const deleteInventoryResponse = await post<any>("/api/inventory/deleteItem", deleteItemBody);
+
+                if (deleteInventoryResponse) {
+                    getItems();
+                }
+            }
+            else {
+                setInventoryItems(inventoryItems.map((item) => item.itemId == itemId ? { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity.valueOf() - 1 } : { itemId: item.itemId, itemName: item.itemName, quantity: item.quantity }));
+            }
+
         }
     }
 

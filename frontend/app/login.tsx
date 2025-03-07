@@ -43,11 +43,7 @@ const LoginScreen = () => {
         if (response) {
             await login(response.data[0].token);
             const decoded = jwtDecode<any>(response.data[0].token);
-            if (decoded.role == "landlord") {
-                router.push("/landlordHome");
-            } else {
-                router.push("/tenantHome");
-            }
+            router.push("/navigation");
         }
     };
 

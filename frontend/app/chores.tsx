@@ -64,8 +64,11 @@ export default function HomeScreen() {
 
   // This function will get the correct thumbnail based on the stored bannerImage
   const getChoreImage = (chore: Chore) => {
-    if (chore.bannerImage && THUMBNAILS[chore.bannerImage]) {
-      return THUMBNAILS[chore.bannerImage];
+    if (chore.bannerImage) {
+      const key = parseInt(chore.bannerImage, 10);
+      if (THUMBNAILS[key]) {
+        return THUMBNAILS[key];
+      }
     }
     return RANDOM_THUMBNAIL();
   };

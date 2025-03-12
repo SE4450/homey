@@ -33,9 +33,9 @@ const AddChore = () => {
     try {
       // Store a reference to the image (just a number 1-5)
       // This matches the keys in the THUMBNAILS object
-      const bannerKey = Object.keys(THUMBNAILS).find(
-        (key) => THUMBNAILS[key] === choreBanner
-      );
+      const bannerKey = Object.keys(THUMBNAILS)
+        .map((key) => parseInt(key, 10))
+        .find((key) => THUMBNAILS[key] === choreBanner);
 
       const response = await axios.post(
         `${API_URL}/api/chores`,

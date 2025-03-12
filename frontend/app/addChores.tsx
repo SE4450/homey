@@ -1,47 +1,89 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, TextInput } from "react-native";
+import { StyleSheet, Text, View, Image, TextInput, Alert } from "react-native";
 import ScreenWrapper from "./components/common/screen-wrapper";
-import { RANDOM_THUMBNAIL } from "./pictures/assets";
+import { RANDOM_THUMBNAIL, THUMBNAILS } from "./pictures/assets";
 import { COLORS } from "./theme/theme";
 import AddButton from "./components/common/add-button";
-import { useRouter } from "expo-router"; // Import useRouter
+import { useRouter } from "expo-router";
+import axios from "axios";
+import { useAuth } from "./context/AuthContext";
 
 const AddChore = () => {
-  const [choreBanner, setChoreBanner] = useState<any>(null); // Initialize the state
-  const [chore, setChore] = useState(""); // TextInput state for the task
-  const [room, setRoom] = useState(""); // TextInput state for the room
-  const router = useRouter(); // Use the router hook
+  const [choreBanner, setChoreBanner] = useState<any>(null);
+  const [chore, setChore] = useState("");
+  const [room, setRoom] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { userToken } = useAuth();
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const banner = RANDOM_THUMBNAIL();
-    console.log("Banner:", banner); // Debugging to ensure banner is set
-    setChoreBanner(banner); // Set a random banner
-  }, []); // Only run once after the component mounts
+    console.log("Banner:", banner);
+    setChoreBanner(banner);
+  }, []);
+
+  const handleAddChore = async () => {
+    if (!chore.trim() || !room.trim()) {
+      Alert.alert("Error", "Please enter both chore name and room");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Store a reference to the image (just a number 1-5)
+      // This matches the keys in the THUMBNAILS object
+      const bannerKey = Object.keys(THUMBNAILS).find(
+        (key) => THUMBNAILS[key] === choreBanner
+      );
+
+      const response = await axios.post(
+        `${API_URL}/api/chores`,
+        {
+          choreName: chore,
+          room: room,
+          bannerImage: bannerKey || null,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        Alert.alert("Success", "Chore added successfully", [
+          { text: "OK", onPress: () => router.push("/chores") },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error adding chore:", error);
+      Alert.alert("Error", "Failed to add chore. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ScreenWrapper>
       <View style={styles.addChoreContainer}>
-        {choreBanner ? (
-          <Image source={choreBanner} style={styles.banner} />
-        ) : (
-          <Text>No banner available</Text>
-        )}
+        {choreBanner && <Image source={choreBanner} style={styles.banner} />}
       </View>
 
-      {/* Form Section */}
       <View style={styles.form}>
         <View style={styles.formItem}>
-          <Text style={styles.subHeading}>What task?</Text>
+          <Text style={styles.subHeading}>Chore Name</Text>
           <TextInput
-            value={chore} // Bind it to the chore state
-            onChangeText={(e: string) => setChore(e)} // Update the chore state when text changes
-            style={styles.input} // Apply input styling
-            placeholder="Enter chore"
+            value={chore}
+            onChangeText={(e: string) => setChore(e)}
+            style={styles.input}
+            placeholder="Enter chore name"
           />
         </View>
 
         <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Which room?</Text>
+          <Text style={styles.subHeading}>Room</Text>
           <TextInput
             value={room}
             onChangeText={(e: string) => setRoom(e)}
@@ -52,10 +94,9 @@ const AddChore = () => {
       </View>
 
       <View>
-        {/* Update onPress function to use the router */}
         <AddButton
-          buttonText="Add Chore"
-          onPress={() => router.push("/home")}
+          buttonText={isLoading ? "Adding..." : "Add Chore"}
+          onPress={handleAddChore}
         />
       </View>
     </ScreenWrapper>

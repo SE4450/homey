@@ -32,7 +32,8 @@ interface Chore {
 export default function HomeScreen() {
   const router = useRouter();
   const { userToken } = useAuth();
-  const [chores, setChores] = useState<Chore[]>([]);
+  const [activeChores, setActiveChores] = useState<Chore[]>([]);
+  const [completedChores, setCompletedChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -46,7 +47,20 @@ export default function HomeScreen() {
       });
 
       if (response.data.status === "success") {
-        setChores(response.data.data);
+        // Separate chores into active and completed
+        const active: Chore[] = [];
+        const completed: Chore[] = [];
+
+        response.data.data.forEach((chore: Chore) => {
+          if (chore.completed) {
+            completed.push(chore);
+          } else {
+            active.push(chore);
+          }
+        });
+
+        setActiveChores(active);
+        setCompletedChores(completed);
       }
     } catch (error) {
       console.error("Error fetching chores:", error);
@@ -73,6 +87,43 @@ export default function HomeScreen() {
     return RANDOM_THUMBNAIL();
   };
 
+  // Render a single chore card
+  const renderChoreCard = (item: Chore) => (
+    <TouchableOpacity
+      onPress={() => router.push(`/choreDetails?id=${item.id}`)}
+    >
+      <View style={styles.choreCard}>
+        <Image source={getChoreImage(item)} style={styles.choreBanner} />
+        <Text style={styles.choreName}>{item.choreName}</Text>
+        <Text style={styles.room}>{item.room}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Render a section of chores (either active or completed)
+  const renderChoreSection = (
+    title: string,
+    chores: Chore[],
+    emptyMessage: string
+  ) => (
+    <View style={styles.sectionContainer}>
+      <Text style={styles.subHeading}>{title}</Text>
+      {chores.length === 0 ? (
+        <Text style={styles.noChoresText}>{emptyMessage}</Text>
+      ) : (
+        <FlatList
+          data={chores}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={styles.choreList}
+          renderItem={({ item }) => renderChoreCard(item)}
+          scrollEnabled={false} // Disable scrolling for nested FlatList
+        />
+      )}
+    </View>
+  );
+
   const styles = StyleSheet.create({
     addButtonText: {
       fontWeight: "700",
@@ -98,9 +149,8 @@ export default function HomeScreen() {
       alignItems: "center",
       position: "relative",
     },
-    listWrapper: {
-      marginBottom: 120,
-      height: 420,
+    sectionContainer: {
+      marginBottom: 20,
     },
     choreName: {
       fontSize: 14,
@@ -117,6 +167,7 @@ export default function HomeScreen() {
       fontWeight: "700",
       color: COLORS.TEXT,
       marginBottom: 12,
+      marginTop: 10,
     },
     choreBanner: {
       height: 140,
@@ -134,7 +185,8 @@ export default function HomeScreen() {
     noChoresText: {
       fontSize: 16,
       textAlign: "center",
-      marginTop: 20,
+      marginTop: 10,
+      marginBottom: 20,
       color: COLORS.TEXT,
     },
   });
@@ -150,38 +202,29 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-        <Text style={styles.subHeading}>ACTIVE CHORES</Text>
-        <View style={styles.listWrapper}>
-          {loading ? (
-            <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          ) : chores.length === 0 ? (
-            <Text style={styles.noChoresText}>
-              No chores found. Add a new chore!
-            </Text>
-          ) : (
-            <FlatList
-              data={chores}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={2}
-              showsVerticalScrollIndicator={false}
-              columnWrapperStyle={styles.choreList}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => router.push(`/choreDetails?id=${item.id}`)}
-                >
-                  <View style={styles.choreCard}>
-                    <Image
-                      source={getChoreImage(item)}
-                      style={styles.choreBanner}
-                    />
-                    <Text style={styles.choreName}>{item.choreName}</Text>
-                    <Text style={styles.room}>{item.room}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-          )}
-        </View>
+
+        {loading ? (
+          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+        ) : (
+          <FlatList
+            data={[1]} // Just need one item to render both sections
+            keyExtractor={() => "main"}
+            renderItem={() => (
+              <View>
+                {renderChoreSection(
+                  "ACTIVE CHORES",
+                  activeChores,
+                  "No active chores found. Add a new chore!"
+                )}
+                {renderChoreSection(
+                  "COMPLETED CHORES",
+                  completedChores,
+                  "No completed chores yet."
+                )}
+              </View>
+            )}
+          />
+        )}
       </ScreenWrapper>
     </Provider>
   );

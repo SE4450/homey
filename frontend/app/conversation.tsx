@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import {
     View,
     StyleSheet,
@@ -10,17 +10,31 @@ import {
     Platform,
     KeyboardAvoidingView
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import MessageBox from "./components/messageBox";
+import { MessageStackParamList } from "./stacks/messagesStack";
+
+type ConversationScreenRouteProp = RouteProp<MessageStackParamList, 'conversation'>;
 
 export default function ConversationScreen() {
-    const { id, name } = useLocalSearchParams();
+    const navigation = useNavigation();
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
     const { get, post, patch, error } = useAxios();
     const { userId } = useAuth();
+    const route = useRoute<ConversationScreenRouteProp>();
+
+    useLayoutEffect(() => {
+        const parent = navigation.getParent();
+        parent?.setOptions({ tabBarStyle: { display: "none" } });
+
+        return () => {
+            parent?.setOptions({ tabBarStyle: { display: "flex" } });
+        };
+    }, [navigation]);
 
     useEffect(() => {
         if (error) {
@@ -31,7 +45,7 @@ export default function ConversationScreen() {
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const response = await get<any>(`/api/messages/conversation/${id}`);
+                const response = await get<any>(`/api/messages/conversation/${route.params.id}`);
                 if (response) {
                     let lastSentMessage: any = null;
                     let lastReceivedMessage: any = null;
@@ -96,7 +110,7 @@ export default function ConversationScreen() {
         setNewMessage("");
 
         try {
-            const response = await post<any>(`/api/messages/send`, { conversationId: id, content: tempMessage.content });
+            const response = await post<any>(`/api/messages/send`, { conversationId: route.params.id, content: tempMessage.content });
             if (response) {
                 const sentMessage = {
                     id: response.data[0].id,
@@ -129,7 +143,15 @@ export default function ConversationScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>{name}</Text>
+            <View style={styles.headerContainer}>
+                <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={styles.backButton}
+                >
+                    <MaterialIcons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{route.params.name}</Text>
+            </View>
             <FlatList
                 data={messages}
                 keyExtractor={(item) => item.id.toString()}
@@ -163,12 +185,23 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F5F5F5",
     },
-    header: {
-        textAlign: "center",
+    headerContainer: {
+        backgroundColor: "#E4E6EB",
+        paddingVertical: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+    },
+    backButton: {
+        position: "absolute",
+        left: 10,
+        top: "50%",
+        transform: [{ translateY: -4 }],
+    },
+    headerTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        paddingVertical: 10,
-        backgroundColor: "#E4E6EB",
+        color: "#333",
     },
     messageList: {
         flexGrow: 1,

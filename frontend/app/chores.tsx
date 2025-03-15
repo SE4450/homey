@@ -199,6 +199,10 @@ export default function HomeScreen() {
       marginBottom: 20,
       color: COLORS.TEXT,
     },
+    scrollContainer: {
+      paddingBottom: 150,
+      flexGrow: 1,
+    },
   });
 
   return (
@@ -233,6 +237,8 @@ export default function HomeScreen() {
                 )}
               </View>
             )}
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={true}
           />
         )}
       </ScreenWrapper>

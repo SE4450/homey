@@ -165,13 +165,6 @@ const ChoreDetails = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Image
-          source={
-            chore.bannerImage ? { uri: chore.bannerImage } : RANDOM_THUMBNAIL()
-          }
-          style={styles.banner}
-        />
-
         <View style={styles.detailsContainer}>
           <Text style={styles.title}>{chore.choreName}</Text>
           <Text style={styles.room}>Room: {chore.room}</Text>
@@ -239,6 +232,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    justifyContent: "center",
   },
   banner: {
     width: "100%",

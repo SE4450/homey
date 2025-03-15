@@ -23,6 +23,7 @@ interface Chore {
   bannerImage: string | null;
   completed: boolean;
   createdAt: string;
+  dueDate: string;
   updatedAt: string;
   assignedTo: number | null;
   assignee?: {
@@ -185,6 +186,11 @@ const ChoreDetails = () => {
           <Text style={styles.sectionTitle}>Created</Text>
           <Text style={styles.date}>
             {new Date(chore.createdAt).toLocaleDateString()}
+          </Text>
+
+          <Text style={styles.sectionTitle}>Due Date</Text>
+          <Text style={styles.date}>
+            {new Date(chore.dueDate).toLocaleDateString()}
           </Text>
         </View>
 

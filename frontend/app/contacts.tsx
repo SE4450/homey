@@ -3,7 +3,6 @@ import {
     View,
     StyleSheet,
     FlatList,
-    ActivityIndicator,
     Alert,
     Button,
 } from "react-native";
@@ -11,15 +10,20 @@ import Contact from "./components/contact";
 import TextField from "./components/textField";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
-import { useRouter } from "expo-router";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { MessageStackParamList } from "./stacks/messagesStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ContactsScreenNavigationProp = StackNavigationProp<MessageStackParamList, "contacts">;
 
 export default function ContactsScreen() {
+    const navigation = useNavigation<ContactsScreenNavigationProp>();
     const [conversations, setConversations] = useState<any>();
     const [loading, setLoading] = useState(true);
     const [newUserId, setNewUserId] = useState("");
     const { get, post, error } = useAxios();
     const { userId } = useAuth();
-    const router = useRouter();
+    const isFocused = useIsFocused();
 
     useEffect(() => {
         if (error) {
@@ -67,14 +71,20 @@ export default function ContactsScreen() {
     };
 
     useEffect(() => {
-        fetchConversations();
-    }, []);
+        let intervalId: NodeJS.Timeout | null = null;
+        if (isFocused) {
+            fetchConversations();
+            intervalId = setInterval(fetchConversations, 5000);
+        }
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [isFocused]);
 
     const handlePress = (id: any, name: any) => {
-        router.push({
-            pathname: "/conversation",
-            params: { id, name },
-        });
+        navigation.navigate("conversation", { id, name });
     };
 
     const createConversation = async () => {
@@ -93,10 +103,6 @@ export default function ContactsScreen() {
             Alert.alert("Error", `Failed to create conversation:\n${err}`);
         }
     };
-
-    if (loading) {
-        return <ActivityIndicator size="large" style={styles.loadingIndicator} />;
-    }
 
     return (
         <View style={styles.container}>

@@ -11,13 +11,20 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Provider } from "react-redux";
-
 import ScreenWrapper from "./components/common/screen-wrapper";
 import { store } from "./redux/store";
 import { COLORS } from "./theme/theme";
 import { IMAGES, RANDOM_THUMBNAIL, THUMBNAILS } from "./pictures/assets";
 import { useAuth } from "./context/AuthContext";
 import axios from "axios";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { ChoresStackParamList } from "./stacks/choresStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ChoresScreenNavigationProp = StackNavigationProp<
+  ChoresStackParamList,
+  "chores"
+>;
 
 interface Chore {
   id: number;
@@ -30,12 +37,13 @@ interface Chore {
 }
 
 export default function HomeScreen() {
-  const router = useRouter();
   const { userToken } = useAuth();
   const [activeChores, setActiveChores] = useState<Chore[]>([]);
   const [completedChores, setCompletedChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const navigation = useNavigation<ChoresScreenNavigationProp>();
+  const isFocused = useIsFocused();
 
   const fetchChores = async () => {
     setLoading(true);
@@ -71,10 +79,10 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    if (userToken) {
+    if (userToken && isFocused) {
       fetchChores();
     }
-  }, [userToken]);
+  }, [userToken, isFocused]);
 
   // This function will get the correct thumbnail based on the stored bannerImage
   const getChoreImage = (chore: Chore) => {
@@ -90,7 +98,9 @@ export default function HomeScreen() {
   // Render a single chore card
   const renderChoreCard = (item: Chore) => (
     <TouchableOpacity
-      onPress={() => router.push(`/choreDetails?id=${item.id}`)}
+      onPress={() =>
+        navigation.navigate("choreDetails", { id: item.id.toString() })
+      }
     >
       <View style={styles.choreCard}>
         <Image source={getChoreImage(item)} style={styles.choreBanner} />
@@ -196,7 +206,7 @@ export default function HomeScreen() {
       <ScreenWrapper>
         <View style={styles.bannerContainer}>
           <Image source={IMAGES.HOMEY_BANNER} style={styles.banner} />
-          <TouchableOpacity onPress={() => router.push("/addChores")}>
+          <TouchableOpacity onPress={() => navigation.navigate("addChore")}>
             <View style={styles.addChoreButton}>
               <Text style={styles.addButtonText}>Add Chore</Text>
             </View>

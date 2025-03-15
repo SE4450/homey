@@ -23,6 +23,14 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import { useAuth } from "./context/AuthContext";
 import useAxios from "./hooks/useAxios";
+import { useNavigation } from "@react-navigation/native";
+import { ChoresStackParamList } from "./stacks/choresStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type AddChoresScreenNavigationProp = StackNavigationProp<
+  ChoresStackParamList,
+  "addChore"
+>;
 
 // Update the Roommate interface to match your user data structure
 interface Roommate {
@@ -42,7 +50,7 @@ const AddChore = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [roommates, setRoommates] = useState<Roommate[]>([]);
-  const router = useRouter();
+  const navigation = useNavigation<AddChoresScreenNavigationProp>();
   const { userToken, userId } = useAuth();
   const { get } = useAxios();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -232,7 +240,7 @@ const AddChore = () => {
 
       if (response.status === 201) {
         Alert.alert("Success", "Chore added successfully", [
-          { text: "OK", onPress: () => router.push("/chores") },
+          { text: "OK", onPress: () => navigation.goBack() },
         ]);
       }
     } catch (error) {

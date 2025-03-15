@@ -8,13 +8,24 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import axios from "axios";
-
 import ScreenWrapper from "./components/common/screen-wrapper";
 import { useAuth } from "./context/AuthContext";
 import { COLORS } from "./theme/theme";
 import { RANDOM_THUMBNAIL } from "./pictures/assets";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { ChoresStackParamList } from "./stacks/choresStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ChoreDetailsScreenRouteProp = RouteProp<
+  ChoresStackParamList,
+  "choreDetails"
+>;
+type ChoreDetailsScreenNavigationProp = StackNavigationProp<
+  ChoresStackParamList,
+  "choreDetails"
+>;
 
 interface Chore {
   id: number;
@@ -35,27 +46,30 @@ interface Chore {
 }
 
 const ChoreDetails = () => {
-  const { id } = useLocalSearchParams();
   const { userToken } = useAuth();
-  const router = useRouter();
   const [chore, setChore] = useState<Chore | null>(null);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const route = useRoute<ChoreDetailsScreenRouteProp>();
+  const navigation = useNavigation<ChoreDetailsScreenNavigationProp>();
 
   const fetchChoreDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/chores?id=${id}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/chores?id=${route.params.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
 
       if (response.data.status === "success" && response.data.data.length > 0) {
         setChore(response.data.data[0]);
       } else {
         Alert.alert("Error", "Chore not found");
-        router.back();
+        navigation.goBack();
       }
     } catch (error) {
       console.error("Error fetching chore details:", error);
@@ -66,15 +80,15 @@ const ChoreDetails = () => {
   };
 
   useEffect(() => {
-    if (userToken && id) {
+    if (userToken && route.params.id) {
       fetchChoreDetails();
     }
-  }, [userToken, id]);
+  }, [userToken, route.params.id]);
 
   const handleMarkComplete = async () => {
     try {
       const response = await axios.put(
-        `${API_URL}/api/chores/${id}`,
+        `${API_URL}/api/chores/${route.params.id}`,
         {
           completed: true,
         },
@@ -88,7 +102,7 @@ const ChoreDetails = () => {
 
       if (response.data.status === "success") {
         Alert.alert("Success", "Chore marked as complete", [
-          { text: "OK", onPress: () => router.push("/chores") },
+          { text: "OK", onPress: () => navigation.goBack() },
         ]);
       }
     } catch (error) {
@@ -109,7 +123,7 @@ const ChoreDetails = () => {
           onPress: async () => {
             try {
               const response = await axios.delete(
-                `${API_URL}/api/chores/${id}`,
+                `${API_URL}/api/chores/${route.params.id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${userToken}`,
@@ -119,7 +133,7 @@ const ChoreDetails = () => {
 
               if (response.data.status === "success") {
                 Alert.alert("Success", "Chore deleted successfully", [
-                  { text: "OK", onPress: () => router.push("/chores") },
+                  { text: "OK", onPress: () => navigation.goBack() },
                 ]);
               }
             } catch (error) {
@@ -219,6 +233,9 @@ const ChoreDetails = () => {
 export default ChoreDetails;
 
 const styles = StyleSheet.create({
+  screenWrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     padding: 16,

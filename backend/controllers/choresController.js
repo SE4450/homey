@@ -19,6 +19,7 @@ exports.getChores = async (req, res) => {
 
     // Get all chores matching the filter
     const chores = await Chore.findAll({
+      order: ["dueDate", "ASC"],
       where: whereClause,
       include: [
         {
@@ -57,7 +58,8 @@ exports.getChores = async (req, res) => {
 
 exports.addChore = async (req, res) => {
   try {
-    const { choreName, room, assignedTo, houseId, bannerImage } = req.body;
+    const { choreName, room, assignedTo, houseId, bannerImage, dueDate } =
+      req.body;
 
     // Validate required fields
     if (!choreName || choreName.trim() === "") {
@@ -78,16 +80,6 @@ exports.addChore = async (req, res) => {
       });
     }
 
-    // Try to sync the table first
-    try {
-      await sequelize.query(
-        'CREATE TABLE IF NOT EXISTS "Chores" ("id" SERIAL PRIMARY KEY, "choreName" VARCHAR(255) NOT NULL, "room" VARCHAR(255) NOT NULL, "assignedTo" INTEGER, "completed" BOOLEAN DEFAULT false, "houseId" INTEGER, "bannerImage" VARCHAR(255), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL)'
-      );
-      console.log("Chores table created or already exists");
-    } catch (syncError) {
-      console.error("Error creating Chores table:", syncError);
-    }
-
     // Create the chore
     const chore = await Chore.create({
       choreName,
@@ -95,6 +87,7 @@ exports.addChore = async (req, res) => {
       assignedTo: assignedTo || null,
       houseId: houseId || null,
       bannerImage: bannerImage || null,
+      dueDate: dueDate || null,
       completed: false,
     });
 
@@ -118,7 +111,8 @@ exports.addChore = async (req, res) => {
 exports.updateChore = async (req, res) => {
   try {
     const { id } = req.params;
-    const { choreName, room, assignedTo, completed, bannerImage } = req.body;
+    const { choreName, room, assignedTo, completed, bannerImage, dueDate } =
+      req.body;
 
     // Find the chore
     const chore = await Chore.findByPk(id);
@@ -139,6 +133,7 @@ exports.updateChore = async (req, res) => {
       assignedTo: assignedTo !== undefined ? assignedTo : chore.assignedTo,
       completed: completed !== undefined ? completed : chore.completed,
       bannerImage: bannerImage || chore.bannerImage,
+      dueDate: dueDate !== undefined ? dueDate : chore.dueDate,
     });
 
     res.status(200).json({

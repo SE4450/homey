@@ -40,6 +40,10 @@ const Chore = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    dueDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   },
   {
     timestamps: true,

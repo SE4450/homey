@@ -18,6 +18,7 @@ import ChoreScreen from './chores'
 //import MessageScreen from './contacts'
 import MessageStackScreen from "./stacks/messagesStack";
 import InventoryScreen from './inventory'
+import CalendarScreen from './calendar'
 
 const Tab = createBottomTabNavigator();
 
@@ -92,6 +93,9 @@ export default function NavigationScreen() {
           else if (route.name === 'Inventory') {
             iconName = 'inventory';
           }
+          else if (route.name === 'Calendar') {
+            iconName = 'calendar-today';
+          }
           else {
             iconName = 'help'; // Fallback icon
           }
@@ -109,6 +113,7 @@ export default function NavigationScreen() {
       <Tab.Screen name="Chores" component={ChoreScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} />
     </Tab.Navigator>
   );
 }

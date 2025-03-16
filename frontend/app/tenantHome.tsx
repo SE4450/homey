@@ -43,13 +43,13 @@ export default function TenantHomeScreen() {
 
     setInventoryAlert([]);
 
-    const response = await get<any>(`/api/inventory/getLowItem?houseId=${user.userId}&quantity=1&quantity=0`);
+    const response = await get<any>(`/api/inventory/getLowItem?houseId=${user.id}&quantity=1&quantity=0`);
 
     if (response) {
       response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
         setInventoryAlert(l => [...l, { itemName: item.itemName }])
       });
-    }
+    }  
   }
 
   if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;

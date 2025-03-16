@@ -15,5 +15,3 @@ EXPOSE ${PORT}
 
 CMD ["node", "index.js"]
 ENTRYPOINT ["./docker/scripts/wait-for-db.sh"]
-
-

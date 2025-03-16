@@ -80,6 +80,40 @@ exports.getUserById = async (req, res) => {
     }
 }
 
+exports.getConfidentialUserInfo = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user.userId, { attributes: { exclude: ["password"] } });
+        if (!user) {
+            return res.status(404).json({
+                status: "error",
+                message: `No user found`,
+                data: [],
+                errors: [`User ${req.user.userId} does not exist`]
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            message: `User ${req.user.userId} found`,
+            data: [user],
+            errors: []
+        });
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: `Unable to get user ${req.params.id} due to validation error(s)`,
+                data: [],
+                errors: err.errors.map(err => err.message)
+            });
+        }
+        res.status(500).json({
+            status: "error",
+            message: `An unexpected error occured while trying to get user ${req.params.id}`,
+            data: [],
+            errors: [`${err.message}`]
+        });
+    }
+}
 exports.createUser = async (req, res) => {
     try {
         const { firstName, lastName, username, email, password, role } = req.body;

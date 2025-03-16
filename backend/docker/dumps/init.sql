@@ -82,6 +82,27 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
 
+--
+-- Name: enum_properties_propertyType; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_properties_propertyType" AS ENUM (
+    'House',
+    'Apartment',
+    'Condo',
+    'Townhouse',
+    'Duplex',
+    'Studio',
+    'Loft',
+    'Bungalow',
+    'Cabin',
+    'Mobile Home',
+    'Other'
+);
+
+
+ALTER TYPE public."enum_properties_propertyType" OWNER TO admin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -456,6 +477,90 @@ ALTER SEQUENCE public."Users_id_seq" OWNED BY public."Users".id;
 
 
 --
+-- Name: properties; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.properties (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    address character varying(255) NOT NULL,
+    city character varying(255) NOT NULL,
+    "propertyDescription" text NOT NULL,
+    bedrooms integer NOT NULL,
+    price integer NOT NULL,
+    "propertyType" public."enum_properties_propertyType" NOT NULL,
+    availability boolean DEFAULT true NOT NULL,
+    "landlordId" integer NOT NULL,
+    "exteriorImage" bytea NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.properties OWNER TO admin;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.properties_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.properties_id_seq OWNER TO admin;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.properties_id_seq OWNED BY public.properties.id;
+
+
+--
+-- Name: property_images; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.property_images (
+    id integer NOT NULL,
+    "propertyId" integer NOT NULL,
+    label character varying(255) NOT NULL,
+    image bytea NOT NULL,
+    description text,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.property_images OWNER TO admin;
+
+--
+-- Name: property_images_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.property_images_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.property_images_id_seq OWNER TO admin;
+
+--
+-- Name: property_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.property_images_id_seq OWNED BY public.property_images.id;
+
+
+--
 -- Name: stores; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -555,6 +660,20 @@ ALTER TABLE ONLY public."Participants" ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Users_id_seq"'::regclass);
+
+
+--
+-- Name: properties id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties ALTER COLUMN id SET DEFAULT nextval('public.properties_id_seq'::regclass);
+
+
+--
+-- Name: property_images id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images ALTER COLUMN id SET DEFAULT nextval('public.property_images_id_seq'::regclass);
 
 
 --
@@ -661,6 +780,22 @@ ALTER TABLE ONLY public."Users"
 
 
 --
+-- Name: properties properties_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT properties_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: property_images property_images_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images
+    ADD CONSTRAINT property_images_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -722,6 +857,22 @@ ALTER TABLE ONLY public."Participants"
 
 ALTER TABLE ONLY public."Participants"
     ADD CONSTRAINT "Participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: properties properties_landlordId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT "properties_landlordId_fkey" FOREIGN KEY ("landlordId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: property_images property_images_propertyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images
+    ADD CONSTRAINT "property_images_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES public.properties(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

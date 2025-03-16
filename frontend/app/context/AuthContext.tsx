@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import * as SecureStore from "expo-secure-store";
 

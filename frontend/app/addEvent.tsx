@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "reac
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "./context/AuthContext";
 
 const AddEvent = () => {
   const { post, loading, error } = useAxios();
@@ -14,6 +15,8 @@ const AddEvent = () => {
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+
+  const { userId } = useAuth();
 
   const handleCreateEvent = async () => {
     if (!title || !eventDate) {
@@ -28,6 +31,7 @@ const AddEvent = () => {
       endTime,
       location,
       description,
+      userId,
     };
 
     const result = await post("/api/calendar", data);

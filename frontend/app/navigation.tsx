@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
@@ -15,9 +12,9 @@ import LandlordHomeScreen from "./landlordHome";
 import ProfileScreen from './profile'
 import ListScreen from './listDisplay';
 import ExpenseScreen from './expenses';
-import ChoreScreen from './chores'
 import MessageStackScreen from "./stacks/messagesStack";
-import InventoryScreen from './inventory'
+import ChoresStackScreen from "./stacks/choresStack";
+import InventoryScreen from "./inventory";
 
 const Tab = createBottomTabNavigator();
 
@@ -59,7 +56,6 @@ export default function NavigationScreen() {
     }
   }, [userToken]);
 
-
   if (!userToken) {
     return <ActivityIndicator size="large" color={COLORS.PRIMARY} />;
   }
@@ -70,41 +66,35 @@ export default function NavigationScreen() {
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof MaterialIcons.glyphMap;
 
-          if (route.name === 'Home') {
-            iconName = 'home';
-          }
-          else if (route.name === 'Profile') {
-            iconName = 'account-circle';
-          }
-          else if (route.name === 'List') {
-            iconName = 'shopping-cart';
-          }
-          else if (route.name === 'Expenses') {
-            iconName = 'paid';
-          }
-          else if (route.name === 'Chores') {
-            iconName = 'checklist';
-          }
-          else if (route.name === 'Messages') {
-            iconName = 'message';
-          }
-          else if (route.name === 'Inventory') {
-            iconName = 'inventory';
-          }
-          else {
-            iconName = 'help'; // Fallback icon
+          if (route.name === "Home") {
+            iconName = "home";
+          } else if (route.name === "Profile") {
+            iconName = "account-circle";
+          } else if (route.name === "List") {
+            iconName = "shopping-cart";
+          } else if (route.name === "Expenses") {
+            iconName = "paid";
+          } else if (route.name === "Chores") {
+            iconName = "checklist";
+          } else if (route.name === "Messages") {
+            iconName = "message";
+          } else if (route.name === "Inventory") {
+            iconName = "inventory";
+          } else {
+            iconName = "help"; // Fallback icon
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#4CAF50',
         tabBarInactiveTintColor: 'grey',
-      })}>
+      })}
+    >
       <Tab.Screen name="Home" component={userRole == "tenant" ? TenantHomeScreen : LandlordHomeScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="List" component={ListScreen} />
       <Tab.Screen name="Expenses" component={ExpenseScreen} />
-      <Tab.Screen name="Chores" component={ChoreScreen} />
+      <Tab.Screen name="Chores" component={ChoresStackScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
     </Tab.Navigator>

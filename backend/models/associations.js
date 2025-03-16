@@ -1,6 +1,6 @@
 const User = require("./userModel");
-// const Property = require("./propertyModel");
-// const PropertyImage = require("./propertyImageModel");
+const Property = require("./propertyModel");
+const PropertyImage = require("./propertyImageModel");
 const Group = require("./groupModel");
 const Conversation = require("./conversationModel");
 const Participant = require("./participantModel");
@@ -8,17 +8,17 @@ const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
 
-// User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
-// Property.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
+User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
+Property.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
 
-// Property.hasMany(PropertyImage, { foreignKey: "propertyId", as: "images", onDelete: "CASCADE" });
-// PropertyImage.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
+Property.hasMany(PropertyImage, { foreignKey: "propertyId", as: "images", onDelete: "CASCADE" });
+PropertyImage.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
 
 User.hasMany(Group, { foreignKey: "landlordId", as: "groups" });
 Group.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
 
-// Property.hasMany(Group, { foreignKey: "propertyId", as: "groups", onDelete: "CASCADE" });
-// Group.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
+Property.hasMany(Group, { foreignKey: "propertyId", as: "groups", onDelete: "CASCADE" });
+Group.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
 
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
@@ -38,4 +38,4 @@ User.hasMany(Expense, { foreignKey: "paidBy", as: "expensesPaidBy" });
 Expense.belongsTo(User, { foreignKey: "owedTo", as: "owedToUser" });
 Expense.belongsTo(User, { foreignKey: "paidBy", as: "paidByUser" });
 
-module.exports = { User, Conversation, Participant, Message, Profile, Expense };
+module.exports = { User, Property, PropertyImage, Conversation, Participant, Message, Profile, Expense };

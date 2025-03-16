@@ -143,6 +143,7 @@ export default function LandlordHomeScreen() {
                                             <View style={styles.propertyDetails}>
                                                 <Text style={styles.propertyName}>{property.name}</Text>
                                                 <Text style={styles.propertyAddress}>{property.address}</Text>
+                                                <Text style={styles.propertyCity}>{property.city}</Text>
                                                 <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEditProperty(property.id)}>
                                                     <Text style={styles.buttonText}>View/Edit Details</Text>
                                                 </TouchableOpacity>
@@ -304,6 +305,10 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     propertyAddress: {
+        fontSize: 14,
+        color: "#666",
+    },
+    propertyCity: {
         fontSize: 14,
         color: "#666",
     },

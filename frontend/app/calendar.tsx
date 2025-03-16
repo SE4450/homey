@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Agenda } from "react-native-calendars";
 import useAxios from "./hooks/useAxios";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { CalendarStackParamList } from "./stacks/calendarStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -16,32 +16,43 @@ type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, 
 
 export default function CalendarWithEvents() {
   const [items, setItems] = useState({});
-  const { get, loading, error } = useAxios();
+  const { get, error } = useAxios();
   const navigation = useNavigation<CalendarScreenNavigationProp>();
 
+  // Helper function to format "HH:mm:ss" into "h:mm AM/PM"
+  const formatTime = (timeStr: string): string => {
+    const [hourStr, minute] = timeStr.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+    return `${hour}:${minute} ${ampm}`;
+  };
+
   useEffect(() => {
-    getEvents(); // Call the function to fetch events from the backend
+    getEvents();
   }, []);
 
-  // Function to fetch events from the backend
+  // Function to fetch events from the backend and format them
   const getEvents = async () => {
     const result = await get<any>("/api/calendar");
 
-    if (result) {
+    if (result && result.data) {
       const formattedEvents: any = {};
 
       result.data.forEach((event: any) => {
-        const date = event.eventDate; // Format: "YYYY-MM-DD"
-
+        const date = event.eventDate; // Expected format: "YYYY-MM-DD"
         if (!formattedEvents[date]) {
           formattedEvents[date] = [];
         }
 
+        const timeString = event.startTime
+          ? `${formatTime(event.startTime)} - ${event.endTime ? formatTime(event.endTime) : "N/A"}`
+          : "All Day";
+
         formattedEvents[date].push({
           name: event.title,
-          time: event.startTime
-            ? `${event.startTime} - ${event.endTime || "N/A"}`
-            : "All Day",
+          time: timeString,
           height: 50,
         });
       });
@@ -61,11 +72,14 @@ export default function CalendarWithEvents() {
     );
   };
 
+  // Use the first date from the events as the default selected date, or fallback
+  const defaultSelectedDate = Object.keys(items).length ? Object.keys(items)[0] : "2025-03-15";
+
   return (
     <View style={styles.container}>
       <Agenda
         items={items}
-        selected={"2025-03-15"}
+        selected={defaultSelectedDate}
         renderItem={renderItem}
         theme={{
           agendaDayTextColor: COLORS.PRIMARY,
@@ -78,7 +92,6 @@ export default function CalendarWithEvents() {
         }}
         style={styles.agenda}
       />
-      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate("addEvent")}

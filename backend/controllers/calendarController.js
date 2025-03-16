@@ -1,17 +1,25 @@
-const { CalendarEvent } = require("../models/calendarModel");
+const { CalendarEvent, User } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 
 // Get all events
 exports.getEvents = async (req, res) => {
     try {
-        const events = await CalendarEvent.findAll();
+        const events = await CalendarEvent.findAll({
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ["id", "firstName", "lastName"],
+                },
+            ],
+        });
 
-        if (events.length === 0) {
+        if (!events || events.length === 0) {
             return res.status(404).json({
                 status: "error",
                 message: "No calendar events found",
                 data: [],
-                errors: ["No events found in the calendar"]
+                errors: ["No events found in the calendar"],
             });
         }
 
@@ -19,14 +27,22 @@ exports.getEvents = async (req, res) => {
             status: "success",
             message: `${events.length} event(s) found`,
             data: events,
-            errors: []
+            errors: [],
         });
     } catch (err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: "Validation error occurred while fetching events",
+                data: [],
+                errors: err.errors.map((e) => e.message),
+            });
+        }
         res.status(500).json({
             status: "error",
-            message: "An error occurred while fetching calendar events",
+            message: "An unexpected error occurred while fetching events",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };
@@ -35,15 +51,22 @@ exports.getEvents = async (req, res) => {
 exports.getEventById = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const event = await CalendarEvent.findByPk(id);
+        const event = await CalendarEvent.findByPk(id, {
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ["id", "firstName", "lastName"],
+                },
+            ],
+        });
 
         if (!event) {
             return res.status(404).json({
                 status: "error",
-                message: "Event not found",
+                message: `No event found with id ${id}`,
                 data: [],
-                errors: [`No event found with id ${id}`]
+                errors: [`No event found with id ${id}`],
             });
         }
 
@@ -51,14 +74,22 @@ exports.getEventById = async (req, res) => {
             status: "success",
             message: `Event ${id} found`,
             data: event,
-            errors: []
+            errors: [],
         });
     } catch (err) {
+        if (err instanceof ValidationError) {
+            return res.status(400).json({
+                status: "error",
+                message: "Validation error occurred while fetching the event",
+                data: [],
+                errors: err.errors.map((e) => e.message),
+            });
+        }
         res.status(500).json({
             status: "error",
-            message: "An error occurred while fetching the event",
+            message: "An unexpected error occurred while fetching the event",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };
@@ -66,9 +97,9 @@ exports.getEventById = async (req, res) => {
 // Create a new event
 exports.createEvent = async (req, res) => {
     try {
-        const { title, eventDate, startTime, endTime, location, description } = req.body;
+        const { title, eventDate, startTime, endTime, location, description, userId } = req.body;
 
-        // Validate input
+        // Validate input fields
         const errors = [];
         if (!title || title.trim().length === 0) {
             errors.push("Title is required.");
@@ -76,13 +107,27 @@ exports.createEvent = async (req, res) => {
         if (!eventDate) {
             errors.push("Event date is required.");
         }
+        if (!userId) {
+            errors.push("User ID is required.");
+        }
 
         if (errors.length > 0) {
             return res.status(400).json({
                 status: "error",
-                message: "Validation error",
+                message: "Validation error(s) occurred while creating the event",
                 data: [],
                 errors,
+            });
+        }
+
+        // Check if user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: "error",
+                message: `User with ID ${userId} not found`,
+                data: [],
+                errors: [`User with ID ${userId} does not exist`],
             });
         }
 
@@ -93,29 +138,30 @@ exports.createEvent = async (req, res) => {
             startTime,
             endTime,
             location,
-            description
+            description,
+            userId,
         });
 
         res.status(201).json({
             status: "success",
             message: "Event created successfully",
             data: newEvent,
-            errors: []
+            errors: [],
         });
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Validation error",
+                message: "Validation error(s) occurred while creating the event",
                 data: [],
-                errors: err.errors.map(error => error.message)
+                errors: err.errors.map((e) => e.message),
             });
         }
         res.status(500).json({
             status: "error",
-            message: "An error occurred while creating the event",
+            message: "An unexpected error occurred while creating the event",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };
@@ -131,9 +177,9 @@ exports.updateEvent = async (req, res) => {
         if (!event) {
             return res.status(404).json({
                 status: "error",
-                message: "Event not found",
+                message: `Event with id ${id} not found`,
                 data: [],
-                errors: [`No event found with id ${id}`]
+                errors: [`No event found with id ${id}`],
             });
         }
 
@@ -143,29 +189,29 @@ exports.updateEvent = async (req, res) => {
             startTime,
             endTime,
             location,
-            description
+            description,
         });
 
         res.status(200).json({
             status: "success",
             message: `Event ${id} updated successfully`,
             data: event,
-            errors: []
+            errors: [],
         });
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
-                message: "Validation error",
+                message: "Validation error(s) occurred while updating the event",
                 data: [],
-                errors: err.errors.map(error => error.message)
+                errors: err.errors.map((e) => e.message),
             });
         }
         res.status(500).json({
             status: "error",
-            message: "An error occurred while updating the event",
+            message: "An unexpected error occurred while updating the event",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };
@@ -180,9 +226,9 @@ exports.deleteEvent = async (req, res) => {
         if (!event) {
             return res.status(404).json({
                 status: "error",
-                message: "Event not found",
+                message: `No event found with id ${id}`,
                 data: [],
-                errors: [`No event found with id ${id}`]
+                errors: [`No event found with id ${id}`],
             });
         }
 
@@ -192,14 +238,14 @@ exports.deleteEvent = async (req, res) => {
             status: "success",
             message: `Event ${id} deleted successfully`,
             data: [],
-            errors: []
+            errors: [],
         });
     } catch (err) {
         res.status(500).json({
             status: "error",
-            message: "An error occurred while deleting the event",
+            message: "An unexpected error occurred while deleting the event",
             data: [],
-            errors: [err.message]
+            errors: [err.message],
         });
     }
 };

@@ -14,6 +14,8 @@ export type ChoresStackParamList = {
     createdAt: string;
     updatedAt: string;
     bannerImage: string | null;
+    assignedTo: string | null;
+    assigneeName: string | null;
   };
 };
 

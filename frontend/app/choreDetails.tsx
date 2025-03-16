@@ -55,6 +55,9 @@ const ChoreDetails = () => {
 
   useEffect(() => {
     if (route.params) {
+      console.log("Route params:", route.params);
+
+      // Create a chore object from the route params
       const choreFromParams: Chore = {
         id: parseInt(route.params.id),
         choreName: route.params.choreName,
@@ -64,44 +67,32 @@ const ChoreDetails = () => {
         updatedAt: route.params.updatedAt,
         bannerImage: route.params.bannerImage,
         dueDate: new Date().toISOString(),
-        assignedTo: null,
+        assignedTo: route.params.assignedTo
+          ? parseInt(route.params.assignedTo)
+          : null,
+        // Add assignee information if available
+        assignee: route.params.assigneeName
+          ? {
+              id: 0, // Placeholder ID
+              firstName: route.params.assigneeName.split(" ")[0],
+              lastName: route.params.assigneeName.split(" ")[1] || "",
+              email: "", // Placeholder email
+            }
+          : undefined,
       };
 
+      console.log("Created chore object:", choreFromParams);
       setChore(choreFromParams);
       setLoading(false);
     }
   }, [route.params]);
 
-  const fetchChoreDetails = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/chores?id=${route.params.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      if (response.data.status === "success" && response.data.data.length > 0) {
-        setChore(response.data.data[0]);
-      } else {
-        Alert.alert("Error", "Chore not found");
-        navigation.goBack();
-      }
-    } catch (error) {
-      console.error("Error fetching chore details:", error);
-      Alert.alert("Error", "Failed to load chore details. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleMarkComplete = async () => {
+    if (!chore) return;
+
     try {
       const response = await axios.put(
-        `${API_URL}/api/chores/${route.params.id}`,
+        `${API_URL}/api/chores/${chore.id}`,
         {
           completed: true,
         },
@@ -125,6 +116,8 @@ const ChoreDetails = () => {
   };
 
   const handleDeleteChore = async () => {
+    if (!chore) return;
+
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this chore?",
@@ -136,7 +129,7 @@ const ChoreDetails = () => {
           onPress: async () => {
             try {
               const response = await axios.delete(
-                `${API_URL}/api/chores/${route.params.id}`,
+                `${API_URL}/api/chores/${chore.id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${userToken}`,
@@ -175,42 +168,52 @@ const ChoreDetails = () => {
     );
   }
 
+  console.log("Rendering chore:", chore);
+
   return (
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{chore.choreName}</Text>
-          <Text style={styles.room}>Room: {chore.room}</Text>
+          <Text style={styles.title}>
+            {chore?.choreName || "Unnamed Chore"}
+          </Text>
+          <Text style={styles.room}>Room: {chore?.room || "Unknown Room"}</Text>
 
           <Text style={styles.sectionTitle}>Status</Text>
           <View
             style={[
               styles.statusBadge,
-              chore.completed ? styles.completedBadge : styles.activeBadge,
+              chore?.completed ? styles.completedBadge : styles.activeBadge,
             ]}
           >
             <Text style={styles.statusText}>
-              {chore.completed ? "Completed" : "Active"}
+              {chore?.completed ? "Completed" : "Active"}
             </Text>
           </View>
 
-          {chore.assignee && (
+          {chore?.assignee || route.params.assigneeName ? (
             <>
               <Text style={styles.sectionTitle}>Assigned To</Text>
               <Text style={styles.assignee}>
-                {chore.assignee.firstName} {chore.assignee.lastName}
+                {chore?.assignee
+                  ? `${chore.assignee.firstName} ${chore.assignee.lastName}`
+                  : route.params.assigneeName}
               </Text>
             </>
-          )}
+          ) : null}
 
           <Text style={styles.sectionTitle}>Created</Text>
           <Text style={styles.date}>
-            {new Date(chore.createdAt).toLocaleDateString()}
+            {chore?.createdAt
+              ? new Date(chore.createdAt).toLocaleDateString()
+              : "Unknown"}
           </Text>
 
           <Text style={styles.sectionTitle}>Due Date</Text>
           <Text style={styles.date}>
-            {new Date(chore.dueDate).toLocaleDateString()}
+            {chore?.dueDate
+              ? new Date(chore.dueDate).toLocaleDateString()
+              : "Unknown"}
           </Text>
         </View>
 

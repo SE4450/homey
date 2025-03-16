@@ -34,11 +34,19 @@ interface Chore {
   completed: boolean;
   createdAt: string;
   updatedAt: string;
+  assignedTo: string;
+  assignee?: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export default function HomeScreen() {
-  const { userToken } = useAuth();
-  const [activeChores, setActiveChores] = useState<Chore[]>([]);
+  const { userToken, userId } = useAuth();
+  const [myActiveChores, setMyActiveChores] = useState<Chore[]>([]);
+  const [roommatesActiveChores, setRoommatesActiveChores] = useState<Chore[]>(
+    []
+  );
   const [completedChores, setCompletedChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -55,19 +63,23 @@ export default function HomeScreen() {
       });
 
       if (response.data.status === "success") {
-        // Separate chores into active and completed
-        const active: Chore[] = [];
+        // Separate chores into my active, roommates active, and completed
+        const myActive: Chore[] = [];
+        const roommatesActive: Chore[] = [];
         const completed: Chore[] = [];
 
         response.data.data.forEach((chore: Chore) => {
           if (chore.completed) {
             completed.push(chore);
+          } else if (chore.assignedTo === userId) {
+            myActive.push(chore);
           } else {
-            active.push(chore);
+            roommatesActive.push(chore);
           }
         });
 
-        setActiveChores(active);
+        setMyActiveChores(myActive);
+        setRoommatesActiveChores(roommatesActive);
         setCompletedChores(completed);
       }
     } catch (error) {
@@ -107,6 +119,10 @@ export default function HomeScreen() {
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
           bannerImage: item.bannerImage,
+          assignedTo: item.assignedTo,
+          assigneeName: item.assignee
+            ? `${item.assignee.firstName} ${item.assignee.lastName}`
+            : null,
         })
       }
     >
@@ -229,14 +245,19 @@ export default function HomeScreen() {
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
         ) : (
           <FlatList
-            data={[1]} // Just need one item to render both sections
+            data={[1]} // Just need one item to render all sections
             keyExtractor={() => "main"}
             renderItem={() => (
               <View>
                 {renderChoreSection(
-                  "ACTIVE CHORES",
-                  activeChores,
-                  "No active chores found. Add a new chore!"
+                  "MY ACTIVE CHORES",
+                  myActiveChores,
+                  "You have no active chores. Add a new chore!"
+                )}
+                {renderChoreSection(
+                  "ROOMMATES' ACTIVE CHORES",
+                  roommatesActiveChores,
+                  "Your roommates have no active chores."
                 )}
                 {renderChoreSection(
                   "COMPLETED CHORES",

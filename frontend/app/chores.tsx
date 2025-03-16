@@ -99,7 +99,15 @@ export default function HomeScreen() {
   const renderChoreCard = (item: Chore) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate("choreDetails", { id: item.id.toString() })
+        navigation.navigate("choreDetails", {
+          id: item.id.toString(),
+          choreName: item.choreName,
+          room: item.room,
+          completed: item.completed,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          bannerImage: item.bannerImage,
+        })
       }
     >
       <View style={styles.choreCard}>

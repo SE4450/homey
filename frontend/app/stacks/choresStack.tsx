@@ -6,7 +6,15 @@ import ChoreDetails from "../choreDetails";
 export type ChoresStackParamList = {
   chores: undefined;
   addChore: undefined;
-  choreDetails: { id: string };
+  choreDetails: {
+    id: string;
+    choreName: string;
+    room: string;
+    completed: boolean;
+    createdAt: string;
+    updatedAt: string;
+    bannerImage: string | null;
+  };
 };
 
 const ChoresStack = createStackNavigator<ChoresStackParamList>();

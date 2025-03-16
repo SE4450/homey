@@ -53,6 +53,25 @@ const ChoreDetails = () => {
   const route = useRoute<ChoreDetailsScreenRouteProp>();
   const navigation = useNavigation<ChoreDetailsScreenNavigationProp>();
 
+  useEffect(() => {
+    if (route.params) {
+      const choreFromParams: Chore = {
+        id: parseInt(route.params.id),
+        choreName: route.params.choreName,
+        room: route.params.room,
+        completed: route.params.completed,
+        createdAt: route.params.createdAt,
+        updatedAt: route.params.updatedAt,
+        bannerImage: route.params.bannerImage,
+        dueDate: new Date().toISOString(),
+        assignedTo: null,
+      };
+
+      setChore(choreFromParams);
+      setLoading(false);
+    }
+  }, [route.params]);
+
   const fetchChoreDetails = async () => {
     setLoading(true);
     try {
@@ -78,12 +97,6 @@ const ChoreDetails = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (userToken && route.params.id) {
-      fetchChoreDetails();
-    }
-  }, [userToken, route.params.id]);
 
   const handleMarkComplete = async () => {
     try {

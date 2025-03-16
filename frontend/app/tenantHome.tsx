@@ -5,13 +5,11 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
-  TouchableOpacity,
   ScrollView
 } from "react-native";
 import useAxios from "./hooks/useAxios";
-import { useAuth } from "./context/AuthContext";
-import { useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
+import useUser from "./hooks/useUser";
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -24,11 +22,9 @@ const COLORS = {
 };
 
 export default function TenantHomeScreen() {
-  const [user, setUser] = useState<any>({});
   const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
-  const { userToken, userId, logout } = useAuth();
+  const { user, userLoading, userError } = useUser();
   const { get, error } = useAxios();
-  const router = useRouter();
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -38,41 +34,16 @@ export default function TenantHomeScreen() {
   }, [error]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await get<any>(`/api/users/user/${userId}`);
-      if (response) {
-        setUser(response.data[0]);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (!userToken) {
-      router.push("/login");
-    }
-  }, [userToken]);
-
-  useEffect(() => {
     if (isFocused) {
       lowInventoryAlert();
     }
   }, [isFocused]);
 
-  const handleNavigation = (path: any, params = {}) => {
-    router.push({ pathname: path, params });
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
-
   const lowInventoryAlert = async () => {
 
     setInventoryAlert([]);
 
-    const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
+    const response = await get<any>(`/api/inventory/getLowItem?houseId=${user.userId}&quantity=1&quantity=0`);
 
     if (response) {
       response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
@@ -81,9 +52,9 @@ export default function TenantHomeScreen() {
     }
   }
 
-  if (!userToken) {
-    return <ActivityIndicator size="large" color={COLORS.PRIMARY} />;
-  }
+  if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
+  if (userError) return <Text>Error: {userError}</Text>;
+  if (!user) return <Text>No user found.</Text>;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -104,33 +75,6 @@ export default function TenantHomeScreen() {
         }
 
       </View>
-
-      {/*
-      <View style={styles.buttonContainer}>
-        {[
-          { title: "Profile", path: "/profile", params: { username: user.username } },
-          { title: "Lists", path: "/listDisplay" },
-          { title: "Expenses", path: "/expenses" },
-          { title: "Chores", path: "/chores" },
-          { title: "Messages", path: "/contacts" },
-          { title: "Inventory", path: "/inventory" },
-        ].map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
-            onPress={() => handleNavigation(item.path, item.params)}
-          >
-            <Text style={styles.buttonText}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
-          onPress={handleLogout}
-        >
-          <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-      */}
     </ScrollView>
   );
 }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Agenda } from "react-native-calendars";
-import { useRouter } from "expo-router";
 import useAxios from "./hooks/useAxios";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { CalendarStackParamList } from "./stacks/calendarStack";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -10,10 +12,12 @@ const COLORS = {
   LIGHT_GRAY: "#F5F5F5",
 };
 
+type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, "calendar">;
+
 export default function CalendarWithEvents() {
   const [items, setItems] = useState({});
-  const router = useRouter();
   const { get, loading, error } = useAxios();
+  const navigation = useNavigation<CalendarScreenNavigationProp>();
 
   useEffect(() => {
     getEvents(); // Call the function to fetch events from the backend
@@ -77,7 +81,7 @@ export default function CalendarWithEvents() {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("./addChores")}
+        onPress={() => navigation.navigate("addEvent")}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

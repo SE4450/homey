@@ -40,7 +40,7 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/inventory", inventoryRoutes);
-app.use("/api/calendar", inventoryRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ message: `${req.method} ${req.url} Not found` });

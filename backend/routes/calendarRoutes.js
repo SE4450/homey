@@ -10,10 +10,10 @@ const {
 const { authenticateUser } = require("../middleware/authenticateUser");
 
 // Get all events
-router.get("/", getEvents);
+router.get("/", authenticateUser(["tenant", "landlord"]), getEvents);
 
 // Create a new event
-router.post("/", createEvent);
+router.post("/", authenticateUser(["tenant", "landlord"]), createEvent);
 
 // Update an event by id
 router.put("/:id", authenticateUser(["tenant", "landlord"]), updateEvent);

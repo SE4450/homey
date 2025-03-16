@@ -3,7 +3,7 @@ const { addExpense, getExpenses } = require("../controllers/expenseController");
 const router = express.Router();
 const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.post("/", addExpense);
-router.get("/", getExpenses);
+router.post("/", authenticateUser(["tenant", "landlord"]), addExpense);
+router.get("/", authenticateUser(["tenant", "landlord"]), getExpenses);
 
 module.exports = router;

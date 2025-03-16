@@ -1,164 +1,118 @@
-import React, { useState, useLayoutEffect } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert 
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
+import { useNavigation } from "@react-navigation/native";
 
 const AddEvent = () => {
-  const router = useRouter();
+  const { post, loading, error } = useAxios();
   const navigation = useNavigation();
-  const { post, error } = useAxios();
 
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
 
-  // Hide bottom navbar when the component is focused
-  useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => {
-      parent?.setOptions({ tabBarStyle: { display: "flex" } });
-    };
-  }, [navigation]);
-
-  // Function to add event to backend
-  const addEvent = async () => {
-    if (!title || !date) {
-      Alert.alert("Error", "Title and Date are required fields.");
+  const handleCreateEvent = async () => {
+    if (!title || !eventDate) {
+      Alert.alert("Error", "Title and Event Date are required");
       return;
     }
 
-    const eventData = {
+    const data = {
       title,
-      eventDate: date,
-      startTime: time || null,
-      endTime: null, // Optionally add end time if needed
+      eventDate,
+      startTime,
+      endTime,
       location,
       description,
     };
 
-    const result = await post("/api/calendar", eventData);
+    const result = await post("/api/calendar", data);
 
     if (result) {
-      Alert.alert("Success", "Event added successfully!");
-      router.push("/calendar"); // Redirect to calendar screen after adding
-    } else {
-      Alert.alert("Error", error || "Failed to add event");
+      Alert.alert("Success", "Event created successfully");
+      navigation.goBack(); // Go back to calendar screen
+    } else if (error) {
+      Alert.alert("Error", error);
     }
   };
 
   return (
     <ScreenWrapper>
-      {/* Form Section */}
-      <View style={styles.form}>
-        <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Event Title</Text>
-          <TextInput
-            value={title}
-            onChangeText={(e) => setTitle(e)}
-            style={styles.input}
-            placeholder="Enter event title"
-          />
-        </View>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder="Title"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Event Date (YYYY-MM-DD)"
+          value={eventDate}
+          onChangeText={setEventDate}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Start Time (HH:MM)"
+          value={startTime}
+          onChangeText={setStartTime}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="End Time (HH:MM)"
+          value={endTime}
+          onChangeText={setEndTime}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Location"
+          value={location}
+          onChangeText={setLocation}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
 
-        <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Date (YYYY-MM-DD)</Text>
-          <TextInput
-            value={date}
-            onChangeText={(e) => setDate(e)}
-            style={styles.input}
-            placeholder="Enter date"
-          />
-        </View>
-
-        <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Time (e.g., 14:00)</Text>
-          <TextInput
-            value={time}
-            onChangeText={(e) => setTime(e)}
-            style={styles.input}
-            placeholder="Enter time"
-          />
-        </View>
-
-        <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Location</Text>
-          <TextInput
-            value={location}
-            onChangeText={(e) => setLocation(e)}
-            style={styles.input}
-            placeholder="Enter location"
-          />
-        </View>
-
-        <View style={styles.formItem}>
-          <Text style={styles.subHeading}>Description</Text>
-          <TextInput
-            value={description}
-            onChangeText={(e) => setDescription(e)}
-            style={[styles.input, styles.textArea]}
-            placeholder="Enter description"
-            multiline
-            numberOfLines={4}
-          />
-        </View>
+        <TouchableOpacity style={styles.button} onPress={handleCreateEvent}>
+          <Text style={styles.buttonText}>
+            {loading ? "Adding..." : "Add Event"}
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={addEvent}>
-        <Text style={styles.saveButtonText}>Save Event</Text>
-      </TouchableOpacity>
     </ScreenWrapper>
   );
 };
 
-export default AddEvent;
-
 const styles = StyleSheet.create({
-  form: {
+  container: {
     padding: 20,
   },
-  formItem: {
-    marginBottom: 15,
-  },
   input: {
-    height: 40,
+    borderBottomWidth: 1,
     borderColor: "#ccc",
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 5,
+    paddingVertical: 8,
+    marginBottom: 15,
+    fontSize: 16,
   },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  subHeading: {
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  saveButton: {
+  button: {
     backgroundColor: "#4CAF50",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    marginHorizontal: 20,
-    marginTop: 10,
   },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 18,
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "bold",
   },
 });
+
+export default AddEvent;

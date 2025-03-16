@@ -4,7 +4,9 @@ const Participant = require("./participantModel");
 const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
+const CalendarEvent = require("./calendarModel"); // Import CalendarEvent
 
+// Existing associations
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
 
@@ -23,4 +25,7 @@ User.hasMany(Expense, { foreignKey: "paidBy", as: "expensesPaidBy" });
 Expense.belongsTo(User, { foreignKey: "owedTo", as: "owedToUser" });
 Expense.belongsTo(User, { foreignKey: "paidBy", as: "paidByUser" });
 
-module.exports = { User, Conversation, Participant, Message, Profile, Expense };
+User.hasMany(CalendarEvent, { foreignKey: "userId", as: "events" });
+CalendarEvent.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+module.exports = { User, Conversation, Participant, Message, Profile, Expense, CalendarEvent };

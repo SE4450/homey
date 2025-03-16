@@ -1,12 +1,21 @@
 import React, { useState, useLayoutEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert 
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "./components/common/screen-wrapper";
+import useAxios from "./hooks/useAxios";
 
 const AddEvent = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const { post, error } = useAxios();
 
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -23,9 +32,30 @@ const AddEvent = () => {
     };
   }, [navigation]);
 
-  const handleSave = () => {
-    console.log("Event saved", { title, date, time, location, description });
-    router.push("/calendar");
+  // Function to add event to backend
+  const addEvent = async () => {
+    if (!title || !date) {
+      Alert.alert("Error", "Title and Date are required fields.");
+      return;
+    }
+
+    const eventData = {
+      title,
+      eventDate: date,
+      startTime: time || null,
+      endTime: null, // Optionally add end time if needed
+      location,
+      description,
+    };
+
+    const result = await post("/api/calendar", eventData);
+
+    if (result) {
+      Alert.alert("Success", "Event added successfully!");
+      router.push("/calendar"); // Redirect to calendar screen after adding
+    } else {
+      Alert.alert("Error", error || "Failed to add event");
+    }
   };
 
   return (
@@ -86,7 +116,7 @@ const AddEvent = () => {
       </View>
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+      <TouchableOpacity style={styles.saveButton} onPress={addEvent}>
         <Text style={styles.saveButtonText}>Save Event</Text>
       </TouchableOpacity>
     </ScreenWrapper>

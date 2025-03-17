@@ -8,24 +8,24 @@ import useUser from "./hooks/useUser";
 import { useRouter } from "expo-router";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Ionicons } from "@expo/vector-icons";
 
 type LandlordHomeScreenNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "home">;
 
 export default function LandlordHomeScreen() {
     const [groups, setGroups] = useState<any>([]);
     const [properties, setProperties] = useState<any>([]);
-    const { user, userLoading, userError } = useUser();
+    const [loadingState, setLoadingState] = useState(true); // Custom loading state
+
+    const { user, userError } = useUser();
     const { logout } = useAuth();
-    const { get, error, loading } = useAxios();
+    const { get, error } = useAxios();
     const isFocused = useIsFocused();
     const navigation = useNavigation<LandlordHomeScreenNavigationProp>();
     const router = useRouter();
 
     useEffect(() => {
         if (isFocused) {
-            fetchGroups();
-            fetchProperties();
+            loadData();
         }
     }, [isFocused]);
 
@@ -34,6 +34,12 @@ export default function LandlordHomeScreen() {
             Alert.alert("Error", error);
         }
     }, [error]);
+
+    const loadData = async () => {
+        setLoadingState(true); // Start loading
+        await Promise.all([fetchGroups(), fetchProperties()]); // Wait for both calls
+        setLoadingState(false); // Finish loading only after both are complete
+    };
 
     const fetchGroups = async () => {
         const response = await get<any>("/api/groups");
@@ -62,7 +68,7 @@ export default function LandlordHomeScreen() {
         router.push("/login");
     };
 
-    if (loading) {
+    if (loadingState) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
@@ -81,21 +87,24 @@ export default function LandlordHomeScreen() {
 
     return (
         <View style={styles.root}>
+            {/* Sticky Header */}
+            <View style={styles.screenHeader}>
+                <Text style={styles.screenHeaderTitle}>Home</Text>
+            </View>
+
             <ScrollView contentContainerStyle={styles.container}>
-                <View style={styles.header}>
-                    <View style={styles.profileSection}>
-                        <Image
-                            style={styles.profileImage}
-                            source={{
-                                uri: "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
-                            }}
-                        />
-                        <View style={styles.profileInfo}>
-                            <Text style={styles.welcomeText}>
-                                Welcome {user.firstName}, {user.lastName}
-                            </Text>
-                            <Text style={styles.emailText}>{user.email}</Text>
-                        </View>
+                <View style={styles.profileSection}>
+                    <Image
+                        style={styles.profileImage}
+                        source={{
+                            uri: "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
+                        }}
+                    />
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.welcomeText}>
+                            Welcome {user.firstName}, {user.lastName}
+                        </Text>
+                        <Text style={styles.emailText}>{user.email}</Text>
                     </View>
                 </View>
 
@@ -142,8 +151,7 @@ export default function LandlordHomeScreen() {
                                             <Image style={styles.propertyImage} source={{ uri: property.exteriorImage }} />
                                             <View style={styles.propertyDetails}>
                                                 <Text style={styles.propertyName}>{property.name}</Text>
-                                                <Text style={styles.propertyAddress}>{property.address}</Text>
-                                                <Text style={styles.propertyCity}>{property.city}</Text>
+                                                <Text style={styles.propertyAddress}>{property.address}, {property.city}</Text>
                                                 <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEditProperty(property.id)}>
                                                     <Text style={styles.buttonText}>View/Edit Details</Text>
                                                 </TouchableOpacity>
@@ -167,6 +175,19 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#f5f5f5",
     },
+    screenHeader: {
+        backgroundColor: "white",
+        paddingTop: 50,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        elevation: 3,
+        alignItems: "center",
+    },
+    screenHeaderTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
@@ -189,12 +210,16 @@ const styles = StyleSheet.create({
     profileSection: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 15,
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 8,
+        marginBottom: 20,
     },
     profileImage: {
         width: 60,
         height: 60,
         borderRadius: 30,
+        marginRight: 15,
     },
     profileInfo: {
         gap: 5,

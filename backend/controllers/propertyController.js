@@ -1,4 +1,5 @@
-const { Property, PropertyImage } = require("../models/associations");
+const { Property, PropertyImage, User } = require("../models/associations");
+const { Op } = require("sequelize");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
 
@@ -79,6 +80,95 @@ exports.getPropertyById = async (req, res) => {
             status: "error",
             message: "Failed to retrieve property",
             data: null,
+            errors: [error.message],
+        });
+    }
+};
+
+exports.getPropertiesForTenants = async (req, res) => {
+    try {
+        const { maxPrice, city, propertyType, bedrooms } = req.query;
+
+        const filters = {
+            availability: true, // Always return only available properties
+        };
+
+        // Apply filters only if they are provided and valid
+        if (maxPrice && !isNaN(parseInt(maxPrice))) {
+            filters.price = { [Op.lte]: parseInt(maxPrice) };
+        }
+
+        if (city && city.trim() !== "") {
+            filters.city = { [Op.iLike]: `%${city}%` }; // Case-insensitive city search
+        }
+
+        if (propertyType && propertyType !== "Any") {
+            filters.propertyType = propertyType;
+        }
+
+        if (bedrooms && !isNaN(parseInt(bedrooms))) {
+            filters.bedrooms = { [Op.gte]: parseInt(bedrooms) }; // Minimum number of bedrooms
+        }
+
+        const properties = await Property.findAll({
+            where: filters,
+            include: [
+                {
+                    model: User,
+                    as: "landlord",
+                    attributes: ["id", "firstName", "lastName", "email"],
+                }
+            ],
+        });
+
+        if (properties.length === 0) {
+            return res.status(404).json({
+                status: "error",
+                message: "No properties found matching your criteria",
+                data: [],
+                errors: ["No properties match the search filters"],
+            });
+        }
+
+        const formattedProperties = properties.map((property) => {
+            const propertyJSON = property.toJSON();
+
+            const exteriorImageBase64 = propertyJSON.exteriorImage
+                ? `data:image/jpeg;base64,${propertyJSON.exteriorImage.toString("base64")}`
+                : null;
+
+            return {
+                id: propertyJSON.id,
+                name: propertyJSON.name,
+                address: propertyJSON.address,
+                city: propertyJSON.city,
+                price: propertyJSON.price,
+                bedrooms: propertyJSON.bedrooms,
+                propertyType: propertyJSON.propertyType,
+                availability: propertyJSON.availability,
+                description: propertyJSON.propertyDescription,
+                exteriorImage: exteriorImageBase64,
+                landlord: {
+                    id: propertyJSON.landlord.id,
+                    name: `${propertyJSON.landlord.firstName[0]}. ${propertyJSON.landlord.lastName}`, // First initial + last name
+                    firstName: `${propertyJSON.landlord.firstName}`,
+                    lastName: `${propertyJSON.landlord.lastName}`,
+                    email: propertyJSON.landlord.email
+                }
+            };
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: `${formattedProperties.length} property(s) found`,
+            data: formattedProperties,
+            errors: [],
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve properties",
+            data: [],
             errors: [error.message],
         });
     }

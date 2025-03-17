@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import useAxios from "../app/hooks/useAxios";
 import { ReviewStackParamList } from "./stacks/reviewsStack";
 import useUser from "./hooks/useUser";
+import StarRating from "react-native-star-rating-widget";
 
 type ReviewScreenRouteProp = RouteProp<ReviewStackParamList, 'review'>;
 
@@ -65,7 +66,7 @@ export default function Reviews() {
     const createReview = async() => {
 
         //ensure that the score is not zero
-        if(reviewScore == 0) {
+        if(reviewScore < 0 || reviewScore > 5) {
             alert("You must enter a review that is not zero");
         }
         else {
@@ -93,11 +94,20 @@ export default function Reviews() {
             <Text style={styles.headerFormat}>Creating a Review For {route.params.reviewName}</Text>
             <Text style={styles.textFormat}>Score:</Text>
             <View style={styles.reviewSectionFormat}>
+                {/*
                 <Button title="1" onPress={() => setReviewScore(1)}></Button>
                 <Button title="2" onPress={() => setReviewScore(2)}></Button>
                 <Button title="3" onPress={() => setReviewScore(3)}></Button>
                 <Button title="4" onPress={() => setReviewScore(4)}></Button>
                 <Button title="5" onPress={() => setReviewScore(5)}></Button>
+                */}
+
+                <StarRating rating={1} starSize={15} onChange={() => setReviewScore(1)}/>
+                <StarRating rating={2} starSize={15} onChange={() => setReviewScore(2)}/>
+                <StarRating rating={3} starSize={15} onChange={() => setReviewScore(3)}/>
+                <StarRating rating={4} starSize={15} onChange={() => setReviewScore(4)}/>
+                <StarRating rating={5} starSize={15} onChange={() => setReviewScore(5)}/>
+                
             </View>
             
 

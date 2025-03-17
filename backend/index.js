@@ -16,6 +16,7 @@ const inventoryRoutes = require("./routes/inventoryRoutes.js");
 const propertyRoutes = require("./routes/propertyRoutes.js");
 const groupRoutes = require("./routes/groupRoutes.js");
 const choresRoutes = require("./routes/choresRoutes.js");
+const reviewRoutes = require("./routes/reviewRoutes.js");
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/chores", choresRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `${req.method} ${req.url} Not found` });

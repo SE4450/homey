@@ -9,6 +9,7 @@ const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
 const Chore = require("./choresModel");
+//const Review = require("./reviewModel");
 
 User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
 Property.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });

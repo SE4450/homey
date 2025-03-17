@@ -13,6 +13,8 @@ const { logger } = require("./middleware/logger.js");
 const sequelize = require("./db.js");
 const expenseRoutes = require("./routes/expenseRoutes.js");
 const inventoryRoutes = require("./routes/inventoryRoutes.js");
+const propertyRoutes = require("./routes/propertyRoutes.js");
+// const groupRoutes = require("./routes/groupRoutes.js");
 const choresRoutes = require("./routes/choresRoutes.js");
 
 const app = express();
@@ -29,7 +31,8 @@ const server = isDevelopment
     );
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(logger);
 
 app.use("/api/users", userRoutes);
@@ -40,6 +43,8 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/inventory", inventoryRoutes);
+app.use("/api/properties", propertyRoutes);
+// app.use("/api/groups", groupRoutes);
 app.use("/api/chores", choresRoutes);
 
 app.use((req, res) => {

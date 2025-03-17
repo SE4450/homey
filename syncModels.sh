@@ -5,6 +5,8 @@ set -e
 cleanup() {
     echo "Cleaning up Docker containers and images..."
 
+    rm -rf ./backend/docker/postgres-data
+    
     docker ps -aq | xargs -r docker rm -f
     docker images -q | xargs -r docker rmi -f
 

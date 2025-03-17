@@ -6,12 +6,12 @@ import { useRouter } from "expo-router";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
-//get the different screens
-import HomeScreen from "./home";
+
+import TenantHomeScreen from "./tenantHome";
+import LandlordHomeScreen from "./landlordHome";
 import ProfileScreen from "./profile";
 import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
-//import MessageScreen from './contacts'
 import MessageStackScreen from "./stacks/messagesStack";
 import ChoresStackScreen from "./stacks/choresStack";
 import InventoryScreen from "./inventory";
@@ -30,7 +30,7 @@ const COLORS = {
 
 export default function NavigationScreen() {
   const [user, setUser] = useState<any>({});
-  const { userToken, userId, logout } = useAuth();
+  const { userToken, userId, userRole } = useAuth();
   const { get, error } = useAxios();
   const router = useRouter();
 
@@ -90,7 +90,10 @@ export default function NavigationScreen() {
         tabBarInactiveTintColor: "grey",
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={userRole == "tenant" ? TenantHomeScreen : LandlordHomeScreen}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="List" component={ListScreen} />
       <Tab.Screen name="Expenses" component={ExpenseScreen} />

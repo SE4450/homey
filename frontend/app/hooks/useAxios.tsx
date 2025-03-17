@@ -76,6 +76,50 @@ const useAxios = () => {
     }
   };
 
+  const put = async <T extends unknown>(url: string, data: object): Promise<T | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await addAuthHeaders();
+      const response = await axiosInstance.put<T>(url, data);
+      return response.data;
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.errors
+          ? `${err.response.data.message}\n\n` + formatErrors(err.response.data.errors)
+          : err.response?.data?.message || err.message;
+
+      setError(errorMessage);
+      await handleJwtError(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const del = async <T extends unknown>(url: string): Promise<T | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await addAuthHeaders();
+      const response = await axiosInstance.delete<T>(url);
+      return response.data;
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.errors
+          ? `${err.response.data.message}\n\n` + formatErrors(err.response.data.errors)
+          : err.response?.data?.message || err.message;
+
+      setError(errorMessage);
+      await handleJwtError(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const patch = async <T extends unknown>(url: string, data: object): Promise<T | null> => {
     setLoading(true);
     setError(null);
@@ -98,7 +142,7 @@ const useAxios = () => {
     }
   };
 
-  return { get, post, patch, loading, error };
+  return { get, post, put, del, patch, loading, error };
 };
 
 export default useAxios;

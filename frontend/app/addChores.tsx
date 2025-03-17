@@ -185,7 +185,7 @@ const AddChore = () => {
   };
 
   const formatDate = (date: Date | null) => {
-    if (!date) return "Select a due date (optional)";
+    if (!date) return "Select a due date ";
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

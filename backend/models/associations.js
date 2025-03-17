@@ -12,13 +12,21 @@ const Chore = require("./choresModel");
 User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
 Property.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
 
-Property.hasMany(PropertyImage, { foreignKey: "propertyId", as: "images", onDelete: "CASCADE" });
+Property.hasMany(PropertyImage, {
+  foreignKey: "propertyId",
+  as: "images",
+  onDelete: "CASCADE",
+});
 PropertyImage.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
 
 User.hasMany(Group, { foreignKey: "landlordId", as: "groups" });
 Group.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
 
-Property.hasMany(Group, { foreignKey: "propertyId", as: "groups", onDelete: "CASCADE" });
+Property.hasMany(Group, {
+  foreignKey: "propertyId",
+  as: "groups",
+  onDelete: "CASCADE",
+});
 Group.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
 
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
@@ -51,4 +59,17 @@ User.hasMany(Expense, { foreignKey: "paidBy", as: "expensesPaidBy" });
 Expense.belongsTo(User, { foreignKey: "owedTo", as: "owedToUser" });
 Expense.belongsTo(User, { foreignKey: "paidBy", as: "paidByUser" });
 
-module.exports = { User, Property, PropertyImage, Conversation, Participant, Message, Profile, Expense, Chore };
+User.hasMany(Chore, { foreignKey: "assignedTo", as: "assignedChores" });
+Chore.belongsTo(User, { foreignKey: "assignedTo", as: "assignee" });
+
+module.exports = {
+  User,
+  Property,
+  PropertyImage,
+  Conversation,
+  Participant,
+  Message,
+  Profile,
+  Expense,
+  Chore,
+};

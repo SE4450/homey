@@ -194,3 +194,42 @@ exports.deleteChore = async (req, res) => {
     });
   }
 };
+
+exports.getChoreById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const chore = await Chore.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: "assignee",
+          attributes: ["id", "firstName", "lastName", "email"],
+        },
+      ],
+    });
+
+    if (!chore) {
+      return res.status(404).json({
+        status: "error",
+        message: "Chore not found",
+        data: null,
+        errors: [`No chore found with ID: ${id}`],
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Chore found",
+      data: chore,
+      errors: [],
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "An unexpected error occurred while fetching the chore",
+      data: null,
+      errors: [err.message],
+    });
+  }
+};

@@ -4,14 +4,14 @@ import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { MaterialIcons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import TenantHomeScreen from "./tenantHome";
 import LandlordHomeScreen from "./landlordHome";
-import ProfileScreen from './profile'
-import ListScreen from './listDisplay';
-import ExpenseScreen from './expenses';
+import ProfileScreen from "./profile";
+import ListScreen from "./listDisplay";
+import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
 import ChoresStackScreen from "./stacks/choresStack";
 import InventoryScreen from "./inventory";
@@ -86,11 +86,14 @@ export default function NavigationScreen() {
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: 'grey',
+        tabBarActiveTintColor: "#4CAF50",
+        tabBarInactiveTintColor: "grey",
       })}
     >
-      <Tab.Screen name="Home" component={userRole == "tenant" ? TenantHomeScreen : LandlordHomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={userRole == "tenant" ? TenantHomeScreen : LandlordHomeScreen}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="List" component={ListScreen} />
       <Tab.Screen name="Expenses" component={ExpenseScreen} />

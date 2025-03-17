@@ -42,8 +42,7 @@ const LoginScreen = () => {
 
         if (response) {
             await login(response.data[0].token);
-            const decoded = jwtDecode<any>(response.data[0].token);
-            router.push("/navigation");
+            router.push(`/homeNavigation`);
         }
     };
 

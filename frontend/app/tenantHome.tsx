@@ -1,142 +1,237 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  ScrollView
-} from "react-native";
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { useAuth } from "./context/AuthContext";
 import useAxios from "./hooks/useAxios";
 import { useIsFocused } from "@react-navigation/native";
 import useUser from "./hooks/useUser";
+import { useRouter, useNavigation } from "expo-router";
+import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-const COLORS = {
-  PRIMARY: "#4CAF50",
-  SECONDARY: "#FF9800",
-  WHITE: "#FFFFFF",
-  BLACK: "#000000",
-  TEXT: "#333333",
-  LIGHT_GRAY: "#F5F5F5",
-  LOGOUT: "#D32F2F",
-};
+type TenantHomeScreenNavigationProp = StackNavigationProp<TenantHomeStackParamList, "home">;
 
 export default function TenantHomeScreen() {
-  const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
-  const { user, userLoading, userError } = useUser();
-  const { get, error } = useAxios();
-  const isFocused = useIsFocused();
+    const [groups, setGroups] = useState<any>([]);
+    const [loading, setLoading] = useState(true);
+    const { user, userLoading, userError } = useUser();
+    const { logout } = useAuth();
+    const { get, error } = useAxios();
+    const isFocused = useIsFocused();
+    const navigation = useNavigation<TenantHomeScreenNavigationProp>();
+    const router = useRouter();
 
-  useEffect(() => {
-    if (error) {
-      Alert.alert("Error", error);
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (isFocused) {
-      lowInventoryAlert();
-    }
-  }, [isFocused]);
-
-  const lowInventoryAlert = async () => {
-
-    setInventoryAlert([]);
-
-    const response = await get<any>(`/api/inventory/getLowItem?houseId=${user.id}&quantity=1&quantity=0`);
-
-    if (response) {
-      response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
-        setInventoryAlert(l => [...l, { itemName: item.itemName }])
-      });
-    }  
-  }
-
-  if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
-  if (userError) return <Text>Error: {userError}</Text>;
-  if (!user) return <Text>No user found.</Text>;
-
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>
-          Welcome, {user.firstName} {user.lastName}
-        </Text>
-        <Text style={styles.heading}>Homeys</Text>
-        {
-          inventoryAlert.length != 0 &&
-          <View style={styles.alertContainer}>
-            <Text style={styles.alertHeading}>Alerts</Text>
-            <Text style={styles.alertHeader}>Low Inventory:</Text>
-            {
-              inventoryAlert.map((item) => <Text key={item.itemName + "textnode"} style={styles.alertText}>{item.itemName}</Text>)
-            }
-          </View>
+    useEffect(() => {
+        if (isFocused) {
+            fetchGroups();
+            setLoading(false);
         }
+    }, [isFocused]);
 
-      </View>
-    </ScrollView>
-  );
+    useEffect(() => {
+        if (error) {
+            Alert.alert("Error", error);
+        }
+    }, [error]);
+
+    const fetchGroups = async () => {
+        const response = await get<any>("/api/groups");
+        if (response) {
+            setGroups(response.data);
+        }
+    };
+
+    const handleNavigateToSearchProperties = () => {
+        navigation.navigate("propertySearchResults");
+    };
+
+    const handleNavigateToGroup = (groupId: string) => {
+        router.push("/groupNavigation");
+    };
+
+    const handleLogout = async () => {
+        await logout();
+        router.push("/login");
+    };
+
+    if (userLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (userError) return <Text>Error: {userError}</Text>;
+    if (!user) return <Text>No user found.</Text>;
+
+    return (
+        <View style={styles.root}>
+            {/* Sticky Header */}
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Home</Text>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.container}>
+                <View style={styles.profileSection}>
+                    <Image
+                        style={styles.profileImage}
+                        source={{
+                            uri: "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
+                        }}
+                    />
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.welcomeText}>Welcome {user.firstName}, {user.lastName}</Text>
+                        <Text style={styles.emailText}>{user.email}</Text>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Text style={styles.logoutText}>Logout</Text>
+                </TouchableOpacity>
+
+                <View style={styles.mainContent}>
+                    {/* Search for Properties */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Search for Properties</Text>
+                        <TouchableOpacity style={styles.createButton} onPress={handleNavigateToSearchProperties}>
+                            <Text style={styles.buttonText}>Find a Property</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* View Groups */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Your Groups</Text>
+                        <View style={styles.groupsList}>
+                            {groups.length > 0 ? (
+                                groups.map((group: any) => (
+                                    <TouchableOpacity
+                                        key={group.id}
+                                        style={styles.groupItem}
+                                        onPress={() => handleNavigateToGroup(group.id)}
+                                    >
+                                        <Text style={styles.groupName}>{group.name}</Text>
+                                    </TouchableOpacity>
+                                ))
+                            ) : (
+                                <Text style={styles.noGroupsText}>You are not in any groups.</Text>
+                            )}
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: COLORS.LIGHT_GRAY,
-    /*
-    alignItems: "center",
-    justifyContent: "space-evenly"
-    */
-  },
-  header: {
-    marginBottom: 30,
-    alignItems: "center",
-  },
-  welcomeText: {
-    fontSize: 18,
-    color: COLORS.TEXT,
-    marginBottom: 10,
-  },
-  heading: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: COLORS.PRIMARY,
-    paddingBottom: 10
-  },
-  buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-  button: {
-    width: "80%",
-    paddingVertical: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-    alignItems: "center",
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.WHITE,
-  },
-  alertContainer: {
-    alignItems: "center",
-    borderWidth: 1,
-    paddingLeft: 50,
-    paddingRight: 50,
-    backgroundColor: COLORS.WHITE
-  },
-  alertHeading: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: COLORS.LOGOUT,
-  },
-  alertHeader: {
-    fontSize: 20,
-    fontWeight: "bold"
-  },
-  alertText: {
-    fontSize: 20,
-  }
+    root: {
+        flex: 1,
+        backgroundColor: "#f5f5f5",
+    },
+    header: {
+        backgroundColor: "white",
+        paddingTop: 50,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        elevation: 3,
+        alignItems: "center",
+    },
+    headerTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f5f5f5",
+    },
+    container: {
+        flexGrow: 1,
+        padding: 16,
+    },
+    profileSection: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 8,
+        marginBottom: 20,
+    },
+    profileImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        marginRight: 15,
+    },
+    profileInfo: {
+        flex: 1,
+    },
+    welcomeText: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    emailText: {
+        fontSize: 14,
+        color: "#666",
+    },
+    logoutButton: {
+        backgroundColor: "#ff4444",
+        padding: 10,
+        borderRadius: 6,
+        marginBottom: 20,
+        alignSelf: "center",
+        minWidth: 100,
+        alignItems: "center",
+    },
+    logoutText: {
+        color: "white",
+        fontWeight: "600",
+    },
+    mainContent: {
+        gap: 20,
+    },
+    section: {
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 8,
+        elevation: 3,
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 15,
+    },
+    createButton: {
+        backgroundColor: "#4CAF50",
+        padding: 12,
+        borderRadius: 6,
+        alignItems: "center",
+        marginBottom: 15,
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "600",
+    },
+    groupsList: {
+        gap: 10,
+    },
+    groupItem: {
+        padding: 15,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 6,
+        textAlign: "center",
+    },
+    groupName: {
+        fontSize: 16,
+        fontWeight: "500",
+        textAlign: "center",
+    },
+    noGroupsText: {
+        fontSize: 14,
+        color: "#666",
+        textAlign: "center",
+    },
 });

@@ -24,12 +24,12 @@ const isDevelopment = process.env.DEVELOPMENT === "true";
 const server = isDevelopment
   ? http.createServer(app)
   : https.createServer(
-    {
-      key: fs.readFileSync("./key.pem"),
-      cert: fs.readFileSync("./cert.crt"),
-    },
-    app
-  );
+      {
+        key: fs.readFileSync("./key.pem"),
+        cert: fs.readFileSync("./cert.crt"),
+      },
+      app
+    );
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));

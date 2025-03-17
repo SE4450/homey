@@ -8,6 +8,7 @@ const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
 const Chore = require("./choresModel");
+//const Review = require("./reviewModel");
 
 User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
 Property.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
@@ -51,4 +52,4 @@ User.hasMany(Expense, { foreignKey: "paidBy", as: "expensesPaidBy" });
 Expense.belongsTo(User, { foreignKey: "owedTo", as: "owedToUser" });
 Expense.belongsTo(User, { foreignKey: "paidBy", as: "paidByUser" });
 
-module.exports = { User, Property, PropertyImage, Conversation, Participant, Message, Profile, Expense, Chore };
+module.exports = { User, Property, PropertyImage, Conversation, Participant, Message, Profile, Expense, Chore }; //Review

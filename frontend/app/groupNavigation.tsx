@@ -4,8 +4,8 @@ import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { MaterialIcons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import HomeScreen from "./home";
 import ProfileScreen from './profile'
@@ -85,8 +85,8 @@ export default function GroupNavigationScreen() {
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: 'grey',
+        tabBarActiveTintColor: "#4CAF50",
+        tabBarInactiveTintColor: "grey",
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

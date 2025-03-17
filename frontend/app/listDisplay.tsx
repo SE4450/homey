@@ -187,10 +187,10 @@ export default function ListDisplay() {
       {listView && (
         <View>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>New List Name:</Text>
             <TextInput
               style={styles.textAreaFormat}
-              placeholder="Enter list name"
+              placeholder="Enter list name (Grocery, Shopping, etc.)"
+              placeholderTextColor="grey"
               value={createdList.toString()}
               onChangeText={(text) => setCreatedList(text)}
             />

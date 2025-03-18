@@ -58,6 +58,7 @@ exports.addExpense = async (req, res) => {
             amount,
             owedTo,
             paidBy,
+            Boolean: false,
         });
 
         res.status(201).json({

@@ -35,7 +35,9 @@ exports.addExpense = async (req, res) => {
             amount,
             owedTo,
             paidBy,
+            completed: false,
         });
+
 
         res.status(201).json({
             status: "success",
@@ -77,7 +79,9 @@ exports.getExpenses = async (req, res) => {
         if (owedBy) whereClause.owedTo = owedBy;
         if (paidBy) whereClause.paidBy = paidBy;
 
-        // Fetch expenses
+        whereClause.completed = false;
+
+        // Fetch the expenses
         const expenses = await Expense.findAll({
             where: whereClause,
             include: [
@@ -101,3 +105,34 @@ exports.getExpenses = async (req, res) => {
         });
     }
 };
+
+exports.completeExpense = async (req, res) => {
+    try {
+        const expenseId = req.params.id;
+        const expense = await Expense.findByPk(expenseId);
+        if (!expense) {
+            return res.status(404).json({
+                status: "error",
+                message: "Expense not found",
+                data: [],
+                errors: [`Expense with id ${expenseId} not found.`],
+            });
+        }
+        expense.completed = true;
+        await expense.save();
+        res.status(200).json({
+            status: "success",
+            message: "Expense marked as completed",
+            data: expense,
+            errors: [],
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occurred while completing the expense",
+            data: [],
+            errors: [err.message],
+        });
+    }
+};
+

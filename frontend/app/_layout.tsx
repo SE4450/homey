@@ -16,9 +16,11 @@ export default function RootLayout() {
         <Stack.Screen name="contacts" options={{ title: "Contacts" }} />
         <Stack.Screen name="conversation" options={{ title: "Conversation" }} />
         <Stack.Screen name="expenses" options={{ title: "Expenses" }} />
-        <Stack.Screen name="profile" options={{ title: "Profile" }} />
+        <Stack.Screen name="mainProfile" options={{ title: "Main Profile" }} />
+        <Stack.Screen name="editProfile" options={{ title: "Edit Profile" }} />
         <Stack.Screen name="listDisplay" options={{ title: "Lists" }} />
         <Stack.Screen name="inventory" options={{ title: "Inventory" }} />
+        <Stack.Screen name="calendar" options={{ title: "Calendar" }} />
         <Stack.Screen name="reviewSelection" options={{ title: "Review Selection" }} />
         <Stack.Screen name="review" options={{ title: "Reviews" }} />
       </Stack>

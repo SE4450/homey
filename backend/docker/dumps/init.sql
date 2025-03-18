@@ -70,18 +70,6 @@ CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
 ALTER TYPE public."enum_Profiles_noiseLevel" OWNER TO admin;
 
 --
--- Name: enum_Reviews_reviewType; Type: TYPE; Schema: public; Owner: admin
---
-
-CREATE TYPE public."enum_Reviews_reviewType" AS ENUM (
-    'user',
-    'property'
-);
-
-
-ALTER TYPE public."enum_Reviews_reviewType" OWNER TO admin;
-
---
 -- Name: enum_Users_role; Type: TYPE; Schema: public; Owner: admin
 --
 
@@ -118,6 +106,48 @@ ALTER TYPE public."enum_properties_propertyType" OWNER TO admin;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: CalendarEvents; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."CalendarEvents" (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    "eventDate" date NOT NULL,
+    "startTime" time without time zone,
+    "endTime" time without time zone,
+    location character varying(255),
+    description text,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL,
+    "userId" integer
+);
+
+
+ALTER TABLE public."CalendarEvents" OWNER TO admin;
+
+--
+-- Name: CalendarEvents_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."CalendarEvents_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."CalendarEvents_id_seq" OWNER TO admin;
+
+--
+-- Name: CalendarEvents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."CalendarEvents_id_seq" OWNED BY public."CalendarEvents".id;
+
 
 --
 -- Name: Chores; Type: TABLE; Schema: public; Owner: admin
@@ -208,6 +238,7 @@ CREATE TABLE public."Expenses" (
     amount double precision NOT NULL,
     "owedTo" integer NOT NULL,
     "paidBy" integer NOT NULL,
+    completed boolean DEFAULT false NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -235,44 +266,6 @@ ALTER SEQUENCE public."Expenses_id_seq" OWNER TO admin;
 --
 
 ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
-
-
---
--- Name: Inventories; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public."Inventories" (
-    "itemId" integer NOT NULL,
-    "houseId" integer NOT NULL,
-    "itemName" character varying(255) NOT NULL,
-    quantity integer NOT NULL,
-    "createdAt" timestamp with time zone NOT NULL,
-    "updatedAt" timestamp with time zone NOT NULL
-);
-
-
-ALTER TABLE public."Inventories" OWNER TO admin;
-
---
--- Name: Inventories_itemId_seq; Type: SEQUENCE; Schema: public; Owner: admin
---
-
-CREATE SEQUENCE public."Inventories_itemId_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public."Inventories_itemId_seq" OWNER TO admin;
-
---
--- Name: Inventories_itemId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
---
-
-ALTER SEQUENCE public."Inventories_itemId_seq" OWNED BY public."Inventories"."itemId";
 
 
 --
@@ -445,46 +438,6 @@ CREATE TABLE public."Profiles" (
 
 
 ALTER TABLE public."Profiles" OWNER TO admin;
-
---
--- Name: Reviews; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public."Reviews" (
-    "reviewId" integer NOT NULL,
-    "reviewType" public."enum_Reviews_reviewType" NOT NULL,
-    "reviewedItemId" integer NOT NULL,
-    "reviewerId" integer NOT NULL,
-    score integer NOT NULL,
-    description character varying(255),
-    "createdAt" timestamp with time zone NOT NULL,
-    "updatedAt" timestamp with time zone NOT NULL
-);
-
-
-ALTER TABLE public."Reviews" OWNER TO admin;
-
---
--- Name: Reviews_reviewId_seq; Type: SEQUENCE; Schema: public; Owner: admin
---
-
-CREATE SEQUENCE public."Reviews_reviewId_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public."Reviews_reviewId_seq" OWNER TO admin;
-
---
--- Name: Reviews_reviewId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
---
-
-ALTER SEQUENCE public."Reviews_reviewId_seq" OWNED BY public."Reviews"."reviewId";
-
 
 --
 -- Name: Users; Type: TABLE; Schema: public; Owner: admin
@@ -726,6 +679,13 @@ ALTER SEQUENCE public."stores_itemID_seq" OWNED BY public.stores."itemID";
 
 
 --
+-- Name: CalendarEvents id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents" ALTER COLUMN id SET DEFAULT nextval('public."CalendarEvents_id_seq"'::regclass);
+
+
+--
 -- Name: Chores id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -744,13 +704,6 @@ ALTER TABLE ONLY public."Conversations" ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."Expenses_id_seq"'::regclass);
-
-
---
--- Name: Inventories itemId; Type: DEFAULT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Inventories" ALTER COLUMN "itemId" SET DEFAULT nextval('public."Inventories_itemId_seq"'::regclass);
 
 
 --
@@ -779,13 +732,6 @@ ALTER TABLE ONLY public."Messages" ALTER COLUMN id SET DEFAULT nextval('public."
 --
 
 ALTER TABLE ONLY public."Participants" ALTER COLUMN id SET DEFAULT nextval('public."Participants_id_seq"'::regclass);
-
-
---
--- Name: Reviews reviewId; Type: DEFAULT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Reviews" ALTER COLUMN "reviewId" SET DEFAULT nextval('public."Reviews_reviewId_seq"'::regclass);
 
 
 --
@@ -831,6 +777,14 @@ ALTER TABLE ONLY public.stores ALTER COLUMN "itemID" SET DEFAULT nextval('public
 
 
 --
+-- Name: CalendarEvents CalendarEvents_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents"
+    ADD CONSTRAINT "CalendarEvents_pkey" PRIMARY KEY (id);
+
+
+--
 -- Name: Chores Chores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -852,14 +806,6 @@ ALTER TABLE ONLY public."Conversations"
 
 ALTER TABLE ONLY public."Expenses"
     ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
-
-
---
--- Name: Inventories Inventories_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Inventories"
-    ADD CONSTRAINT "Inventories_pkey" PRIMARY KEY ("itemId");
 
 
 --
@@ -900,14 +846,6 @@ ALTER TABLE ONLY public."Participants"
 
 ALTER TABLE ONLY public."Profiles"
     ADD CONSTRAINT "Profiles_pkey" PRIMARY KEY (id);
-
-
---
--- Name: Reviews Reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Reviews"
-    ADD CONSTRAINT "Reviews_pkey" PRIMARY KEY ("reviewId");
 
 
 --
@@ -980,6 +918,14 @@ ALTER TABLE ONLY public.property_images
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
+
+
+--
+-- Name: CalendarEvents CalendarEvents_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents"
+    ADD CONSTRAINT "CalendarEvents_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --

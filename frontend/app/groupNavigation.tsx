@@ -11,8 +11,9 @@ import ProfileScreen from "./profile";
 import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
-import ChoresStackScreen from "./stacks/choresStack";
 import InventoryScreen from "./inventory";
+import CalendarScreen from "./calendar";
+import ChoresStackScreen from "./stacks/choresStack";
 import ReviewsScreen from "./stacks/reviewsStack";
 
 const Tab = createBottomTabNavigator();
@@ -71,8 +72,6 @@ export default function GroupNavigationScreen() {
 
           if (route.name === "Home") {
             iconName = "home";
-          } else if (route.name === "Profile") {
-            iconName = "account-circle";
           } else if (route.name === "List") {
             iconName = "shopping-cart";
           } else if (route.name === "Expenses") {
@@ -85,6 +84,10 @@ export default function GroupNavigationScreen() {
             iconName = "inventory";
           } else if (route.name === "Reviews") {
             iconName = "star-rate";
+          } else if (route.name === "Profile") {
+            iconName = "account-circle";
+          } else if (route.name === "Calendar") {
+            iconName = "calendar-today";
           } else {
             iconName = "help"; // Fallback icon
           }

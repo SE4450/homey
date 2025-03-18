@@ -4,8 +4,8 @@ const { getReviews, createReview } = require("../controllers/reviewController");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
 
-router.get("/", getReviews);
+router.get("/", authenticateUser(["tenant", "landlord"]), getReviews);
 
-router.post("/", createReview);
+router.post("/", authenticateUser(["tenant", "landlord"]), createReview);
 
 module.exports = router;

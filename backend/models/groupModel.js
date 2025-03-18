@@ -24,7 +24,7 @@ const Group = sequelize.define('Group', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'Properties',
+            model: 'properties',
             key: 'id'
         },
         onDelete: 'SET NULL'

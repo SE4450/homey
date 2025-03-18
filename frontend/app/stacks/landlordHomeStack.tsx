@@ -16,7 +16,7 @@ export type LandlordHomeStackParamList = {
 
 const LandlordHomeStack = createStackNavigator<LandlordHomeStackParamList>();
 
-export default function MessageStackScreen() {
+export default function LandlordHomeStackScreen() {
     return (
         <NavigationContainer>
             <LandlordHomeStack.Navigator screenOptions={{ headerShown: false }}>

@@ -123,7 +123,7 @@ export default function HomeScreen() {
         {
           upcomingEvents.length > 0 && (
             <View style={styles.alertContainer}>
-              <Text style={styles.alertHeading}>Upcoming Events (within 48 hours):</Text>
+              <Text style={styles.alertHeading}>Upcoming Events:</Text>
               {upcomingEvents.map((event) => (
                 <Text key={event.id} style={styles.alertText}>
                   {event.title} - {event.eventDate} {event.startTime && `at ${event.startTime}`}

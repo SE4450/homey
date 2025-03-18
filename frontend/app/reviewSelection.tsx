@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     reviewButtonFormat: {
-        borderWidth: 2,
+        borderWidth: 1,
         width: 100,
         height: 100,
         backgroundColor: "white",
@@ -78,12 +78,6 @@ export default function ReviewSelection() {
                     )
                 }
             </View>
-
-            <Text style={styles.textFormat}>House To Review:</Text>
-            <TouchableOpacity style={styles.reviewButtonFormat}
-            onPress={() => createNewReview(houseToReview.houseName, "property", houseToReview.houseId)}>
-                <Text style={styles.reviewTextFormat}>Review For {houseToReview.houseName}</Text>
-            </TouchableOpacity>
         </ScrollView>
     )
 }

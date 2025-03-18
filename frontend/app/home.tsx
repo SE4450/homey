@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -61,6 +62,22 @@ interface ListItem {
   purchased: string;
 }
 
+// Update the greetings array to remove commas
+const friendlyGreetings = [
+  "Welcome",
+  "Hey there",
+  "Howdy",
+  "What's up",
+  "Yo",
+  "Hi",
+  "Hello",
+  "Greetings",
+  "Sup",
+  "Hiya",
+  "Good to see you",
+  "Wassup",
+];
+
 export default function HomeScreen() {
   const [inventoryAlert, setInventoryAlert] = useState(
     [] as Array<{ itemName: String }>
@@ -88,6 +105,7 @@ export default function HomeScreen() {
   const { userToken, userId } = useAuth();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
     if (error) {
@@ -110,6 +128,7 @@ export default function HomeScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    setGreeting(getRandomGreeting());
     await loadData();
     setLastRefreshed(new Date());
     setRefreshing(false);
@@ -290,6 +309,19 @@ export default function HomeScreen() {
     </View>
   );
 
+  // Add this function to get a random greeting
+  const getRandomGreeting = () => {
+    const randomIndex = Math.floor(Math.random() * friendlyGreetings.length);
+    return friendlyGreetings[randomIndex];
+  };
+
+  // Update the greeting whenever the screen is focused or refreshed
+  useEffect(() => {
+    if (isFocused) {
+      setGreeting(getRandomGreeting());
+    }
+  }, [isFocused]);
+
   if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
   if (userError) return <Text>Error: {userError}</Text>;
   if (!user) return <Text>No user found.</Text>;
@@ -302,10 +334,13 @@ export default function HomeScreen() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>
-          Welcome, {user.firstName} {user.lastName}
-        </Text>
         <Text style={styles.heading}>Homeys</Text>
+        <Text style={styles.welcomeText}>
+          <Text style={styles.greeting}>{greeting}</Text>{" "}
+          <Text style={styles.userName}>
+            {user.firstName} {user.lastName}
+          </Text>
+        </Text>
 
         <View style={styles.quickActionsContainer}>
           <Text style={styles.sectionHeading}>Quick Actions</Text>
@@ -321,21 +356,19 @@ export default function HomeScreen() {
               />
               <Text style={styles.actionButtonText}>Create List</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => navigation.navigate("Calendar")}
-            >
-              <Icon name="calendar-plus" size={22} color={COLORS.WHITE} />
-              <Text style={styles.actionButtonText}>New Event</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => navigation.navigate("Chores")}
             >
               <Icon name="broom" size={22} color={COLORS.WHITE} />
               <Text style={styles.actionButtonText}>Add Chore</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate("Calendar")}
+            >
+              <Icon name="calendar-plus" size={22} color={COLORS.WHITE} />
+              <Text style={styles.actionButtonText}>New Event</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -471,6 +504,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.TEXT,
     marginBottom: 10,
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    textAlign: "center",
+  },
+  greeting: {
+    fontWeight: "600",
+    color: COLORS.PRIMARY,
+    fontStyle: "italic",
+  },
+  userName: {
+    fontWeight: "500",
+    color: COLORS.TEXT,
   },
   heading: {
     fontSize: 32,

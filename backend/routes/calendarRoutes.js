@@ -5,7 +5,8 @@ const {
   getEvents,
   createEvent,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  getUpcomingEvents
 } = require("../controllers/calendarController");
 const { authenticateUser } = require("../middleware/authenticateUser");
 

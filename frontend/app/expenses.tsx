@@ -178,30 +178,30 @@ export default function ExpensesScreen() {
   };
 
   // Render each simplified debt row with expandable details
+  // Render each simplified debt row with all details visible
   const renderDebtRow = ({ item }: { item: SimplifiedDebt }) => {
     const displayAmount = Math.abs(item.netAmount).toFixed(2);
     const color = item.netAmount < 0 ? "red" : "green";
-    const [expanded, setExpanded] = useState(false);
+
     return (
-      <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+      <View>
         <View style={styles.debtRow}>
           <Text style={{ fontWeight: "bold" }}>{item.userName}</Text>
           <Text style={{ color }}>
             {item.netAmount < 0 ? `-$${displayAmount}` : `$${displayAmount}`}
           </Text>
         </View>
-        {expanded && (
-          <View style={styles.debtDetails}>
-            {item.details.map((exp, index) => (
-              <Text key={index} style={styles.debtDetailText}>
-                {exp.expenseName}: ${exp.amount.toFixed(2)}
-              </Text>
-            ))}
-          </View>
-        )}
-      </TouchableOpacity>
+        <View style={styles.debtDetails}>
+          {item.details.map((exp, index) => (
+            <Text key={index} style={styles.debtDetailText}>
+              {exp.expenseName}: ${exp.amount.toFixed(2)}
+            </Text>
+          ))}
+        </View>
+      </View>
     );
   };
+
 
   return (
     <View style={styles.container}>

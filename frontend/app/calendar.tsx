@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Agenda } from "react-native-calendars";
 import useAxios from "./hooks/useAxios";
+import { useIsFocused } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { CalendarStackParamList } from "./stacks/calendarStack";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Ionicons } from '@expo/vector-icons';
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -16,10 +18,10 @@ type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, 
 
 export default function CalendarWithEvents() {
   const [items, setItems] = useState({});
-  const { get, error } = useAxios();
+  const { get, error, del } = useAxios();
   const navigation = useNavigation<CalendarScreenNavigationProp>();
+  const isFocused = useIsFocused();
 
-  // Helper function to format "HH:mm:ss" into "h:mm AM/PM"
   const formatTime = (timeStr: string): string => {
     const [hourStr, minute] = timeStr.split(":");
     let hour = parseInt(hourStr, 10);
@@ -30,18 +32,20 @@ export default function CalendarWithEvents() {
   };
 
   useEffect(() => {
-    getEvents();
-  }, []);
+    if (isFocused) {
+      getEvents();
+    }
+  }, [isFocused]);
 
-  // Function to fetch events from the backend and format them
   const getEvents = async () => {
     const result = await get<any>("/api/calendar");
 
     if (result && result.data) {
       const formattedEvents: any = {};
 
+      // Inside getEvents() in calendar.tsx
       result.data.forEach((event: any) => {
-        const date = event.eventDate; // Expected format: "YYYY-MM-DD"
+        const date = event.eventDate;
         if (!formattedEvents[date]) {
           formattedEvents[date] = [];
         }
@@ -51,11 +55,18 @@ export default function CalendarWithEvents() {
           : "All Day";
 
         formattedEvents[date].push({
+          id: event.id,
           name: event.title,
+          eventDate: event.eventDate, // Add this line so eventDate is passed along
+          startTime: event.startTime, // Optionally include these if needed by editEvent
+          endTime: event.endTime,
           time: timeString,
-          height: 50,
+          location: event.location || "No location",
+          description: event.description || "No description",
+          height: 70,
         });
       });
+
 
       setItems(formattedEvents);
     } else {
@@ -63,16 +74,68 @@ export default function CalendarWithEvents() {
     }
   };
 
-  const renderItem = (item: any) => {
-    return (
-      <View style={styles.item}>
-        <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.timeText}>{item.time}</Text>
-      </View>
+  const deleteEvent = async (id: number) => {
+    Alert.alert(
+      "Delete Event",
+      "Are you sure you want to delete this event?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await del(`/api/calendar/${id}`);
+              Alert.alert("Success", "Event deleted successfully");
+              getEvents(); // Refresh after deletion
+            } catch (err) {
+              Alert.alert("Error", "Failed to delete event");
+            }
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: true }
     );
   };
 
-  // Use the first date from the events as the default selected date, or fallback
+  const renderItem = (item: any) => {
+    return (
+      <TouchableOpacity activeOpacity={1} style={styles.item}>
+        {/* Delete Button */}
+        <TouchableOpacity onPress={() => deleteEvent(item.id)} style={styles.deleteIcon}>
+          <Ionicons name="trash-outline" size={20} color="red" />
+        </TouchableOpacity>
+
+        {/* Edit Button */}
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("editEvent", {
+              id: item.id,
+              title: item.name,
+              eventDate: item.eventDate,
+              startTime: item.startTime,
+              endTime: item.endTime,
+              location: item.location,
+              description: item.description,
+            })
+          }
+          style={styles.editIcon}
+        >
+          <Ionicons name="pencil-outline" size={20} color="blue" />
+        </TouchableOpacity>
+
+        <Text style={styles.itemText}>{item.name}</Text>
+        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={styles.locationText}>Location: {item.location}</Text>
+        <Text style={styles.descriptionText}>Description: {item.description}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+
   const defaultSelectedDate = Object.keys(items).length ? Object.keys(items)[0] : "2025-03-15";
 
   return (
@@ -123,6 +186,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  editIcon: {
+    position: "absolute",
+    right: 40,
+    top: 10,
+    zIndex: 10,
+  },
   itemText: {
     color: COLORS.PRIMARY,
     fontWeight: "bold",
@@ -132,6 +201,22 @@ const styles = StyleSheet.create({
     color: "#555",
     fontSize: 14,
     marginTop: 4,
+  },
+  locationText: {
+    color: "#777",
+    fontSize: 14,
+    marginTop: 2,
+  },
+  descriptionText: {
+    color: "#777",
+    fontSize: 14,
+    marginTop: 2,
+  },
+  deleteIcon: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 10,
   },
   fab: {
     position: "absolute",

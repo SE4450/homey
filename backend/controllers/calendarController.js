@@ -249,3 +249,47 @@ exports.deleteEvent = async (req, res) => {
         });
     }
 };
+
+exports.getUpcomingEvents = async (req, res) => {
+    try {
+        const now = new Date();
+        const twoDaysLater = new Date(now);
+        twoDaysLater.setDate(now.getDate() + 2);
+
+        const events = await CalendarEvent.findAll({
+            where: {
+                eventDate: {
+                    [Op.between]: [now.toISOString().split('T')[0], twoDaysLater.toISOString().split('T')[0]]
+                }
+            },
+            include: [{
+                model: User,
+                as: "user",
+                attributes: ["id", "firstName", "lastName"]
+            }]
+        });
+
+        if (!events.length) {
+            return res.status(404).json({
+                status: "error",
+                message: "No upcoming events within 48 hours",
+                data: [],
+                errors: []
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: `${events.length} event(s) within 48 hours found`,
+            data: events,
+            errors: []
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "error",
+            message: "An error occurred while fetching upcoming events",
+            data: [],
+            errors: [err.message]
+        });
+    }
+};

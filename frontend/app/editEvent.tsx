@@ -6,31 +6,52 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Platform,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useNavigation } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
-import { useAuth } from "./context/AuthContext";
 
-const AddEvent = () => {
-  const router = useRouter();
+const EditEvent = () => {
   const navigation = useNavigation();
-  const { post, loading, error } = useAxios();
-  const { userId } = useAuth();
+  const route = useRoute();
+  const { put, loading, error } = useAxios();
 
-  const [title, setTitle] = useState("");
-  const [eventDate, setEventDate] = useState(new Date());
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
+  // Destructure the event parameters passed from calendar.tsx
+  const {
+    id,
+    title: initialTitle,
+    eventDate: initialEventDate,
+    startTime: initialStartTime,
+    endTime: initialEndTime,
+    location: initialLocation,
+    description: initialDescription,
+  } = route.params as {
+    id: number;
+    title: string;
+    eventDate: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    description: string;
+  };
 
-  // Hide bottom navbar when the component is focused
+  // Helper function to combine the event date and time string into a Date object
+  const parseDateTime = (dateStr: string, timeStr: string): Date => {
+    return new Date(`${dateStr}T${timeStr}:00`);
+  };
+
+  // Set initial states from the route parameters
+  const [title, setTitle] = useState(initialTitle);
+  const [eventDate, setEventDate] = useState(new Date(initialEventDate));
+  const [startTime, setStartTime] = useState(parseDateTime(initialEventDate, initialStartTime));
+  const [endTime, setEndTime] = useState(parseDateTime(initialEventDate, initialEndTime));
+  const [location, setLocation] = useState(initialLocation);
+  const [description, setDescription] = useState(initialDescription);
+
+  // Hide the bottom navbar when this component is focused
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
@@ -45,7 +66,8 @@ const AddEvent = () => {
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
-  const handleCreateEvent = async () => {
+  // Handler for updating the event
+  const handleUpdateEvent = async () => {
     if (!title || !eventDate) {
       Alert.alert("Error", "Title and Event Date are required");
       return;
@@ -58,13 +80,12 @@ const AddEvent = () => {
       endTime: formatTime(endTime),
       location,
       description,
-      userId,
     };
 
-    const result = await post("/api/calendar", data);
+    const result = await put(`/api/calendar/${id}`, data);
 
     if (result) {
-      Alert.alert("Success", "Event created successfully");
+      Alert.alert("Success", "Event updated successfully");
       navigation.goBack();
     } else if (error) {
       Alert.alert("Error", error);
@@ -76,7 +97,9 @@ const AddEvent = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ marginTop: 50 }}>
           <View style={styles.form}>
-            {/* Title */}
+            {/* Heading */}
+            <Text style={styles.heading}>Edit Event</Text>
+            {/* Event Title */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Event Title</Text>
               <TextInput
@@ -86,8 +109,7 @@ const AddEvent = () => {
                 placeholder="Enter event title"
               />
             </View>
-
-            {/* Date Picker */}
+            {/* Date and Time Pickers */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Date (YYYY-MM-DD)</Text>
               <DateTimePicker
@@ -95,7 +117,10 @@ const AddEvent = () => {
                 mode="date"
                 display="default"
                 onChange={(event, selectedDate) => {
-                  if (selectedDate) setEventDate(selectedDate);
+                  if (selectedDate) {
+                    setEventDate(selectedDate);
+                    // Optionally, you can also update startTime and endTime if needed
+                  }
                 }}
                 textColor="black"
               />
@@ -128,7 +153,6 @@ const AddEvent = () => {
                 </View>
               </View>
             </View>
-
             {/* Location */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Location</Text>
@@ -139,7 +163,6 @@ const AddEvent = () => {
                 placeholder="Enter location"
               />
             </View>
-
             {/* Description */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Description</Text>
@@ -153,15 +176,14 @@ const AddEvent = () => {
               />
             </View>
           </View>
-
-          {/* Save Button */}
+          {/* Update Event Button */}
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={handleCreateEvent}
+            onPress={handleUpdateEvent}
             disabled={loading}
           >
             <Text style={styles.saveButtonText}>
-              {loading ? "Saving..." : "Save Event"}
+              {loading ? "Updating..." : "Update Event"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -170,7 +192,7 @@ const AddEvent = () => {
   );
 };
 
-export default AddEvent;
+export default EditEvent;
 
 const styles = StyleSheet.create({
   form: {
@@ -178,6 +200,13 @@ const styles = StyleSheet.create({
   },
   formItem: {
     marginBottom: 15,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#333",
   },
   input: {
     height: 40,
@@ -191,12 +220,12 @@ const styles = StyleSheet.create({
   },
   inlineTimeContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start", // Align to left side
+    justifyContent: "flex-start",
     marginTop: 10,
   },
   timeWrapper: {
     marginRight: 20,
-    alignItems: "flex-start", // Align each picker to left side
+    alignItems: "flex-start",
   },
   label: {
     fontSize: 14,

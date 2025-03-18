@@ -25,11 +25,12 @@ const COLORS = {
 
 export default function HomeScreen() {
   const [user, setUser] = useState<any>({});
-  const [inventoryAlert, setInventoryAlert] = useState([] as Array<{itemName: String}>);
+  const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
   const { userToken, userId, logout } = useAuth();
   const { get, error } = useAxios();
   const router = useRouter();
   const isFocused = useIsFocused();
+  const [upcomingEvents, setUpcomingEvents] = useState([] as Array<{ id: number; title: string; eventDate: string; startTime?: string; endTime?: string }>);
 
   useEffect(() => {
     if (error) {
@@ -54,9 +55,10 @@ export default function HomeScreen() {
   }, [userToken]);
 
   useEffect(() => {
-    if(isFocused) { 
+    if (isFocused) {
       lowInventoryAlert();
-  } 
+      fetchUpcomingEvents();
+    }
   }, [isFocused]);
 
   const handleNavigation = (path: any, params = {}) => {
@@ -68,15 +70,31 @@ export default function HomeScreen() {
     router.push("/login");
   };
 
+  const fetchUpcomingEvents = async () => {
+    setUpcomingEvents([]);
+
+    const response = await get<any>("/api/calendar/upcoming");
+
+    if (response) {
+      setUpcomingEvents(response.data.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        eventDate: event.eventDate,
+        startTime: event.startTime,
+        endTime: event.endTime
+      })));
+    }
+  };
+
   const lowInventoryAlert = async () => {
 
     setInventoryAlert([]);
 
     const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
 
-    if(response) {
-      response.data.forEach((item: {itemId: Number, houseId: Number, itemName: String, quantity: Number}) => {
-      setInventoryAlert(l => [...l, {itemName: item.itemName}])
+    if (response) {
+      response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
+        setInventoryAlert(l => [...l, { itemName: item.itemName }])
       })
     }
   }
@@ -92,44 +110,29 @@ export default function HomeScreen() {
           Welcome, {user.firstName} {user.lastName}
         </Text>
         <Text style={styles.heading}>Homeys</Text>
-        { 
+        {
           inventoryAlert.length != 0 &&
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
             <Text style={styles.alertHeader}>Low Inventory:</Text>
             {
-              inventoryAlert.map((item) => <Text key={item.itemName+"textnode"} style={styles.alertText}>{item.itemName}</Text>)
+              inventoryAlert.map((item) => <Text key={item.itemName + "textnode"} style={styles.alertText}>{item.itemName}</Text>)
             }
           </View>
-        }        
+        }
+        {
+          upcomingEvents.length > 0 && (
+            <View style={styles.alertContainer}>
+              <Text style={styles.alertHeading}>Upcoming Events (within 48 hours):</Text>
+              {upcomingEvents.map((event) => (
+                <Text key={event.id} style={styles.alertText}>
+                  {event.title} - {event.eventDate} {event.startTime && `at ${event.startTime}`}
+                </Text>
+              ))}
+            </View>
+          )
+        }
       </View>
-
-      {/*
-      <View style={styles.buttonContainer}>
-        {[
-          { title: "Profile", path: "/profile", params: { username: user.username } },
-          { title: "Lists", path: "/listDisplay" },
-          { title: "Expenses", path: "/expenses" },
-          { title: "Chores", path: "/chores" },
-          { title: "Messages", path: "/contacts" },
-          { title: "Inventory", path: "/inventory"},
-        ].map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
-            onPress={() => handleNavigation(item.path, item.params)}
-          >
-            <Text style={styles.buttonText}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
-          onPress={handleLogout}
-        >
-          <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-      */}
     </ScrollView>
   );
 }

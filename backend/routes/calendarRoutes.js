@@ -12,6 +12,9 @@ const { authenticateUser } = require("../middleware/authenticateUser");
 // Get all events
 router.get("/", authenticateUser(["tenant", "landlord"]), getEvents);
 
+// Get events within 48 hours
+router.get("/upcoming", authenticateUser(["tenant", "landlord"]), getUpcomingEvents);
+
 // Create a new event
 router.post("/", authenticateUser(["tenant", "landlord"]), createEvent);
 

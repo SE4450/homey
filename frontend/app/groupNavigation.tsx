@@ -8,7 +8,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import HomeScreen from "./home";
-import ProfileScreen from "./profile";
 import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
@@ -81,8 +80,6 @@ export default function GroupNavigationScreen() {
             iconName = "inventory";
           } else if (route.name === "Profile") {
             iconName = "account-circle";
-          } else if (route.name === "Reviews") {
-            iconName = "star-rate";
           } else if (route.name === "Calendar") {
             iconName = "calendar-today";
           } else {
@@ -96,14 +93,13 @@ export default function GroupNavigationScreen() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ReviewsScreen} />
       <Tab.Screen name="List" component={ListScreen} />
       <Tab.Screen name="Expenses" component={ExpenseScreen} />
       <Tab.Screen name="Chores" component={ChoresStackScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
-      <Tab.Screen name="Reviews" component={ReviewsScreen} />
     </Tab.Navigator>
   );
 }

@@ -94,19 +94,8 @@ export default function Reviews() {
             <Text style={styles.headerFormat}>Creating a Review For {route.params.reviewName}</Text>
             <Text style={styles.textFormat}>Score:</Text>
             <View style={styles.reviewSectionFormat}>
-                {/*
-                <Button title="1" onPress={() => setReviewScore(1)}></Button>
-                <Button title="2" onPress={() => setReviewScore(2)}></Button>
-                <Button title="3" onPress={() => setReviewScore(3)}></Button>
-                <Button title="4" onPress={() => setReviewScore(4)}></Button>
-                <Button title="5" onPress={() => setReviewScore(5)}></Button>
-                */}
 
-                <StarRating rating={1} starSize={15} onChange={() => setReviewScore(1)}/>
-                <StarRating rating={2} starSize={15} onChange={() => setReviewScore(2)}/>
-                <StarRating rating={3} starSize={15} onChange={() => setReviewScore(3)}/>
-                <StarRating rating={4} starSize={15} onChange={() => setReviewScore(4)}/>
-                <StarRating rating={5} starSize={15} onChange={() => setReviewScore(5)}/>
+                <StarRating rating={reviewScore} onChange={setReviewScore} enableHalfStar={false} />
                 
             </View>
             

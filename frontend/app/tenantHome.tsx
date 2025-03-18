@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    Alert,
+    ActivityIndicator,
+} from "react-native";
 import { useAuth } from "./context/AuthContext";
 import useAxios from "./hooks/useAxios";
 import { useIsFocused } from "@react-navigation/native";
@@ -7,12 +16,14 @@ import useUser from "./hooks/useUser";
 import { useRouter, useNavigation } from "expo-router";
 import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Ionicons } from "@expo/vector-icons";
 
 type TenantHomeScreenNavigationProp = StackNavigationProp<TenantHomeStackParamList, "home">;
 
 export default function TenantHomeScreen() {
     const [groups, setGroups] = useState<any>([]);
-    const [loading, setLoading] = useState(true);
+    const [loadingState, setLoadingState] = useState(true); // custom loading state
+
     const { user, userLoading, userError } = useUser();
     const { logout } = useAuth();
     const { get, error } = useAxios();
@@ -22,8 +33,7 @@ export default function TenantHomeScreen() {
 
     useEffect(() => {
         if (isFocused) {
-            fetchGroups();
-            setLoading(false);
+            loadData();
         }
     }, [isFocused]);
 
@@ -33,8 +43,14 @@ export default function TenantHomeScreen() {
         }
     }, [error]);
 
+    const loadData = async () => {
+        setLoadingState(true);
+        await Promise.all([fetchGroups()]);
+        setLoadingState(false);
+    };
+
     const fetchGroups = async () => {
-        const response = await get<any>("/api/groups");
+        const response = await get<any>("/api/groups/tenant");
         if (response) {
             setGroups(response.data);
         }
@@ -44,8 +60,9 @@ export default function TenantHomeScreen() {
         navigation.navigate("propertySearchResults");
     };
 
+    // When a group card is pressed, navigate into group details (or your group navigation screen)
     const handleNavigateToGroup = (groupId: string) => {
-        router.push("/groupNavigation");
+        router.push({ pathname: "/groupNavigation", params: { groupId, role: "tenant" } });
     };
 
     const handleLogout = async () => {
@@ -53,16 +70,21 @@ export default function TenantHomeScreen() {
         router.push("/login");
     };
 
-    if (userLoading) {
+    if (userLoading || loadingState) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
             </View>
         );
     }
-
     if (userError) return <Text>Error: {userError}</Text>;
     if (!user) return <Text>No user found.</Text>;
+
+    // Group the groups into rows of two
+    const groupRows = [];
+    for (let i = 0; i < groups.length; i += 2) {
+        groupRows.push(groups.slice(i, i + 2));
+    }
 
     return (
         <View style={styles.root}>
@@ -72,6 +94,7 @@ export default function TenantHomeScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.container}>
+                {/* Profile Section */}
                 <View style={styles.profileSection}>
                     <Image
                         style={styles.profileImage}
@@ -80,7 +103,9 @@ export default function TenantHomeScreen() {
                         }}
                     />
                     <View style={styles.profileInfo}>
-                        <Text style={styles.welcomeText}>Welcome {user.firstName}, {user.lastName}</Text>
+                        <Text style={styles.welcomeText}>
+                            Welcome {user.firstName}, {user.lastName}
+                        </Text>
                         <Text style={styles.emailText}>{user.email}</Text>
                     </View>
                 </View>
@@ -90,7 +115,7 @@ export default function TenantHomeScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.mainContent}>
-                    {/* Search for Properties */}
+                    {/* Search for Properties Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Search for Properties</Text>
                         <TouchableOpacity style={styles.createButton} onPress={handleNavigateToSearchProperties}>
@@ -98,23 +123,47 @@ export default function TenantHomeScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {/* View Groups */}
+                    {/* Groups Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Your Groups</Text>
-                        <View style={styles.groupsList}>
-                            {groups.length > 0 ? (
-                                groups.map((group: any) => (
-                                    <TouchableOpacity
-                                        key={group.id}
-                                        style={styles.groupItem}
-                                        onPress={() => handleNavigateToGroup(group.id)}
-                                    >
-                                        <Text style={styles.groupName}>{group.name}</Text>
-                                    </TouchableOpacity>
-                                ))
-                            ) : (
-                                <Text style={styles.noGroupsText}>You are not in any groups.</Text>
-                            )}
+                        <View style={styles.groupsGrid}>
+                            {groupRows.map((row, rowIndex) => (
+                                <View key={rowIndex} style={styles.groupRow}>
+                                    {row.map((group: any) => (
+                                        <TouchableOpacity
+                                            key={group.id}
+                                            style={styles.groupCard}
+                                            onPress={() => handleNavigateToGroup(group.id)}
+                                        >
+                                            <Text style={styles.groupCardTitle}>{group.name}</Text>
+                                            {group.property && group.property.exteriorImage ? (
+                                                <Image
+                                                    style={styles.groupPropertyImage}
+                                                    source={{ uri: group.property.exteriorImage }}
+                                                />
+                                            ) : (
+                                                <View style={styles.noImagePlaceholder}>
+                                                    <Text style={styles.noImageText}>No Image</Text>
+                                                </View>
+                                            )}
+                                            {group.property && (
+                                                <View style={styles.groupPropertyDetails}>
+                                                    <Text style={styles.groupPropertyName}>{group.property.name}</Text>
+                                                    <Text style={styles.groupPropertyAddress}>
+                                                        {group.property.address}, {group.property.city}
+                                                    </Text>
+                                                    {group.landlord && (
+                                                        <Text style={styles.groupLandlord}>
+                                                            Landlord: {group.landlord.firstName} {group.landlord.lastName}
+                                                        </Text>
+                                                    )}
+                                                </View>
+                                            )}
+                                        </TouchableOpacity>
+                                    ))}
+                                    {row.length === 1 && <View style={[styles.groupCard, { width: "48%" }]} />}
+                                </View>
+                            ))}
                         </View>
                     </View>
                 </View>
@@ -215,23 +264,99 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "600",
     },
-    groupsList: {
-        gap: 10,
+    groupsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        gap: 15,
     },
-    groupItem: {
-        padding: 15,
-        backgroundColor: "#f9f9f9",
-        borderRadius: 6,
+    groupRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 15,
+    },
+    groupCard: {
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        width: "48%",
+        marginBottom: 15,
+        elevation: 3,
+        padding: 10,
+        alignItems: "center",
+    },
+    groupCardTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
         textAlign: "center",
     },
-    groupName: {
+    groupPropertyImage: {
+        width: "100%",
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    noImagePlaceholder: {
+        width: "100%",
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    noImageText: {
+        color: "#666",
         fontSize: 16,
-        fontWeight: "500",
-        textAlign: "center",
     },
-    noGroupsText: {
+    groupPropertyDetails: {
+        alignItems: "center",
+    },
+    groupPropertyName: {
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    groupPropertyAddress: {
         fontSize: 14,
         color: "#666",
-        textAlign: "center",
+    },
+    groupLandlord: {
+        fontSize: 14,
+        color: "#666",
+        marginTop: 5,
+    },
+    // (Properties section styles remain unchanged)
+    propertiesGrid: {},
+    propertyRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 15,
+    },
+    propertyCard: {
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+        overflow: "hidden",
+        width: "48%",
+        marginBottom: 15,
+    },
+    propertyImage: {
+        width: "100%",
+        height: 150,
+    },
+    propertyDetails: {
+        padding: 15,
+        gap: 8,
+    },
+    propertyName: {
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    propertyAddress: {
+        fontSize: 14,
+        color: "#666",
+    },
+    propertyCity: {
+        fontSize: 14,
+        color: "#666",
     },
 });

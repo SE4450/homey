@@ -9,7 +9,12 @@ export type ReviewStackParamList = {
 
 const ReviewStack = createStackNavigator<ReviewStackParamList>();
 
-export default function ReviewStackScreen() {
+type ReviewScreenProps = {
+    groupId: string;
+    role: string;
+};
+
+export default function ReviewStackScreen({ groupId, role }: ReviewScreenProps) {
     return (
         <ReviewStack.Navigator>
             <ReviewStack.Screen name="reviewSelection" component={reviewSelectScreen} options={{

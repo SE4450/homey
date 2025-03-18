@@ -39,8 +39,12 @@ const styles = StyleSheet.create({
     }
 });
 
+type InventoryScreenProps = {
+    groupId: string;
+    role: string;
+};
 
-export default function Inventory() {
+export default function Inventory({ groupId, role }: InventoryScreenProps) {
     //variables
     const [inventoryItems, setInventoryItems] = useState([] as Array<{ itemId: Number, itemName: String, quantity: Number }>);
     const [item, setItem] = useState("");

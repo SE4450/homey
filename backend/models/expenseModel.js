@@ -1,15 +1,23 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-const User = require("./userModel");
+const Group = require("./groupModel"); // Import Group model
 
 const Expense = sequelize.define("Expense", {
     id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
+        primaryKey: true,
     },
-    expenseName: {
+    groupId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: "groups",
+            key: "id",
+        },
+        onDelete: "CASCADE",
+    },
+    description: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -17,24 +25,25 @@ const Expense = sequelize.define("Expense", {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
-    owedTo: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: User,
-            key: "id",
-        },
-    },
     paidBy: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: User,
+            model: "users",
+            key: "id",
+        },
+    },
+    owedTo: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: "users",
             key: "id",
         },
     },
 }, {
-    timestamps: true
+    timestamps: true,
+    tableName: "expenses",
 });
 
 module.exports = Expense;

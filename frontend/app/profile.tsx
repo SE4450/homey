@@ -15,42 +15,42 @@ const COLORS = {
     TEXT: "#333333",
     LIGHT_GRAY: "#F5F5F5",
     LOGOUT: "#D32F2F",
-  };
+};
 
 //stylesheet for the component
 const styles = StyleSheet.create({
-    profilePopup : {
+    profilePopup: {
         borderColor: "black",
         borderWidth: 1,
         padding: 10,
         position: "fixed",
         backgroundColor: "white"
     },
-    textAreaFormat : {
+    textAreaFormat: {
         height: 30,
         width: 150,
         marginBottom: 12,
         borderWidth: 1,
         backgroundColor: "white"
-        
+
     },
-    accountFormat : {
+    accountFormat: {
         flexDirection: "row",
         padding: 10
     },
 
     container: {
-      backgroundColor: 'white',
-      padding: 16,
+        backgroundColor: 'white',
+        padding: 16,
     },
     dropdown: {
-      height: 30,
-      width:150,
-      borderColor: 'gray',
-      borderWidth: 0.5,
-      borderRadius: 8,
-      paddingHorizontal: 8,
-      backgroundColor: "white"
+        height: 30,
+        width: 150,
+        borderColor: 'gray',
+        borderWidth: 0.5,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        backgroundColor: "white"
     },
     logoutContainer: {
         width: "100%",
@@ -62,15 +62,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 15,
         alignItems: "center",
-      },
-      buttonText: {
+    },
+    buttonText: {
         fontSize: 16,
         fontWeight: "bold",
         color: COLORS.WHITE,
-      },
+    },
 });
 
-export default function Profile() {
+type ProfileScreenProps = {
+    groupId: string;
+    role: string;
+};
+
+export default function Profile({ groupId, role }: ProfileScreenProps) {
 
     const [cleaningValue, setCleaningValue] = useState("");
     const [noiseValue, setNoiseValue] = useState("");
@@ -93,19 +98,19 @@ export default function Profile() {
     }, []);
 
     useEffect(() => {
-    const fetchUser = async () => {
-        const response = await get<any>(`/api/users/user/${userId}`);
-        if (response) {
-        setUser(response.data[0]);
-        }
-    };
-    fetchUser();
+        const fetchUser = async () => {
+            const response = await get<any>(`/api/users/user/${userId}`);
+            if (response) {
+                setUser(response.data[0]);
+            }
+        };
+        fetchUser();
     }, []);
 
     const handleLogout = async () => {
         await logout();
         router.push("/login");
-      };
+    };
 
     const getProfile = async () => {
         const body = { id: userId };
@@ -180,7 +185,7 @@ export default function Profile() {
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
                     onPress={handleLogout}
-                    >
+                >
                     <Text style={[styles.buttonText, { color: COLORS.WHITE }]}>Logout</Text>
                 </TouchableOpacity>
             </View>

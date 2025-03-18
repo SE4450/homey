@@ -2,17 +2,14 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
-import ExpenseRow from "./components/expenseRow"; // Import the new component
+import ExpenseRow from "./components/expenseRow";
 
-interface Expense {
-    id: number;
-    expenseName: string;
-    amount: number;
-    owedTo: number;
-    paidBy: number;
-}
+type ExpenseScreenProps = {
+    groupId: string;
+    role: string;
+};
 
-export default function ExpensesScreen() {
+export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [payeeId, setPayeeId] = useState("");
@@ -31,8 +28,8 @@ export default function ExpensesScreen() {
     // Fetch expenses where the user is the payee (owed to the user) or the payer (user owes)
     const fetchExpenses = async () => {
         try {
-            const responseOwed = await get<any>(`/api/expenses?owedTo=${userId}`);
-            const responseOwe = await get<any>(`/api/expenses?paidBy=${userId}`);
+            const responseOwed = await get<any>(`/api/expenses/${groupId}?owedTo=${userId}`);
+            const responseOwe = await get<any>(`/api/expenses/${groupId}?paidBy=${userId}`);
 
             if (responseOwed) {
                 setExpensesOwed(responseOwed.data); // Ensure the state is updated correctly
@@ -56,6 +53,7 @@ export default function ExpensesScreen() {
         }
         try {
             const response = await post("/api/expenses", {
+                groupId: groupId,
                 expenseName: name,
                 amount: parseFloat(amount),
                 owedTo: userId,

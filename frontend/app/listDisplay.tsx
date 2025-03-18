@@ -6,7 +6,7 @@ import { useAuth } from "../app/context/AuthContext";
 import Lists from "./components/Lists";
 
 const styles = StyleSheet.create({
-    textAreaFormat : {
+    textAreaFormat: {
         height: 40,
         margin: 12,
         borderWidth: 1,
@@ -14,13 +14,13 @@ const styles = StyleSheet.create({
         backgroundColor: "white"
     },
     displayedLists: {
-        
+
     },
-    listFormat : {
+    listFormat: {
         width: 200,
         borderWidth: 2,
         backgroundColor: "white",
-        
+
     },
     textFormat: {
         fontSize: 40,
@@ -28,14 +28,19 @@ const styles = StyleSheet.create({
     }
 });
 
-export default function ListDisplay() {
+type ListScreenProps = {
+    groupId: string;
+    role: string;
+};
+
+export default function ListDisplay({ groupId, role }: ListScreenProps) {
     const [listView, setListView] = useState(true);
     const [list, setList] = useState(false);
     const [listName, setListName] = useState("" as String);
     const [createdList, setCreatedList] = useState("" as String);
     const [listID, setListID] = useState(0 as Number);
     //variable that will hold the names of all the user created lists
-    const [lists, setLists] = useState([] as Array<{name: String, id: Number}>);
+    const [lists, setLists] = useState([] as Array<{ name: String, id: Number }>);
 
     const { post, get } = useAxios();
     const { userToken, userId } = useAuth();
@@ -48,27 +53,27 @@ export default function ListDisplay() {
     }, []);
 
     //function called in the useEffect to load all the users created lists
-    const usersLists = async() => {
+    const usersLists = async () => {
         //fetch request goes here
         const response = await get<any>(`/api/lists?userId=${userId}`);
 
         //clear the array
         setLists([]);
 
-        if(response) {
-            for(const list of response.data) {
-                setLists(l => [...l, {name: list.listName, id: list.listId}]);
+        if (response) {
+            for (const list of response.data) {
+                setLists(l => [...l, { name: list.listName, id: list.listId }]);
             }
         }
     }
 
     //function to create a new list
-    const createList = async() => {
-        if(createdList != "") {
+    const createList = async () => {
+        if (createdList != "") {
             const body = { userId: userId, listName: createdList }
             const response = await post<any>("/api/lists/createList", body)
 
-            if(response) {
+            if (response) {
                 usersLists();
             }
         }
@@ -76,11 +81,11 @@ export default function ListDisplay() {
             alert("You must add a name for a list");
         }
         setCreatedList("");
-        
+
     }
 
     //function for the delete alert
-    const deleteConfirmation = async(listId: Number, listName: String) => {
+    const deleteConfirmation = async (listId: Number, listName: String) => {
         Alert.alert('Delete List', `Do you want to delete the list ${listName}`, [
             {
                 text: "Yes",
@@ -93,13 +98,13 @@ export default function ListDisplay() {
     }
 
     //function to delete a list
-    const deleteList = async(listId: Number) => {
+    const deleteList = async (listId: Number) => {
 
         const body = { listId: listId }
 
         const response = await post<any>("/api/lists/deleteList", body);
 
-        if(response) {
+        if (response) {
             usersLists();
             alert("The list has been deleted");
         }
@@ -107,11 +112,11 @@ export default function ListDisplay() {
             alert("You must add a name for a list");
         }
         setCreatedList("");
-        
+
     }
 
     //function to display the selected list
-    const displayList = async(ListName: String, ID: Number) => {
+    const displayList = async (ListName: String, ID: Number) => {
         setListName(ListName);
         setListID(ID);
         setListView(!listView);
@@ -120,18 +125,18 @@ export default function ListDisplay() {
 
 
 
-    return(
+    return (
         <ScrollView>
 
             {
-                listView && 
+                listView &&
                 <View>
                     <Text>New List Name:</Text>
                     <TextInput style={styles.textAreaFormat} placeholder="Type New List Entry Here" onChangeText={text => setCreatedList(text)}></TextInput>
                     <Button title="Create List" onPress={() => createList()}></Button>
-                    {lists.map((list) => 
-                        <View style={styles.displayedLists} key={list.name+"view"}>
-                            <Pressable key={list.name+"button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)} onLongPress={() => deleteConfirmation(list.id, list.name)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>
+                    {lists.map((list) =>
+                        <View style={styles.displayedLists} key={list.name + "view"}>
+                            <Pressable key={list.name + "button"} style={styles.listFormat} onPress={() => displayList(list.name, list.id)} onLongPress={() => deleteConfirmation(list.id, list.name)}><Text style={styles.textFormat}>{list.name}</Text></Pressable>
                         </View>
                     )}
                 </View>
@@ -141,7 +146,7 @@ export default function ListDisplay() {
                 list &&
                 <View>
                     <Pressable onPress={() => displayList("", 0)}><Text>Back</Text></Pressable>
-                    <Lists name={listName} id={listID} houseId={userId}/>
+                    <Lists name={listName} id={listID} houseId={userId} />
                 </View>
             }
         </ScrollView>

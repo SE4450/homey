@@ -529,6 +529,42 @@ ALTER SEQUENCE public."Users_id_seq" OWNED BY public."Users".id;
 
 
 --
+-- Name: group_participants; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.group_participants (
+    id integer NOT NULL,
+    "groupId" integer NOT NULL,
+    "tenantId" integer NOT NULL,
+    "joinedAt" timestamp with time zone
+);
+
+
+ALTER TABLE public.group_participants OWNER TO admin;
+
+--
+-- Name: group_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.group_participants_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.group_participants_id_seq OWNER TO admin;
+
+--
+-- Name: group_participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.group_participants_id_seq OWNED BY public.group_participants.id;
+
+
+--
 -- Name: groups; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -760,6 +796,13 @@ ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Use
 
 
 --
+-- Name: group_participants id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.group_participants ALTER COLUMN id SET DEFAULT nextval('public.group_participants_id_seq'::regclass);
+
+
+--
 -- Name: groups id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -892,6 +935,22 @@ ALTER TABLE ONLY public."Users"
 
 
 --
+-- Name: group_participants group_participants_groupId_tenantId_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.group_participants
+    ADD CONSTRAINT "group_participants_groupId_tenantId_key" UNIQUE ("groupId", "tenantId");
+
+
+--
+-- Name: group_participants group_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.group_participants
+    ADD CONSTRAINT group_participants_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: groups groups_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -928,7 +987,7 @@ ALTER TABLE ONLY public.stores
 --
 
 ALTER TABLE ONLY public."Chores"
-    ADD CONSTRAINT "Chores_assignedTo_fkey" FOREIGN KEY ("assignedTo") REFERENCES public."Users"(id);
+    ADD CONSTRAINT "Chores_assignedTo_fkey" FOREIGN KEY ("assignedTo") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -977,6 +1036,22 @@ ALTER TABLE ONLY public."Participants"
 
 ALTER TABLE ONLY public."Participants"
     ADD CONSTRAINT "Participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: group_participants group_participants_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.group_participants
+    ADD CONSTRAINT "group_participants_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: group_participants group_participants_tenantId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.group_participants
+    ADD CONSTRAINT "group_participants_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

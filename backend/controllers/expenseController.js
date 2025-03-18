@@ -1,60 +1,37 @@
-const { Expense, User } = require("../models/associations");
-const { ValidationError } = require("sequelize");
+const { Expense, User, Group } = require("../models"); // Ensure models are imported
 
+/**
+ * Add an Expense to a Group
+ */
 exports.addExpense = async (req, res) => {
     try {
-        const { expenseName, amount, owedTo, paidBy } = req.body;
+        const { groupId, description, amount, owedTo, paidBy } = req.body;
 
         // Validate required fields
-        const errors = [];
-        if (!expenseName || expenseName.trim().length === 0) {
-            errors.push("Expense name is required.");
-        }
-        if (!amount || isNaN(amount) || amount <= 0) {
-            errors.push("Amount must be a positive number.");
-        }
-        if (!owedTo) {
-            errors.push("OwedTo (user ID) is required.");
-        }
-        if (!paidBy) {
-            errors.push("PaidBy (user ID) is required.");
-        }
-        if (owedTo === paidBy) {
-            errors.push("OwedTo and PaidBy cannot be the same user.");
-        }
-
-        if (errors.length > 0) {
+        if (!groupId || !description || !amount || !owedTo || !paidBy) {
             return res.status(400).json({
                 status: "error",
-                message: "Validation error(s)",
+                message: "Missing required fields",
                 data: [],
-                errors,
+                errors: ["groupId, description, amount, owedTo, and paidBy are required"],
             });
         }
 
-        // Ensure users exist
-        const [owedToUser, paidByUser] = await Promise.all([
-            User.findByPk(owedTo),
-            User.findByPk(paidBy),
-        ]);
-        if (!owedToUser) {
-            errors.push(`User with ID ${owedTo} does not exist.`);
-        }
-        if (!paidByUser) {
-            errors.push(`User with ID ${paidBy} does not exist.`);
-        }
-        if (errors.length > 0) {
+        // Ensure the group exists
+        const group = await Group.findByPk(groupId);
+        if (!group) {
             return res.status(404).json({
                 status: "error",
-                message: "User not found",
-                data: [],
-                errors,
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
             });
         }
 
         // Create the expense
         const expense = await Expense.create({
-            expenseName,
+            groupId,
+            description,
             amount,
             owedTo,
             paidBy,
@@ -66,48 +43,41 @@ exports.addExpense = async (req, res) => {
             data: expense,
             errors: [],
         });
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return res.status(400).json({
-                status: "error",
-                message: "Validation error(s)",
-                data: [],
-                errors: err.errors.map((e) => e.message),
-            });
-        }
+    } catch (error) {
         res.status(500).json({
             status: "error",
-            message: "An unexpected error occurred while adding the expense",
+            message: "Failed to add expense",
             data: [],
-            errors: [err.message],
+            errors: [error.message],
         });
     }
 };
 
+/**
+ * Get all Expenses for a Group
+ */
 exports.getExpenses = async (req, res) => {
     try {
-        const { owedTo, paidBy } = req.query;
+        const { groupId } = req.params;
+        const { owedBy, paidBy } = req.query; // Query params for filtering
 
-        // Validation: Ensure at least one filter is provided
-        if (!owedTo && !paidBy) {
-            return res.status(400).json({
+        // Ensure the group exists
+        const group = await Group.findByPk(groupId);
+        if (!group) {
+            return res.status(404).json({
                 status: "error",
-                message: "At least one of 'owedTo' or 'paidBy' must be provided as a query parameter",
-                data: [],
-                errors: ["Missing filter criteria (owedTo or paidBy)"],
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
             });
         }
 
-        // Build the filter condition
-        const whereClause = {};
-        if (owedTo) {
-            whereClause.owedTo = owedTo;
-        }
-        if (paidBy) {
-            whereClause.paidBy = paidBy;
-        }
+        // Build query conditions
+        let whereClause = { groupId };
+        if (owedBy) whereClause.owedTo = owedBy;
+        if (paidBy) whereClause.paidBy = paidBy;
 
-        // Fetch the expenses
+        // Fetch expenses
         const expenses = await Expense.findAll({
             where: whereClause,
             include: [
@@ -116,27 +86,18 @@ exports.getExpenses = async (req, res) => {
             ],
         });
 
-        if (expenses.length === 0) {
-            return res.status(404).json({
-                status: "error",
-                message: "No expenses found for the provided filter(s)",
-                data: [],
-                errors: [`No expenses found for filter criteria: ${JSON.stringify(whereClause)}`],
-            });
-        }
-
         res.status(200).json({
             status: "success",
             message: `${expenses.length} expense(s) found`,
             data: expenses,
             errors: [],
         });
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({
             status: "error",
-            message: "An unexpected error occurred while fetching expenses",
+            message: "Failed to retrieve expenses",
             data: [],
-            errors: [err.message],
+            errors: [error.message],
         });
     }
 };

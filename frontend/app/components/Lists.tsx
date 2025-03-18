@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   actionButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#333",
     fontWeight: "500",
   },
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   deleteButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#d32f2f",
     fontWeight: "500",
   },
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   purchaseButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#388e3c",
     fontWeight: "500",
   },
@@ -353,7 +353,7 @@ export default function Lists(props: {
       <Text style={styles.inputLabel}>New Entry:</Text>
       <TextInput
         style={styles.textAreaFormat}
-        placeholder="Type New List Entry Here"
+        placeholder="Enter Item Name"
         value={item}
         onChangeText={(text) => setItem(text)}
       />

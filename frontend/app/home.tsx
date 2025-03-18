@@ -5,13 +5,11 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
-  TouchableOpacity,
   ScrollView
 } from "react-native";
 import useAxios from "./hooks/useAxios";
-import { useAuth } from "./context/AuthContext";
-import { useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
+import useUser from "./hooks/useUser";
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -24,11 +22,9 @@ const COLORS = {
 };
 
 export default function HomeScreen() {
-  const [user, setUser] = useState<any>({});
   const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
-  const { userToken, userId, logout } = useAuth();
+  const { user, userLoading, userError } = useUser();
   const { get, error } = useAxios();
-  const router = useRouter();
   const isFocused = useIsFocused();
   const [upcomingEvents, setUpcomingEvents] = useState([] as Array<{ id: number; title: string; eventDate: string; startTime?: string; endTime?: string }>);
 
@@ -39,36 +35,11 @@ export default function HomeScreen() {
   }, [error]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await get<any>(`/api/users/user/${userId}`);
-      if (response) {
-        setUser(response.data[0]);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (!userToken) {
-      router.push("/login");
-    }
-  }, [userToken]);
-
-  useEffect(() => {
     if (isFocused) {
       lowInventoryAlert();
       fetchUpcomingEvents();
     }
   }, [isFocused]);
-
-  const handleNavigation = (path: any, params = {}) => {
-    router.push({ pathname: path, params });
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
 
   const fetchUpcomingEvents = async () => {
     setUpcomingEvents([]);
@@ -90,18 +61,18 @@ export default function HomeScreen() {
 
     setInventoryAlert([]);
 
-    const response = await get<any>(`/api/inventory/getLowItem?houseId=${userId}&quantity=1&quantity=0`);
+    const response = await get<any>(`/api/inventory/getLowItem?houseId=${user.id}&quantity=1&quantity=0`);
 
     if (response) {
       response.data.forEach((item: { itemId: Number, houseId: Number, itemName: String, quantity: Number }) => {
         setInventoryAlert(l => [...l, { itemName: item.itemName }])
-      })
+      });
     }
   }
 
-  if (!userToken) {
-    return <ActivityIndicator size="large" color={COLORS.PRIMARY} />;
-  }
+  if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
+  if (userError) return <Text>Error: {userError}</Text>;
+  if (!user) return <Text>No user found.</Text>;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

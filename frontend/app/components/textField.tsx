@@ -1,5 +1,5 @@
 import React from "react";
-import { TextInput, StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { TextInput, StyleSheet, TextStyle, ViewStyle, KeyboardTypeOptions } from "react-native";
 
 type TextFieldProps = {
     placeholder?: string;
@@ -10,6 +10,8 @@ type TextFieldProps = {
     value?: string;
     onChangeText: (text: string) => void;
     secureTextEntry?: boolean;
+    disabled?: boolean;
+    keyboardType?: KeyboardTypeOptions; // New optional prop for numeric input
 };
 
 const TextField: React.FC<TextFieldProps> = ({
@@ -18,15 +20,19 @@ const TextField: React.FC<TextFieldProps> = ({
     value = "",
     onChangeText,
     secureTextEntry = false,
+    disabled = false,
+    keyboardType = "default", // Default keyboard type
 }) => {
     return (
         <TextInput
-            style={[styles.input, customStyle?.inputStyle]}
+            style={[styles.input, customStyle?.inputStyle, disabled && styles.disabledInput]}
             placeholder={placeholder}
             value={value}
             onChangeText={onChangeText}
             placeholderTextColor="#888"
             secureTextEntry={secureTextEntry}
+            editable={!disabled}
+            keyboardType={keyboardType} // Apply keyboardType prop
         />
     );
 };
@@ -39,6 +45,10 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 8,
         fontSize: 16,
+    },
+    disabledInput: {
+        backgroundColor: "#e0e0e0",
+        color: "#a0a0a0",
     },
 });
 

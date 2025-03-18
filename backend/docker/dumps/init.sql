@@ -70,6 +70,18 @@ CREATE TYPE public."enum_Profiles_noiseLevel" AS ENUM (
 ALTER TYPE public."enum_Profiles_noiseLevel" OWNER TO admin;
 
 --
+-- Name: enum_Reviews_reviewType; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_Reviews_reviewType" AS ENUM (
+    'user',
+    'property'
+);
+
+
+ALTER TYPE public."enum_Reviews_reviewType" OWNER TO admin;
+
+--
 -- Name: enum_Users_role; Type: TYPE; Schema: public; Owner: admin
 --
 
@@ -81,6 +93,27 @@ CREATE TYPE public."enum_Users_role" AS ENUM (
 
 
 ALTER TYPE public."enum_Users_role" OWNER TO admin;
+
+--
+-- Name: enum_properties_propertyType; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public."enum_properties_propertyType" AS ENUM (
+    'House',
+    'Apartment',
+    'Condo',
+    'Townhouse',
+    'Duplex',
+    'Studio',
+    'Loft',
+    'Bungalow',
+    'Cabin',
+    'Mobile Home',
+    'Other'
+);
+
+
+ALTER TYPE public."enum_properties_propertyType" OWNER TO admin;
 
 SET default_tablespace = '';
 
@@ -126,6 +159,48 @@ ALTER SEQUENCE public."CalendarEvents_id_seq" OWNER TO admin;
 --
 
 ALTER SEQUENCE public."CalendarEvents_id_seq" OWNED BY public."CalendarEvents".id;
+
+
+--
+-- Name: Chores; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Chores" (
+    id integer NOT NULL,
+    "choreName" character varying(255) NOT NULL,
+    room character varying(255) NOT NULL,
+    "assignedTo" integer,
+    completed boolean DEFAULT false,
+    "houseId" integer,
+    "bannerImage" character varying(255),
+    "dueDate" timestamp with time zone NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Chores" OWNER TO admin;
+
+--
+-- Name: Chores_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Chores_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Chores_id_seq" OWNER TO admin;
+
+--
+-- Name: Chores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Chores_id_seq" OWNED BY public."Chores".id;
 
 
 --
@@ -414,6 +489,46 @@ CREATE TABLE public."Profiles" (
 ALTER TABLE public."Profiles" OWNER TO admin;
 
 --
+-- Name: Reviews; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Reviews" (
+    "reviewId" integer NOT NULL,
+    "reviewType" public."enum_Reviews_reviewType" NOT NULL,
+    "reviewedItemId" integer NOT NULL,
+    "reviewerId" integer NOT NULL,
+    score integer NOT NULL,
+    description character varying(255),
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public."Reviews" OWNER TO admin;
+
+--
+-- Name: Reviews_reviewId_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Reviews_reviewId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Reviews_reviewId_seq" OWNER TO admin;
+
+--
+-- Name: Reviews_reviewId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Reviews_reviewId_seq" OWNED BY public."Reviews"."reviewId";
+
+
+--
 -- Name: Users; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -453,6 +568,128 @@ ALTER SEQUENCE public."Users_id_seq" OWNER TO admin;
 --
 
 ALTER SEQUENCE public."Users_id_seq" OWNED BY public."Users".id;
+
+
+--
+-- Name: groups; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.groups (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    "landlordId" integer NOT NULL,
+    "propertyId" integer,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.groups OWNER TO admin;
+
+--
+-- Name: groups_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.groups_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.groups_id_seq OWNER TO admin;
+
+--
+-- Name: groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.groups_id_seq OWNED BY public.groups.id;
+
+
+--
+-- Name: properties; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.properties (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    address character varying(255) NOT NULL,
+    city character varying(255) NOT NULL,
+    "propertyDescription" text NOT NULL,
+    bedrooms integer NOT NULL,
+    price integer NOT NULL,
+    "propertyType" public."enum_properties_propertyType" NOT NULL,
+    availability boolean DEFAULT true NOT NULL,
+    "landlordId" integer NOT NULL,
+    "exteriorImage" bytea NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.properties OWNER TO admin;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.properties_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.properties_id_seq OWNER TO admin;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.properties_id_seq OWNED BY public.properties.id;
+
+
+--
+-- Name: property_images; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.property_images (
+    id integer NOT NULL,
+    "propertyId" integer NOT NULL,
+    label character varying(255) NOT NULL,
+    image bytea NOT NULL,
+    description text,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.property_images OWNER TO admin;
+
+--
+-- Name: property_images_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.property_images_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.property_images_id_seq OWNER TO admin;
+
+--
+-- Name: property_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.property_images_id_seq OWNED BY public.property_images.id;
 
 
 --
@@ -499,6 +736,13 @@ ALTER SEQUENCE public."stores_itemID_seq" OWNED BY public.stores."itemID";
 --
 
 ALTER TABLE ONLY public."CalendarEvents" ALTER COLUMN id SET DEFAULT nextval('public."CalendarEvents_id_seq"'::regclass);
+
+
+--
+-- Name: Chores id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Chores" ALTER COLUMN id SET DEFAULT nextval('public."Chores_id_seq"'::regclass);
 
 
 --
@@ -551,10 +795,38 @@ ALTER TABLE ONLY public."Participants" ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: Reviews reviewId; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Reviews" ALTER COLUMN "reviewId" SET DEFAULT nextval('public."Reviews_reviewId_seq"'::regclass);
+
+
+--
 -- Name: Users id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Users_id_seq"'::regclass);
+
+
+--
+-- Name: groups id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.groups ALTER COLUMN id SET DEFAULT nextval('public.groups_id_seq'::regclass);
+
+
+--
+-- Name: properties id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties ALTER COLUMN id SET DEFAULT nextval('public.properties_id_seq'::regclass);
+
+
+--
+-- Name: property_images id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images ALTER COLUMN id SET DEFAULT nextval('public.property_images_id_seq'::regclass);
 
 
 --
@@ -570,6 +842,14 @@ ALTER TABLE ONLY public.stores ALTER COLUMN "itemID" SET DEFAULT nextval('public
 
 ALTER TABLE ONLY public."CalendarEvents"
     ADD CONSTRAINT "CalendarEvents_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Chores Chores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Chores"
+    ADD CONSTRAINT "Chores_pkey" PRIMARY KEY (id);
 
 
 --
@@ -637,6 +917,14 @@ ALTER TABLE ONLY public."Profiles"
 
 
 --
+-- Name: Reviews Reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Reviews"
+    ADD CONSTRAINT "Reviews_pkey" PRIMARY KEY ("reviewId");
+
+
+--
 -- Name: Users Users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -661,19 +949,35 @@ ALTER TABLE ONLY public."Users"
 
 
 --
+-- Name: groups groups_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.groups
+    ADD CONSTRAINT groups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: properties properties_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT properties_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: property_images property_images_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images
+    ADD CONSTRAINT property_images_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
-
-
---
--- Name: CalendarEvents CalendarEvents_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."CalendarEvents"
-    ADD CONSTRAINT "CalendarEvents_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -722,6 +1026,38 @@ ALTER TABLE ONLY public."Participants"
 
 ALTER TABLE ONLY public."Participants"
     ADD CONSTRAINT "Participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: groups groups_landlordId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.groups
+    ADD CONSTRAINT "groups_landlordId_fkey" FOREIGN KEY ("landlordId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: groups groups_propertyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.groups
+    ADD CONSTRAINT "groups_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES public.properties(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: properties properties_landlordId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT "properties_landlordId_fkey" FOREIGN KEY ("landlordId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: property_images property_images_propertyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.property_images
+    ADD CONSTRAINT "property_images_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES public.properties(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

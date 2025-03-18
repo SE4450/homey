@@ -33,6 +33,11 @@ const Expense = sequelize.define("Expense", {
             key: "id",
         },
     },
+    completed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 }, {
     timestamps: true
 });

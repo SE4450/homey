@@ -1,5 +1,5 @@
 const { CalendarEvent, User } = require("../models/associations");
-const { ValidationError } = require("sequelize");
+const { ValidationError, Op } = require("sequelize");
 
 // Get all events
 exports.getEvents = async (req, res) => {

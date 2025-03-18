@@ -3,19 +3,21 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  Button,
-  Pressable,
   TouchableOpacity,
 } from "react-native";
 import { useState, useEffect } from "react";
-import { Dropdown } from "react-native-element-dropdown";
+import { StarRatingDisplay } from "react-native-star-rating-widget";
 import { useAuth } from "./context/AuthContext";
-import { useLocalSearchParams } from "expo-router";
-import TextField from "./components/textField";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { ReviewStackParamList } from "./stacks/reviewsStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ReviewScreenNavigationProp = StackNavigationProp<
+  ReviewStackParamList,
+  "mainProfile"
+>;
 
 const COLORS = {
   PRIMARY: "#4a90e2",
@@ -49,6 +51,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: COLORS.WHITE,
     paddingHorizontal: 10,
+  },
+  accountRatingFormat: {
+    alignItems: "center",
+    marginBottom: 30,
   },
   accountFormat: {
     flexDirection: "row",
@@ -88,7 +94,14 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT,
     textAlign: "center",
   },
-  logoutContainer: {
+  scoreHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: COLORS.TEXT,
+    textAlign: "center",
+  },
+  buttonContainer: {
     width: "100%",
     alignItems: "center",
   },
@@ -106,29 +119,30 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Profile() {
+export default function MainProfileDisplay() {
+  const [avgScoreValue, setAvgScoreValue] = useState(0);
   const [cleaningValue, setCleaningValue] = useState("");
   const [noiseValue, setNoiseValue] = useState("");
   const [startSleepValue, setStartSleepValue] = useState("");
   const [endSleepValue, setEndSleepValue] = useState("");
   const [allergiesValue, setAllergiesValue] = useState("");
-  const data = [
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-  ];
 
   const { post, get } = useAxios();
   const [user, setUser] = useState<any>({});
   const { userId, logout } = useAuth();
+  const navigation = useNavigation<ReviewScreenNavigationProp>();
+  const isFocused = useIsFocused();
   const router = useRouter();
-  const navigation = useNavigation();
 
   useEffect(() => {
-    getProfile();
-  }, []);
+    if(isFocused) {
+        getProfile();
+        getAvgUserScore();
+    }
+  }, [isFocused]);
 
   useEffect(() => {
+    //currently needed to get the user id
     const fetchUser = async () => {
       const response = await get<any>(`/api/users/user/${userId}`);
       if (response) {
@@ -166,26 +180,21 @@ export default function Profile() {
     }
   };
 
-  const updateProfile = async () => {
-    const body = {
-      cleaningHabits: cleaningValue,
-      noiseLevel: noiseValue,
-      sleepStart: startSleepValue,
-      sleepEnd: endSleepValue,
-      alergies: allergiesValue,
-    };
-    const response = await post<any>(
-      `/api/profile/updateProfile/${userId}`,
-      body
-    );
+  const getAvgUserScore = async() => {
 
-    if (response) {
-      alert("Profile updated");
+    const response = await get<any>(`/api/reviews?reviewType=user&reviewedItemId=${userId}`);
 
-      //route back to the main page
-      navigation.goBack();
+    if(response){
+      let avgScore = 0;
+      if(response.data.length != 0) {
+        for(let i = 0; i < response.data.length; i++) {
+          avgScore += response.data[i].score;
+        }
+        avgScore = Math.round((avgScore / response.data.length) * 100) / 100
+        setAvgScoreValue(avgScore);
+      }
     }
-  };
+  }
 
   return (
     <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
@@ -193,63 +202,79 @@ export default function Profile() {
         <View>
           <Text style={styles.userHeader}>{user.username}</Text>
         </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Cleaning Habits:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={data}
-            labelField="label"
-            valueField="value"
-            placeholder={cleaningValue || "Select"}
-            value={cleaningValue}
-            onChange={(item) => setCleaningValue(item.value)}
-          />
+        <View style={styles.accountRatingFormat}>
+          <StarRatingDisplay rating={avgScoreValue} starSize={50}/>
+          <Text style={styles.scoreHeader}>Average Rating: {avgScoreValue}</Text>
         </View>
         <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Noise Level:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={data}
-            labelField="label"
-            valueField="value"
-            placeholder={noiseValue || "Select"}
-            value={noiseValue}
-            onChange={(item) => setNoiseValue(item.value)}
-          />
+          <Text style={styles.labelText}>Cleaning Habits: {cleaningValue}</Text>
         </View>
         <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Sleep Start:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="e.g. 8:00"
-            value={startSleepValue}
-            onChangeText={(text) => setStartSleepValue(text)}
-          />
+          <Text style={styles.labelText}>Noise Level: {noiseValue}</Text>
         </View>
         <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Sleep End:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="e.g. 10:00"
-            value={endSleepValue}
-            onChangeText={(text) => setEndSleepValue(text)}
-          />
+          <Text style={styles.labelText}>Sleep Start (A.M.): {startSleepValue}</Text>
         </View>
         <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Allergies:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="List allergies"
-            value={allergiesValue}
-            onChangeText={(text) => setAllergiesValue(text)}
-          />
+          <Text style={styles.labelText}>Sleep End (P.M.): {endSleepValue}</Text>
         </View>
-        <TouchableOpacity style={styles.updateButton} onPress={updateProfile}>
-          <Text style={styles.updateButtonText}>Update Profile</Text>
+        <View style={styles.accountFormat}>
+          <Text style={styles.labelText}>Allergies: {allergiesValue}</Text>
+        </View>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
+          onPress={() => navigation.navigate("editProfile")}
+        >
+          <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.logoutContainer}>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          onPress={() => navigation.navigate("displayReview")}
+        >
+          <Text style={styles.buttonText}>Understand Your Score</Text>
+        </TouchableOpacity>
+      </View>
+
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          onPress={() => navigation.navigate("reviewSelection")}
+        >
+          <Text style={styles.buttonText}>Review Your Roomates</Text>
+        </TouchableOpacity>
+      </View>
+
+
+      {/* THE FOLLOWING 2 VIEWS NEED TO BE UPDATED TO HAVE THE APPROPRIATE LANDLORD ID AND HOUSE ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          onPress={() => navigation.navigate("review", { reviewName: "Landlord", reviewType: "user", itemId: 1 })}
+        >
+          <Text style={styles.buttonText}>Review Your Landlord</Text>
+        </TouchableOpacity>
+      </View>
+
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          onPress={() => navigation.navigate("review", { reviewName: "House", reviewType: "property", itemId: 1 })}
+        >
+          <Text style={styles.buttonText}>Review Your House</Text>
+        </TouchableOpacity>
+      </View>
+
+
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
           onPress={handleLogout}

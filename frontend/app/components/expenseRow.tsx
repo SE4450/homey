@@ -1,37 +1,59 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+// ExpenseRow.tsx
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 interface ExpenseRowProps {
-    expenseName: string;
-    amount: number;
-    userId: number;
-    role: "OwedTo" | "PaidBy"; // "OwedTo" for expenses owed to the user, "PaidBy" for expenses the user owes
+  expense: any;
+  role: "OwedTo" | "PaidBy";
+  onComplete: (expenseId: number) => void;
 }
 
-const ExpenseRow: React.FC<ExpenseRowProps> = ({ expenseName, amount, userId, role }) => {
-    return (
-        <View style={styles.row}>
-            <Text style={styles.cell}>{expenseName}</Text>
-            <Text style={styles.cell}>${amount.toFixed(2)}</Text>
-            <Text style={styles.cell}>
-                {role === "OwedTo" ? `Paid by: ${userId}` : `Owed to: ${userId}`}
-            </Text>
-        </View>
-    );
+const ExpenseRow: React.FC<ExpenseRowProps> = ({ expense, role, onComplete }) => {
+  const [checkmarkOpaque, setCheckmarkOpaque] = useState(false);
+
+  const handleCheckmarkPress = () => {
+    setCheckmarkOpaque(true);
+    onComplete(expense.id);
+  };
+
+  return (
+    <View style={styles.row}>
+      <TouchableOpacity onPress={handleCheckmarkPress}>
+        <Text style={[styles.checkmark, { opacity: checkmarkOpaque ? 1 : 0.5 }]}>
+          ✓
+        </Text>
+      </TouchableOpacity>
+      <View style={styles.details}>
+        <Text style={styles.expenseName}>{expense.expenseName}</Text>
+        <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-    },
-    cell: {
-        flex: 1,
-        textAlign: "left",
-    },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  checkmark: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  details: {
+    flex: 1,
+  },
+  expenseName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  amount: {
+    fontSize: 14,
+    color: "#555",
+  },
 });
 
 export default ExpenseRow;

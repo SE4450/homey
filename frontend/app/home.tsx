@@ -87,6 +87,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const { userToken, userId } = useAuth();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
   useEffect(() => {
     if (error) {
@@ -110,6 +111,7 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await loadData();
+    setLastRefreshed(new Date());
     setRefreshing(false);
   };
 
@@ -400,7 +402,7 @@ export default function HomeScreen() {
                 <Icon
                   name="calendar-month"
                   size={24}
-                  color={COLORS.SECONDARY}
+                  color={COLORS.PRIMARY}
                   style={styles.cardIcon}
                 />
                 <View>
@@ -444,6 +446,10 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
+
+        <Text style={styles.lastRefreshedText}>
+          Last updated: {lastRefreshed.toLocaleTimeString()}
+        </Text>
       </View>
     </ScrollView>
   );
@@ -653,5 +659,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.TEXT + "80",
     marginLeft: 10,
+  },
+  lastRefreshedText: {
+    fontSize: 12,
+    color: COLORS.TEXT + "80",
+    textAlign: "center",
+    marginTop: 5,
+    marginBottom: 10,
   },
 });

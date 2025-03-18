@@ -102,7 +102,6 @@ export default function GroupNavigationScreen() {
       <Tab.Screen name="Chores" component={ChoresStackScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Reviews" component={ReviewsScreen} />
     </Tab.Navigator>

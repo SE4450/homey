@@ -26,6 +26,7 @@ export default function HomeScreen() {
   const { user, userLoading, userError } = useUser();
   const { get, error } = useAxios();
   const isFocused = useIsFocused();
+  const [upcomingEvents, setUpcomingEvents] = useState([] as Array<{ id: number; title: string; eventDate: string; startTime?: string; endTime?: string }>);
 
   useEffect(() => {
     if (error) {
@@ -36,8 +37,25 @@ export default function HomeScreen() {
   useEffect(() => {
     if (isFocused) {
       lowInventoryAlert();
+      fetchUpcomingEvents();
     }
   }, [isFocused]);
+
+  const fetchUpcomingEvents = async () => {
+    setUpcomingEvents([]);
+
+    const response = await get<any>("/api/calendar/upcoming");
+
+    if (response) {
+      setUpcomingEvents(response.data.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        eventDate: event.eventDate,
+        startTime: event.startTime,
+        endTime: event.endTime
+      })));
+    }
+  };
 
   const lowInventoryAlert = async () => {
 
@@ -73,7 +91,18 @@ export default function HomeScreen() {
             }
           </View>
         }
-
+        {
+          upcomingEvents.length > 0 && (
+            <View style={styles.alertContainer}>
+              <Text style={styles.alertHeading}>Upcoming Events:</Text>
+              {upcomingEvents.map((event) => (
+                <Text key={event.id} style={styles.alertText}>
+                  {event.title} - {event.eventDate} {event.startTime && `at ${event.startTime}`}
+                </Text>
+              ))}
+            </View>
+          )
+        }
       </View>
     </ScrollView>
   );

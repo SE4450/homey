@@ -7,6 +7,7 @@ const Participant = require("./participantModel");
 const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
+const CalendarEvent = require("./calendarModel"); // Import CalendarEvent
 const Chore = require("./choresModel");
 //const Review = require("./reviewModel");
 
@@ -30,6 +31,7 @@ Property.hasMany(Group, {
 });
 Group.belongsTo(Property, { foreignKey: "propertyId", as: "property" });
 
+// Existing associations
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
 
@@ -63,6 +65,9 @@ Expense.belongsTo(User, { foreignKey: "paidBy", as: "paidByUser" });
 User.hasMany(Chore, { foreignKey: "assignedTo", as: "assignedChores" });
 Chore.belongsTo(User, { foreignKey: "assignedTo", as: "assignee" });
 
+User.hasMany(CalendarEvent, { foreignKey: "userId", as: "events" });
+CalendarEvent.belongsTo(User, { foreignKey: "userId", as: "user" });
+
 module.exports = {
   User,
   Property,
@@ -73,4 +78,5 @@ module.exports = {
   Profile,
   Expense,
   Chore,
+  CalendarEvent,
 };

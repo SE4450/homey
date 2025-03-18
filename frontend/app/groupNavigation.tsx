@@ -12,8 +12,9 @@ import ProfileScreen from './profile'
 import ListScreen from './listDisplay';
 import ExpenseScreen from './expenses';
 import MessageStackScreen from "./stacks/messagesStack";
+import InventoryScreen from './inventory'
+import CalendarScreen from './calendar'
 import ChoresStackScreen from "./stacks/choresStack";
-import InventoryScreen from "./inventory";
 import ReviewsScreen from "./stacks/reviewsStack";
 
 const Tab = createBottomTabNavigator();
@@ -83,6 +84,9 @@ export default function GroupNavigationScreen() {
           } else if (route.name === "Reviews"){
             iconName = "star-rate";
           }
+          else if (route.name === 'Calendar') {
+            iconName = 'calendar-today';
+          }
           else {
             iconName = "help"; // Fallback icon
           }
@@ -100,6 +104,7 @@ export default function GroupNavigationScreen() {
       <Tab.Screen name="Chores" component={ChoresStackScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Reviews" component={ReviewsScreen} />
     </Tab.Navigator>
   );

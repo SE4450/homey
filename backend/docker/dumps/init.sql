@@ -120,6 +120,48 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: CalendarEvents; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."CalendarEvents" (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    "eventDate" date NOT NULL,
+    "startTime" time without time zone,
+    "endTime" time without time zone,
+    location character varying(255),
+    description text,
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL,
+    "userId" integer
+);
+
+
+ALTER TABLE public."CalendarEvents" OWNER TO admin;
+
+--
+-- Name: CalendarEvents_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."CalendarEvents_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."CalendarEvents_id_seq" OWNER TO admin;
+
+--
+-- Name: CalendarEvents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."CalendarEvents_id_seq" OWNED BY public."CalendarEvents".id;
+
+
+--
 -- Name: Chores; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -690,6 +732,13 @@ ALTER SEQUENCE public."stores_itemID_seq" OWNED BY public.stores."itemID";
 
 
 --
+-- Name: CalendarEvents id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents" ALTER COLUMN id SET DEFAULT nextval('public."CalendarEvents_id_seq"'::regclass);
+
+
+--
 -- Name: Chores id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -785,6 +834,14 @@ ALTER TABLE ONLY public.property_images ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.stores ALTER COLUMN "itemID" SET DEFAULT nextval('public."stores_itemID_seq"'::regclass);
+
+
+--
+-- Name: CalendarEvents CalendarEvents_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents"
+    ADD CONSTRAINT "CalendarEvents_pkey" PRIMARY KEY (id);
 
 
 --
@@ -921,14 +978,6 @@ ALTER TABLE ONLY public.property_images
 
 ALTER TABLE ONLY public.stores
     ADD CONSTRAINT stores_pkey PRIMARY KEY ("itemID");
-
-
---
--- Name: Chores Chores_assignedTo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."Chores"
-    ADD CONSTRAINT "Chores_assignedTo_fkey" FOREIGN KEY ("assignedTo") REFERENCES public."Users"(id);
 
 
 --

@@ -68,8 +68,6 @@ export default function NavigationScreen() {
 
           if (route.name === "Home") {
             iconName = "home";
-          } else if (route.name === "Profile") {
-            iconName = "account-circle";
           } else if (route.name === "List") {
             iconName = "shopping-cart";
           } else if (route.name === "Expenses") {
@@ -80,6 +78,8 @@ export default function NavigationScreen() {
             iconName = "message";
           } else if (route.name === "Inventory") {
             iconName = "inventory";
+          } else if (route.name === "Profile") {
+            iconName = "account-circle";
           } else {
             iconName = "help"; // Fallback icon
           }
@@ -94,12 +94,12 @@ export default function NavigationScreen() {
         name="Home"
         component={userRole == "tenant" ? TenantHomeScreen : LandlordHomeScreen}
       />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="List" component={ListScreen} />
       <Tab.Screen name="Expenses" component={ExpenseScreen} />
       <Tab.Screen name="Chores" component={ChoresStackScreen} />
       <Tab.Screen name="Messages" component={MessageStackScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

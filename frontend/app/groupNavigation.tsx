@@ -12,7 +12,7 @@ import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
 import InventoryScreen from "./inventory";
-import CalendarScreen from "./calendar";
+import CalendarStackScreen from "./stacks/calendarStack";
 import ChoresStackScreen from "./stacks/choresStack";
 import ReviewsScreen from "./stacks/reviewsStack";
 
@@ -121,6 +121,9 @@ export default function GroupNavigationScreen() {
       </Tab.Screen>
       <Tab.Screen name="Reviews">
         {() => <ReviewsScreen groupId={groupIdString} role={roleString} />}
+      </Tab.Screen>
+      <Tab.Screen name="Calender">
+        {() => <CalendarStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
     </Tab.Navigator>
   );

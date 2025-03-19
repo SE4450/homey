@@ -8,12 +8,13 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { MessageStackParamList } from "./stacks/messagesStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type ContactsScreenNavigationProp = StackNavigationProp<
-  MessageStackParamList,
-  "contacts"
->;
+type ContactsScreenNavigationProp = StackNavigationProp<MessageStackParamList, "contacts">;
+type ContactScreenProps = {
+  groupId: string;
+  role: string;
+};
 
-export default function ContactsScreen() {
+export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
   const navigation = useNavigation<ContactsScreenNavigationProp>();
   const [conversations, setConversations] = useState<any>();
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,8 @@ export default function ContactsScreen() {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await get<any>("/api/conversations");
+      console.log(groupId);
+      const response = await get<any>(`/api/conversations/${groupId}`);
       if (response) {
         const formattedConversations = response.data.map(
           (conversation: any) => {

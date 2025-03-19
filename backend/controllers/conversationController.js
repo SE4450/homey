@@ -4,13 +4,17 @@ const sequelize = require("../db.js");
 
 exports.getConversations = async (req, res) => {
     try {
+        const { groupId } = req.params; // Extract groupId from route params
+
+        // Find conversations related to the group and user
         const conversations = await Conversation.findAll({
+            where: { groupId }, // Filter conversations by groupId
             include: [
                 {
                     model: Participant,
                     as: "filterParticipants",
-                    where: { userId: req.user.userId },
-                    attributes: []
+                    where: { userId: req.user.userId }, // Ensure user is part of the conversation
+                    attributes: [],
                 },
                 {
                     model: Participant,
@@ -20,32 +24,32 @@ exports.getConversations = async (req, res) => {
                         model: User,
                         as: "users",
                         attributes: ["id", "username", "firstName", "lastName"],
-                    }
+                    },
                 },
                 {
                     model: Message,
                     as: "messages",
                     attributes: ["id", "content", "createdAt", "senderId", "readBy"],
                     limit: 1,
-                    order: [["createdAt", "DESC"]]
+                    order: [["createdAt", "DESC"]],
                 },
-            ]
+            ],
         });
 
         if (!conversations || conversations.length === 0) {
             return res.status(404).json({
                 status: "error",
-                message: "No conversations found",
+                message: "No conversations found for this group",
                 data: [],
-                errors: [`No conversations found for user ${req.user.userId}`]
+                errors: [`No conversations found in group ${groupId} for user ${req.user.userId}`],
             });
         }
 
         res.status(200).json({
             status: "success",
-            message: `${conversations.length} conversation(s) found`,
+            message: `${conversations.length} conversation(s) found in group ${groupId}`,
             data: conversations,
-            errors: []
+            errors: [],
         });
     } catch (err) {
         if (err instanceof ValidationError) {
@@ -53,7 +57,7 @@ exports.getConversations = async (req, res) => {
                 status: "error",
                 message: "Validation error occurred while fetching conversations",
                 data: [],
-                errors: err.errors.map((error) => error.message)
+                errors: err.errors.map((error) => error.message),
             });
         }
 

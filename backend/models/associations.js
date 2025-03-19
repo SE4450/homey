@@ -44,6 +44,9 @@ User.belongsToMany(Group, { through: GroupParticipant, foreignKey: "tenantId", a
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
 
+Conversation.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+Group.hasMany(Conversation, { foreignKey: "groupId", as: "conversations" });
+
 // Conversation - Message Relationship
 Conversation.hasMany(Message, { foreignKey: "conversationId", as: "messages" });
 Message.belongsTo(Conversation, {

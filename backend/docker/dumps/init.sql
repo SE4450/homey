@@ -209,6 +209,7 @@ ALTER SEQUENCE public."Chores_id_seq" OWNED BY public."Chores".id;
 
 CREATE TABLE public."Conversations" (
     id integer NOT NULL,
+    "groupId" integer NOT NULL,
     type public."enum_Conversations_type" NOT NULL,
     name character varying(255),
     "createdAt" timestamp with time zone NOT NULL,
@@ -1055,6 +1056,14 @@ ALTER TABLE ONLY public."CalendarEvents"
 
 ALTER TABLE ONLY public."Chores"
     ADD CONSTRAINT "Chores_assignedTo_fkey" FOREIGN KEY ("assignedTo") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Conversations Conversations_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Conversations"
+    ADD CONSTRAINT "Conversations_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

@@ -17,7 +17,7 @@ type MessageScreenProps = {
 export default function MessageStackScreen({ groupId, role }: MessageScreenProps) {
     return (
         <MessageStack.Navigator>
-            <MessageStack.Screen name="contacts" component={ContactsScreen} options={{
+            <MessageStack.Screen name="contacts" component={() => ContactsScreen({ groupId, role })} options={{
                 headerShown: false
             }} />
             <MessageStack.Screen

@@ -3,7 +3,7 @@ const router = express.Router();
 const { getConversations, getConversationById, createDM, createGroupChat, addParticipant, removeParticipant } = require("../controllers/conversationController");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.get("/", authenticateUser(["tenant", "landlord"]), getConversations);
+router.get("/:groupId", authenticateUser(["tenant", "landlord"]), getConversations);
 
 router.get("/:conversationId", authenticateUser(["tenant", "landlord"]), getConversationById);
 

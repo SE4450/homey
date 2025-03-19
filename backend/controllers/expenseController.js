@@ -62,7 +62,7 @@ exports.getExpenses = async (req, res) => {
     try {
         // Extract parameters
         const { groupId } = req.params;
-        const { owedBy, paidBy } = req.query;
+        const { owedTo, paidBy } = req.query;
 
         // Ensure groupId is a number
         const groupIdNum = parseInt(groupId, 10);
@@ -78,10 +78,11 @@ exports.getExpenses = async (req, res) => {
         // Build the where clause
         let whereClause = { groupId: groupIdNum };
 
-        if (owedBy) {
-            const owedByNum = parseInt(owedBy, 10);
-            if (!isNaN(owedByNum)) {
-                whereClause.owedTo = owedByNum;
+        // Fix the owedTo filter
+        if (owedTo) {
+            const owedToNum = parseInt(owedTo, 10);
+            if (!isNaN(owedToNum)) {
+                whereClause.owedTo = owedToNum;
             }
         }
 
@@ -133,6 +134,7 @@ exports.getExpenses = async (req, res) => {
         });
     }
 };
+
 
 exports.completeExpense = async (req, res) => {
     try {

@@ -8,12 +8,13 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { MessageStackParamList } from "./stacks/messagesStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type ContactsScreenNavigationProp = StackNavigationProp<
-  MessageStackParamList,
-  "contacts"
->;
+type ContactsScreenNavigationProp = StackNavigationProp<MessageStackParamList, "contacts">;
+type ContactScreenProps = {
+  groupId: string;
+  role: string;
+};
 
-export default function ContactsScreen() {
+export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
   const navigation = useNavigation<ContactsScreenNavigationProp>();
   const [conversations, setConversations] = useState<any>();
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,8 @@ export default function ContactsScreen() {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await get<any>("/api/conversations");
+      console.log(groupId);
+      const response = await get<any>(`/api/conversations/${groupId}`);
       if (response) {
         const formattedConversations = response.data.map(
           (conversation: any) => {
@@ -46,7 +48,18 @@ export default function ContactsScreen() {
               id: conversation.id,
               name: conversation.participants
                 .filter((p: any) => p.userId !== userId)
-                .map((p: any) => `${p.users.firstName} ${p.users.lastName}`)
+                .map((p: any) => {
+                  if (conversation.type == "group") {
+                    if (conversation.participants.some((participant: any) => participant.role == "landlord") && conversation.participants.length > 2) {
+                      return "Tenants and Landlord Groupchat";
+                    } else {
+                      return "Tenants Groupchat";
+                    }
+                  } else {
+                    return `${p.users.firstName} ${p.users.lastName}`
+                  }
+                })
+                .slice(0, 1)
                 .join(", "),
               latestMessage: latestMessage?.content || "No messages yet",
               date: new Date(
@@ -55,6 +68,7 @@ export default function ContactsScreen() {
                 hour: "2-digit",
                 minute: "2-digit",
               }),
+              type: conversation.type,
               imageUri:
                 conversation.participants[0]?.user?.profilePicture ||
                 "https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp",
@@ -87,8 +101,8 @@ export default function ContactsScreen() {
     };
   }, [isFocused]);
 
-  const handlePress = (id: any, name: any) => {
-    navigation.navigate("conversation", { id, name });
+  const handlePress = (id: any, name: any, type: any) => {
+    navigation.navigate("conversation", { id, name, type });
   };
 
   const createConversation = async () => {
@@ -115,18 +129,6 @@ export default function ContactsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextField
-          placeholder="Enter User ID"
-          value={newUserId}
-          onChangeText={setNewUserId}
-          customStyle={{
-            containerStyle: styles.textFieldContainer,
-            inputStyle: styles.textField,
-          }}
-        />
-        <Button title="Create" onPress={createConversation} />
-      </View>
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id.toString()}
@@ -136,7 +138,7 @@ export default function ContactsScreen() {
             name={item.name}
             latestMessage={item.latestMessage}
             date={item.date}
-            onPress={() => handlePress(item.id, item.name)}
+            onPress={() => handlePress(item.id, item.name, item.type)}
             hasNewMessage={item.hasNewMessage}
           />
         )}

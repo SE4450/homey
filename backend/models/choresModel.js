@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
 const User = require("./userModel");
+const Group = require("./groupModel.js");
 
 const Chore = sequelize.define(
   "Chore",
@@ -31,10 +32,6 @@ const Chore = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    houseId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     // We'll store the image path or identifier here
     bannerImage: {
       type: DataTypes.STRING,
@@ -43,6 +40,15 @@ const Chore = sequelize.define(
     dueDate: {
       type: DataTypes.DATE,
       allowNull: false,
+    },
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Group,
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
   },
   {

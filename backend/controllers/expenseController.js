@@ -135,7 +135,6 @@ exports.getExpenses = async (req, res) => {
     }
 };
 
-
 exports.completeExpense = async (req, res) => {
     try {
         const expenseId = req.params.id;

@@ -158,8 +158,7 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
   //function to get the house inventory
   const getItems = async () => {
     //make a fetch request to get any items for the selected list
-    const body = { houseId: userId }; //this will need to be changed to the houseId when we have it
-    const response = await get<any>("/api/inventory", body);
+    const response = await get<any>(`/api/inventory/${groupId}`);
 
     //clear the set list items
     setInventoryItems([]);
@@ -187,7 +186,7 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
   //function to add an item to the list
   const addItem = async (itemName: String) => {
     //make a fetch request to add the new item to the database
-    const body = { houseId: userId, itemName: itemName };
+    const body = { groupId, itemName: itemName };
     const response = await post<any>("/api/inventory/createInventory", body);
 
     if (response) {
@@ -197,7 +196,7 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
 
   //function to decrement the inventory
   const removeItem = async (itemId: Number, quantity: Number) => {
-    const body = { itemId: itemId, houseId: userId, quantity: quantity };
+    const body = { itemId: itemId, quantity: quantity };
 
     //call the post request
     const response = await post<any>("/api/inventory/removeQuantity", body);
@@ -209,7 +208,7 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
       }
       //if the inventory is empty remove it from the displayed list
       if (response.data.quantity == 1) {
-        const deleteItemBody = { itemId: itemId, houseId: userId };
+        const deleteItemBody = { itemId: itemId };
         const deleteInventoryResponse = await post<any>(
           "/api/inventory/deleteItem",
           deleteItemBody

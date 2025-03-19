@@ -1,4 +1,4 @@
-const { Group, GroupParticipant, Property, User } = require("../models/associations");
+const { Group, GroupParticipant, Property, User, Conversation, Participant, Profile } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
 const { Op } = require("sequelize");
@@ -197,33 +197,112 @@ exports.createGroup = async (req, res) => {
     try {
         const { name, propertyId, tenantIds } = req.body;
 
-        if (!name || !propertyId || !tenantIds || tenantIds.length === 0) {
+        if (!name || !propertyId || !tenantIds || tenantIds.length < 1) {
             return res.status(400).json({
                 status: "error",
                 message: "Missing required fields (name, propertyId, or tenants)",
                 data: [],
-                errors: ["Name, property, and at least one tenant are required"],
+                errors: ["Name, property, and at least two tenans are required"],
             });
         }
 
         const group = await Group.create(
-            {
-                name,
-                propertyId,
-                landlordId: req.user.userId,
-            },
+            { name, propertyId, landlordId: req.user.userId },
             { transaction }
         );
+
+        const profiles = tenantIds.map((tenantId) => ({
+            userId: tenantId,
+            groupId: group.id
+        }));
+
+        await Profile.bulkCreate(profiles, { transaction });
 
         // Add tenants to the group
         const participants = tenantIds.map((tenantId) => ({
             groupId: group.id,
-            tenantId,
+            tenantId
         }));
 
         await GroupParticipant.bulkCreate(participants, { transaction });
 
+        // 3️⃣ Create Group Conversations
+        // 🏠 Full Group Chat (Landlord + Tenants)
+        const fullGroupChat = await Conversation.create(
+            { groupId: group.id, type: "group" },
+            { transaction }
+        );
+
+        // 🤝 Tenants-Only Chat
+        const tenantGroupChat = await Conversation.create(
+            { groupId: group.id, type: "group" },
+            { transaction }
+        );
+
+
+        console.log("tenant:" + tenantIds.toString());
+        console.log("landlord:" + req.user.userId);
+        // 4️⃣ Add Participants to Conversations
+        // 📌 Full Group Chat (Everyone: Landlord + Tenants)
+        const fullGroupParticipants = [
+            { conversationId: fullGroupChat.id, userId: req.user.userId, role: "landlord" },
+            ...tenantIds.map((tenantId) => ({ conversationId: fullGroupChat.id, userId: tenantId, role: "tenant" })),
+        ];
+
+        console.log("Test 1");
+        await Participant.bulkCreate(fullGroupParticipants, { transaction });
+
+        // 📌 Tenants-Only Chat (Only Tenants)
+        const tenantParticipants = tenantIds.map((tenantId) => ({
+            conversationId: tenantGroupChat.id,
+            userId: tenantId,
+            role: "tenant"
+        }));
+        console.log("Test 2");
+        await Participant.bulkCreate(tenantParticipants, { transaction });
+
+        let privateConversations = [];
+
+        // Landlord <-> Each Tenant
+        tenantIds.forEach((tenantId) => {
+            privateConversations.push({ type: "dm", groupId: group.id });
+        });
+
+        // Tenant <-> Tenant DMs
+        for (let i = 0; i < tenantIds.length; i++) {
+            for (let j = i + 1; j < tenantIds.length; j++) {
+                privateConversations.push({ type: "dm", groupId: group.id });
+            }
+        }
+
+        // Create Private Conversations
+        const createdPrivateChats = await Conversation.bulkCreate(privateConversations, { transaction });
+
+        // Associate Users with Private Conversations
+        let privateParticipants = [];
+        let chatIndex = 0;
+
+        tenantIds.forEach((tenantId) => {
+            // Add landlord <-> tenant DM
+            privateParticipants.push({ conversationId: createdPrivateChats[chatIndex].id, userId: req.user.userId });
+            privateParticipants.push({ conversationId: createdPrivateChats[chatIndex].id, userId: tenantId, role: "tenant" });
+            chatIndex++;
+        });
+
+        // Tenant <-> Tenant DMs
+        for (let i = 0; i < tenantIds.length; i++) {
+            for (let j = i + 1; j < tenantIds.length; j++) {
+                privateParticipants.push({ conversationId: createdPrivateChats[chatIndex].id, userId: tenantIds[i] });
+                privateParticipants.push({ conversationId: createdPrivateChats[chatIndex].id, userId: tenantIds[j] });
+                chatIndex++;
+            }
+        }
+
+        // Insert all private chat participants
+        await Participant.bulkCreate(privateParticipants, { transaction });
+
         await transaction.commit();
+
         res.status(201).json({
             status: "success",
             message: "Group created successfully",
@@ -232,6 +311,7 @@ exports.createGroup = async (req, res) => {
         });
     } catch (error) {
         await transaction.rollback();
+        console.log(error);
         res.status(500).json({
             status: "error",
             message: "Failed to create group",
@@ -397,6 +477,94 @@ exports.deleteGroup = async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "Failed to delete group",
+            data: null,
+            errors: [error.message],
+        });
+    }
+};
+
+exports.getLandlordInfo = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        const group = await Group.findOne({
+            where: { id: groupId },
+            include: {
+                model: User,
+                as: "landlord",
+                attributes: ["id", "firstName", "lastName", "email", "username"]
+            }
+        });
+
+        if (!group) {
+            return res.status(404).json({
+                status: "error",
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Landlord information retrieved successfully",
+            data: group.landlord,
+            errors: []
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve landlord information",
+            data: null,
+            errors: [error.message],
+        });
+    }
+};
+
+exports.getPropertyInfo = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        const group = await Group.findOne({
+            where: { id: groupId },
+            include: {
+                model: Property,
+                as: "property",
+                attributes: ["id", "name", "address", "city", "exteriorImage"]
+            }
+        });
+
+        if (!group) {
+            return res.status(404).json({
+                status: "error",
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
+            });
+        }
+
+        const groupJSON = group.property.toJSON();
+        console.log("test" + groupJSON.firstName);
+        const exteriorImageBase64 = groupJSON.exteriorImage ? `data:image/jpeg;base64,${groupJSON.exteriorImage.toString("base64")}` : null;
+
+        res.status(200).json({
+            status: "success",
+            message: "Property information retrieved successfully",
+            data: {
+                id: groupJSON.id,
+                city: groupJSON.city,
+                address: groupJSON.address,
+                name: groupJSON.name,
+                exteriorImage: exteriorImageBase64
+            },
+            errors: []
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve property information",
             data: null,
             errors: [error.message],
         });

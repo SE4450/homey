@@ -31,14 +31,14 @@ export default function ChoresStackScreen({ groupId, role }: ChoreScreenProps) {
     <ChoresStack.Navigator>
       <ChoresStack.Screen
         name="chores"
-        component={Chores}
+        component={() => Chores({ groupId, role })}
         options={{
           headerShown: false,
         }}
       />
       <ChoresStack.Screen
         name="addChore"
-        component={AddChores}
+        component={() => AddChores({ groupId, role })}
         options={{
           headerShown: false,
         }}

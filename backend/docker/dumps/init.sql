@@ -131,6 +131,7 @@ CREATE TABLE public."CalendarEvents" (
     "endTime" time without time zone,
     location character varying(255),
     description text,
+    "groupId" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL,
     "userId" integer
@@ -171,9 +172,9 @@ CREATE TABLE public."Chores" (
     room character varying(255) NOT NULL,
     "assignedTo" integer,
     completed boolean DEFAULT false,
-    "houseId" integer,
     "bannerImage" character varying(255),
     "dueDate" timestamp with time zone NOT NULL,
+    "groupId" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -209,6 +210,7 @@ ALTER SEQUENCE public."Chores_id_seq" OWNED BY public."Chores".id;
 
 CREATE TABLE public."Conversations" (
     id integer NOT NULL,
+    "groupId" integer NOT NULL,
     type public."enum_Conversations_type" NOT NULL,
     name character varying(255),
     "createdAt" timestamp with time zone NOT NULL,
@@ -246,9 +248,9 @@ ALTER SEQUENCE public."Conversations_id_seq" OWNED BY public."Conversations".id;
 
 CREATE TABLE public."Inventories" (
     "itemId" integer NOT NULL,
-    "houseId" integer NOT NULL,
     "itemName" character varying(255) NOT NULL,
     quantity integer NOT NULL,
+    "groupId" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -325,6 +327,7 @@ CREATE TABLE public."Lists" (
     "listId" integer NOT NULL,
     "userId" integer NOT NULL,
     "listName" character varying(255) NOT NULL,
+    "groupId" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
@@ -442,12 +445,36 @@ CREATE TABLE public."Profiles" (
     "sleepStart" character varying(255),
     "sleepEnd" character varying(255),
     alergies character varying(255),
+    "userId" integer NOT NULL,
+    "groupId" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL
 );
 
 
 ALTER TABLE public."Profiles" OWNER TO admin;
+
+--
+-- Name: Profiles_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Profiles_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Profiles_id_seq" OWNER TO admin;
+
+--
+-- Name: Profiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Profiles_id_seq" OWNED BY public."Profiles".id;
+
 
 --
 -- Name: Reviews; Type: TABLE; Schema: public; Owner: admin
@@ -826,6 +853,13 @@ ALTER TABLE ONLY public."Participants" ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: Profiles id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Profiles" ALTER COLUMN id SET DEFAULT nextval('public."Profiles_id_seq"'::regclass);
+
+
+--
 -- Name: Reviews reviewId; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -1042,6 +1076,14 @@ ALTER TABLE ONLY public.stores
 
 
 --
+-- Name: CalendarEvents CalendarEvents_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."CalendarEvents"
+    ADD CONSTRAINT "CalendarEvents_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: CalendarEvents CalendarEvents_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1055,6 +1097,38 @@ ALTER TABLE ONLY public."CalendarEvents"
 
 ALTER TABLE ONLY public."Chores"
     ADD CONSTRAINT "Chores_assignedTo_fkey" FOREIGN KEY ("assignedTo") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Chores Chores_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Chores"
+    ADD CONSTRAINT "Chores_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Conversations Conversations_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Conversations"
+    ADD CONSTRAINT "Conversations_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Inventories Inventories_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Inventories"
+    ADD CONSTRAINT "Inventories_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Lists Lists_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Lists"
+    ADD CONSTRAINT "Lists_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -1087,6 +1161,14 @@ ALTER TABLE ONLY public."Participants"
 
 ALTER TABLE ONLY public."Participants"
     ADD CONSTRAINT "Participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Profiles Profiles_groupId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Profiles"
+    ADD CONSTRAINT "Profiles_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES public.groups(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

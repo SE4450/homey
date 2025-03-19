@@ -1,10 +1,12 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
+const Group = require("./groupModel.js")
 
 const Profile = sequelize.define("Profile", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false,
     },
     cleaningHabits: {
@@ -25,10 +27,23 @@ const Profile = sequelize.define("Profile", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    alergies:{
+    alergies: {
         type: DataTypes.STRING,
         allowNull: true
-    }
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    groupId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Group,
+            key: "id",
+        },
+        onDelete: "CASCADE",
+    },
 });
 
 module.exports = Profile;

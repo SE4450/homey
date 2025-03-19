@@ -11,7 +11,7 @@ import { useAuth } from "./context/AuthContext";
 import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { ReviewStackParamList } from "./stacks/reviewsStack";
+import { ReviewStackParamList } from "./stacks/groupsStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
 type ReviewScreenNavigationProp = StackNavigationProp<
@@ -135,9 +135,9 @@ export default function MainProfileDisplay() {
   const router = useRouter();
 
   useEffect(() => {
-    if(isFocused) {
-        getProfile();
-        getAvgUserScore();
+    if (isFocused) {
+      getProfile();
+      getAvgUserScore();
     }
   }, [isFocused]);
 
@@ -180,14 +180,14 @@ export default function MainProfileDisplay() {
     }
   };
 
-  const getAvgUserScore = async() => {
+  const getAvgUserScore = async () => {
 
     const response = await get<any>(`/api/reviews?reviewType=user&reviewedItemId=${userId}`);
 
-    if(response){
+    if (response) {
       let avgScore = 0;
-      if(response.data.length != 0) {
-        for(let i = 0; i < response.data.length; i++) {
+      if (response.data.length != 0) {
+        for (let i = 0; i < response.data.length; i++) {
           avgScore += response.data[i].score;
         }
         avgScore = Math.round((avgScore / response.data.length) * 100) / 100
@@ -203,7 +203,7 @@ export default function MainProfileDisplay() {
           <Text style={styles.userHeader}>{user.username}</Text>
         </View>
         <View style={styles.accountRatingFormat}>
-          <StarRatingDisplay rating={avgScoreValue} starSize={50}/>
+          <StarRatingDisplay rating={avgScoreValue} starSize={50} />
           <Text style={styles.scoreHeader}>Average Rating: {avgScoreValue}</Text>
         </View>
         <View style={styles.accountFormat}>
@@ -235,7 +235,7 @@ export default function MainProfileDisplay() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
           onPress={() => navigation.navigate("displayReview")}
         >
           <Text style={styles.buttonText}>Understand Your Score</Text>
@@ -245,7 +245,7 @@ export default function MainProfileDisplay() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
           onPress={() => navigation.navigate("reviewSelection")}
         >
           <Text style={styles.buttonText}>Review Your Roomates</Text>
@@ -256,7 +256,7 @@ export default function MainProfileDisplay() {
       {/* THE FOLLOWING 2 VIEWS NEED TO BE UPDATED TO HAVE THE APPROPRIATE LANDLORD ID AND HOUSE ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
           onPress={() => navigation.navigate("review", { reviewName: "Landlord", reviewType: "user", itemId: 1 })}
         >
           <Text style={styles.buttonText}>Review Your Landlord</Text>
@@ -266,7 +266,7 @@ export default function MainProfileDisplay() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
+          style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
           onPress={() => navigation.navigate("review", { reviewName: "House", reviewType: "property", itemId: 1 })}
         >
           <Text style={styles.buttonText}>Review Your House</Text>

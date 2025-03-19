@@ -1,4 +1,4 @@
-const { Message, Conversation, Participant } = require("../models/associations");
+const { User, Message, Conversation, Participant } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 
 exports.sendMessage = async (req, res) => {
@@ -78,6 +78,7 @@ exports.getMessages = async (req, res) => {
             });
         }
 
+        // Ensure the user is a participant in the conversation
         const conversation = await Conversation.findOne({
             where: { id: conversationId },
             include: {
@@ -97,7 +98,18 @@ exports.getMessages = async (req, res) => {
             });
         }
 
-        const messages = await Message.findAll({ where: { conversationId }, order: [["createdAt", "ASC"]] });
+        // Fetch messages and include sender details
+        const messages = await Message.findAll({
+            where: { conversationId },
+            order: [["createdAt", "ASC"]],
+            include: [
+                {
+                    model: User,
+                    as: "users", // Ensure this alias matches your associations
+                    attributes: ["id", "firstName", "lastName"]
+                }
+            ]
+        });
 
         res.status(200).json({
             status: "success",
@@ -122,6 +134,7 @@ exports.getMessages = async (req, res) => {
         });
     }
 };
+
 
 exports.markMessageAsRead = async (req, res) => {
     try {

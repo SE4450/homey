@@ -12,9 +12,9 @@ import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
 import InventoryScreen from "./inventory";
-import CalendarScreen from "./calendar";
+import CalendarStackScreen from "./stacks/calendarStack";
 import ChoresStackScreen from "./stacks/choresStack";
-import ReviewsScreen from "./stacks/reviewsStack";
+import GroupStackScreen from "./stacks/groupsStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -36,7 +36,6 @@ export default function GroupNavigationScreen() {
   const { groupId, role } = useLocalSearchParams();
   const groupIdString = groupId as string;
   const roleString = role as string;
-
 
   useEffect(() => {
     if (error) {
@@ -70,26 +69,36 @@ export default function GroupNavigationScreen() {
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof MaterialIcons.glyphMap;
 
-          if (route.name === "Home") {
-            iconName = "home";
-          } else if (route.name === "List") {
-            iconName = "shopping-cart";
-          } else if (route.name === "Expenses") {
-            iconName = "paid";
-          } else if (route.name === "Chores") {
-            iconName = "checklist";
-          } else if (route.name === "Messages") {
-            iconName = "message";
-          } else if (route.name === "Inventory") {
-            iconName = "inventory";
-          } else if (route.name === "Reviews") {
-            iconName = "star-rate";
-          } else if (route.name === "Profile") {
-            iconName = "account-circle";
-          } else if (route.name === "Calendar") {
-            iconName = "calendar-today";
-          } else {
-            iconName = "help"; // Fallback icon
+          switch (route.name) {
+            case "Home":
+              iconName = "home";
+              break;
+            case "Profile":
+              iconName = "account-circle";
+              break;
+            case "List":
+              iconName = "shopping-cart";
+              break;
+            case "Expenses":
+              iconName = "paid";
+              break;
+            case "Chores":
+              iconName = "checklist";
+              break;
+            case "Messages":
+              iconName = "message";
+              break;
+            case "Inventory":
+              iconName = "inventory";
+              break;
+            case "Group":
+              iconName = "groups";
+              break;
+            case "Calendar":
+              iconName = "calendar-month";
+              break;
+            default:
+              iconName = "help";
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
@@ -101,12 +110,6 @@ export default function GroupNavigationScreen() {
       <Tab.Screen name="Home">
         {() => <HomeScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
-      <Tab.Screen name="Profile">
-        {() => <ReviewsScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="List">
-        {() => <ListScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
       <Tab.Screen name="Expenses">
         {() => <ExpenseScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
@@ -116,9 +119,27 @@ export default function GroupNavigationScreen() {
       <Tab.Screen name="Messages">
         {() => <MessageStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
-      <Tab.Screen name="Inventory">
-        {() => <InventoryScreen groupId={groupIdString} role={roleString} />}
+      <Tab.Screen name="Group" options={{ headerShown: false }} >
+        {() => <GroupStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
+      <Tab.Screen name="Calendar">
+        {() => <CalendarStackScreen groupId={groupIdString} role={roleString} />}
+      </Tab.Screen>
+
+      {/* Show additional tabs only for tenants */}
+      {roleString == "tenant" && (
+        <>
+          <Tab.Screen name="Profile">
+            {() => <ProfileScreen groupId={groupIdString} role={roleString} />}
+          </Tab.Screen>
+          <Tab.Screen name="List">
+            {() => <ListScreen groupId={groupIdString} role={roleString} />}
+          </Tab.Screen>
+          <Tab.Screen name="Inventory">
+            {() => <InventoryScreen groupId={groupIdString} role={roleString} />}
+          </Tab.Screen>
+        </>
+      )}
     </Tab.Navigator>
   );
 }

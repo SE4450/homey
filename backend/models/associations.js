@@ -8,9 +8,11 @@ const Participant = require("./participantModel");
 const Message = require("./messageModel");
 const Profile = require("./profileModel");
 const Expense = require("./expenseModel");
-const CalendarEvent = require("./calendarModel"); // Import CalendarEvent
+const CalendarEvent = require("./calendarModel")
 const Chore = require("./choresModel");
 const Review = require("./reviewModel");
+const List = require("./listModel");
+const Inventory = require("./inventoryModel");
 
 // Property - User (Landlord) Relationship
 User.hasMany(Property, { foreignKey: "landlordId", as: "properties" });
@@ -44,6 +46,9 @@ User.belongsToMany(Group, { through: GroupParticipant, foreignKey: "tenantId", a
 User.hasMany(Message, { foreignKey: "senderId", as: "messages" });
 Message.belongsTo(User, { foreignKey: "senderId", as: "users" });
 
+Conversation.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+Group.hasMany(Conversation, { foreignKey: "groupId", as: "conversations" });
+
 // Conversation - Message Relationship
 Conversation.hasMany(Message, { foreignKey: "conversationId", as: "messages" });
 Message.belongsTo(Conversation, {
@@ -74,8 +79,24 @@ Expense.belongsTo(User, { foreignKey: "owedTo", as: "owedToUser" });
 User.hasMany(Chore, { foreignKey: "assignedTo", as: "assignedChores" });
 Chore.belongsTo(User, { foreignKey: "assignedTo", as: "assignee" });
 
+// Group and Chore Relationship
+Group.hasMany(Chore, { foreignKey: "groupId", as: "chores", onDelete: "CASCADE" });
+Chore.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+
 User.hasMany(CalendarEvent, { foreignKey: "userId", as: "events" });
 CalendarEvent.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+Group.hasMany(CalendarEvent, { foreignKey: "groupId", as: "events", onDelete: "CASCADE" });
+CalendarEvent.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+
+Group.hasMany(Profile, { foreignKey: "groupId", as: "profiles", onDelete: "CASCADE" });
+Profile.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+
+Group.hasMany(List, { foreignKey: "groupId", as: "lists", onDelete: "CASCADE" });
+List.belongsTo(Group, { foreignKey: "groupId", as: "list" });
+
+Group.hasMany(Inventory, { foreignKey: "groupId", as: "inventories", onDelete: "CASCADE" });
+Inventory.belongsTo(Group, { foreignKey: "groupId", as: "inventory" });
 
 module.exports = {
   User,
@@ -91,4 +112,6 @@ module.exports = {
   Chore,
   Review,
   CalendarEvent,
+  List,
+  Inventory
 };

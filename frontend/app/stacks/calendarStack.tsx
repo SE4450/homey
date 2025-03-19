@@ -20,11 +20,11 @@ export type CalendarStackParamList = {
 
 const CalendarStack = createStackNavigator<CalendarStackParamList>();
 
-export default function CalendarStackScreen() {
+export default function CalendarStackScreen({ groupId, role }: any) {
   return (
     <CalendarStack.Navigator>
-      <CalendarStack.Screen name="calendar" component={Calendar} options={{ headerShown: false }} />
-      <CalendarStack.Screen name="addEvent" component={AddEvent} options={{ headerShown: false }} />
+      <CalendarStack.Screen name="calendar" component={() => Calendar({ groupId, role })} options={{ headerShown: false }} />
+      <CalendarStack.Screen name="addEvent" component={() => AddEvent({ groupId, role })} options={{ headerShown: false }} />
       <CalendarStack.Screen name="editEvent" component={EditEvent} options={{ headerShown: false }} />
     </CalendarStack.Navigator>
   );

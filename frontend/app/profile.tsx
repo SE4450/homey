@@ -13,7 +13,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useAuth } from "./context/AuthContext";
 import { useLocalSearchParams } from "expo-router";
 import TextField from "./components/textField";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useIsFocused } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
 
@@ -118,6 +118,8 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
   const [startSleepValue, setStartSleepValue] = useState("");
   const [endSleepValue, setEndSleepValue] = useState("");
   const [allergiesValue, setAllergiesValue] = useState("");
+  const isFocused = useIsFocused();
+
   const data = [
     { label: "Low", value: "Low" },
     { label: "Medium", value: "Medium" },
@@ -131,8 +133,10 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
   const navigation = useNavigation();
 
   useEffect(() => {
-    getProfile();
-  }, []);
+    if (isFocused) {
+      getProfile();
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -144,14 +148,8 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
-
   const getProfile = async () => {
-    const body = { id: userId };
-    const response = await get<any>("/api/profile", body);
+    const response = await get<any>(`/api/profile/${groupId}?userId=${userId}`);
 
     if (response) {
       if (response.data[0].cleaningHabits != null) {
@@ -179,13 +177,12 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
       sleepStart: startSleepValue,
       sleepEnd: endSleepValue,
       alergies: allergiesValue,
+      userId,
     };
-    const response = await post<any>(
-      `/api/profile/updateProfile/${userId}`,
-      body
-    );
+    const response = await post<any>(`/api/profile/updateProfile/${groupId}`, body);
 
     if (response) {
+      console.log(response.data)
       alert("Profile updated");
 
       //route back to the main page
@@ -197,7 +194,7 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
     <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
       <View style={styles.profilePopup}>
         <View>
-          <Text style={styles.userHeader}>{user.username}</Text>
+          <Text style={styles.userHeader}>{user.firstName} {user.lastName}</Text>
         </View>
         <View style={styles.accountFormat}>
           <Text style={styles.labelText}>Cleaning Habits:</Text>

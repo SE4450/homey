@@ -1,13 +1,15 @@
-const Inventory = require("../models/inventoryModel.js");
+const Inventory = require("../models/inventoryModel");
 const { ValidationError } = require("sequelize");
 
 //get the inventory for the user
-exports.getInventory = async(req, res) => {
+exports.getInventory = async (req, res) => {
     try {
-        //get the inventory based on the house id
-        const inventoryList = await Inventory.findAll({ order: ['createdAt'], where: req.query });
+        const { groupId } = req.params;
 
-        if(inventoryList == 0) {
+        //get the inventory based on the house id
+        const inventoryList = await Inventory.findAll({ order: ['createdAt'], where: { groupId } });
+
+        if (inventoryList == 0) {
             return res.status(204).json({
                 status: "success",
                 message: "No inventory exists for the given house",
@@ -22,7 +24,7 @@ exports.getInventory = async(req, res) => {
             data: inventoryList,
             errors: []
         });
-    } catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -43,11 +45,12 @@ exports.getInventory = async(req, res) => {
 
 
 //endpoint to get all items that have a quantity less then 1
-exports.getLowItem = async(req, res) => {
+exports.getLowItem = async (req, res) => {
     try {
-        const inventoryItem = await Inventory.findAll({ order: ['createdAt'], where: req.query });
+        const { groupId } = req.params;
+        const inventoryItem = await Inventory.findAll({ order: ['createdAt'], where: { groupId } });
 
-        if(inventoryItem == 0) {
+        if (inventoryItem == 0) {
             return res.status(204).json({
                 status: "success",
                 message: "No inventory exists for the given house",
@@ -62,7 +65,7 @@ exports.getLowItem = async(req, res) => {
             data: inventoryItem,
             errors: []
         });
-    } catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -80,25 +83,23 @@ exports.getLowItem = async(req, res) => {
     }
 }
 
-
-
 //create a new inventory item
-exports.createInventory = async(req, res) => {
+exports.createInventory = async (req, res) => {
     try {
         //variables received from message
-        const { houseId, itemName} = req.body;
+        const { itemName, groupId } = req.body;
 
         //check to see if the user already has this item in the database
-        const inventoryItem = await Inventory.findOne({ where: { houseId: houseId, itemName: itemName.toLowerCase()}});
+        const inventoryItem = await Inventory.findOne({ where: { itemName: itemName.toLowerCase(), groupId } });
 
         //if we didn't find any item then we can create it
-        if(!inventoryItem) {
+        if (!inventoryItem) {
             const newInventoryItem = await Inventory.create({
-                houseId: houseId,
+                groupId,
                 itemName: itemName.toLowerCase(),
                 quantity: 1
             });
-            
+
             //send response
             res.status(201).json({
                 status: "success",
@@ -108,9 +109,9 @@ exports.createInventory = async(req, res) => {
             });
         }
         //otherwise if the item already exists update it's quantity in the database
-        else{
+        else {
             //increment the quantity amount
-            const UpdatedInventory = await Inventory.update({ quantity: inventoryItem.quantity+1 }, { where: { houseId: houseId, itemId: inventoryItem.itemId } });
+            const UpdatedInventory = await Inventory.update({ quantity: inventoryItem.quantity + 1 }, { where: { itemId: inventoryItem.itemId, groupId } });
 
             res.status(201).json({
                 status: "success",
@@ -120,7 +121,7 @@ exports.createInventory = async(req, res) => {
             });
         }
 
-    } catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -141,24 +142,24 @@ exports.createInventory = async(req, res) => {
 
 
 //delete an inventroy item
-exports.deleteInventoryItem = async(req, res) => {
+exports.deleteInventoryItem = async (req, res) => {
     try {
-        const { itemId, houseId } = req.body;
+        const { itemId } = req.body;
 
         //check to make sure the item exists
-        const inventoryItem = await Inventory.findOne({ where: { houseId: houseId, itemId: itemId }});
+        const inventoryItem = await Inventory.findOne({ where: { itemId: itemId } });
 
-        if(inventoryItem == 0) {
+        if (inventoryItem == 0) {
             return res.status(404).json({
                 status: "error",
                 message: "The inventory does not exist",
                 data: [],
                 errors: ["No inventroy exists"]
             });
-        } 
-        else{
+        }
+        else {
             //if we find the inventory, delete it from the list
-            const newInventoryList = await Inventory.destroy({ where: { houseId: houseId, itemId: itemId }});
+            const newInventoryList = await Inventory.destroy({ where: { itemId: itemId } });
 
             res.status(201).json({
                 status: "success",
@@ -168,7 +169,7 @@ exports.deleteInventoryItem = async(req, res) => {
             });
         }
 
-    } catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -186,18 +187,17 @@ exports.deleteInventoryItem = async(req, res) => {
     }
 }
 
-
 //add new inventory quantity
-exports.removeQuantity = async(req, res) => {
+exports.removeQuantity = async (req, res) => {
     try {
         //sent parameters
-        const { itemId, houseId, quantity } = req.body;
+        const { itemId, quantity } = req.body;
 
         //find the item the user wants to decrement
-        const inventoryItem = await Inventory.findOne({ where: { houseId: houseId, itemId: itemId}});
+        const inventoryItem = await Inventory.findOne({ where: { itemId: itemId } });
 
         //if the inventory item is already zero send an error response
-        if(inventoryItem.quantity == 0) {
+        if (inventoryItem.quantity == 0) {
             return res.status(404).json({
                 status: "error",
                 message: "The inventory is already empty for this item",
@@ -211,10 +211,10 @@ exports.removeQuantity = async(req, res) => {
             let message = "item removed from the inventory";
 
             //reduce the quantity of the inventory
-            await Inventory.update({quantity: quantity-1}, { where: { houseId: houseId, itemId: itemId}});
+            await Inventory.update({ quantity: quantity - 1 }, { where: { itemId: itemId } });
 
             //check to see if there is any of the inventory to delete
-            if(inventoryItem.quantity == 2) {
+            if (inventoryItem.quantity == 2) {
                 message = `There is only one more ${inventoryItem.itemName}`;
             }
             res.status(201).json({
@@ -223,8 +223,8 @@ exports.removeQuantity = async(req, res) => {
                 data: inventoryItem,
                 errors: []
             });
-        }      
-    } catch(err) {
+        }
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",

@@ -14,6 +14,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import useAxios from "./hooks/useAxios";
 import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
+import useUser from "./hooks/useUser";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "./components/button";
 
@@ -24,6 +25,7 @@ export default function TenantPropertyDetailsScreen() {
     const route = useRoute<PropertyDetailsRouteProp>();
     const navigation = useNavigation<PropertyDetailsNavigationProp>();
     const { get, error } = useAxios();
+    const { user, userLoading, userError } = useUser();
 
     const property = route.params.property;
 
@@ -97,10 +99,14 @@ export default function TenantPropertyDetailsScreen() {
         if (!property.landlord?.email) return;
         const subject = encodeURIComponent(`Inquiry about ${property.name}`);
         const body = encodeURIComponent(
-            `Hello ${property.landlord.firstName},\n\nI'm interested in your property at ${property.address}. Can we schedule a time to discuss?`
+            `Hello ${property.landlord.firstName},\n\nI'm interested in your property at ${property.address}. Can we schedule a time to discuss?\n\nBest regards,\n${user.firstName} ${user.lastName}`
         );
         Linking.openURL(`mailto:${property.landlord.email}?subject=${subject}&body=${body}`);
     };
+
+    if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
+    if (userError) return <Text>Error: {userError}</Text>;
+    if (!user) return <Text>No user found.</Text>;
 
     return (
         <View style={styles.root}>

@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
 export default function Lists(props: {
   name: String;
   id: Number;
-  houseId: any;
+  groupId: any;
 }) {
   const [listItems, setListItems] = useState(
     [] as Array<{
@@ -174,7 +174,7 @@ export default function Lists(props: {
 
   const fetchRoommates = async () => {
     try {
-      const response = await get<any>(`/api/users`);
+      const response = await get<any>(`/api/groups/${props.groupId}/participants`);
       if (response && response.data) {
         setUsers(response.data);
       }
@@ -286,11 +286,8 @@ export default function Lists(props: {
       if (response) {
         getItems();
 
-        const inventoryBody = { itemName: itemName, houseId: props.houseId };
-        const inventoryResponse = await post<any>(
-          "/api/inventory/createInventory",
-          inventoryBody
-        );
+        const inventoryBody = { itemName: itemName, groupId: props.groupId };
+        const inventoryResponse = await post<any>(`/api/inventory/createInventory`, inventoryBody);
 
         if (inventoryResponse) {
           Alert.alert(

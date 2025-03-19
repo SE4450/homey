@@ -16,7 +16,7 @@ const COLORS = {
 
 type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, "calendar">;
 
-export default function CalendarWithEvents() {
+export default function CalendarWithEvents({ groupId, role }: any) {
   const [items, setItems] = useState({});
   const { get, error, del } = useAxios();
   const navigation = useNavigation<CalendarScreenNavigationProp>();
@@ -38,7 +38,7 @@ export default function CalendarWithEvents() {
   }, [isFocused]);
 
   const getEvents = async () => {
-    const result = await get<any>("/api/calendar");
+    const result = await get<any>(`/api/calendar/${groupId}`);
 
     if (result && result.data) {
       const formattedEvents: any = {};

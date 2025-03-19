@@ -3,13 +3,13 @@ const router = express.Router();
 const { getLists, createList, deleteList, getItems, createItem, updateItem, deleteItem } = require("../controllers/listController.js");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.get("/", authenticateUser(["tenant", "landlord"]), getLists);
+router.get("/items", authenticateUser(["tenant", "landlord"]), getItems);
+
+router.get("/:groupId", authenticateUser(["tenant", "landlord"]), getLists);
 
 router.post("/createList", authenticateUser(["tenant", "landlord"]), createList);
 
 router.post("/deleteList", authenticateUser(["tenant", "landlord"]), deleteList);
-
-router.get("/items", authenticateUser(["tenant", "landlord"]), getItems);
 
 router.post("/createItem", authenticateUser(["tenant", "landlord"]), createItem);
 

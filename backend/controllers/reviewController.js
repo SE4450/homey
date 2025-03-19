@@ -2,18 +2,18 @@ const Review = require("../models/reviewModel.js");
 const { ValidationError } = require("sequelize");
 
 //a way to get the reviews 
-exports.getReviews = async(req, res) => {
+exports.getReviews = async (req, res) => {
     try {
 
         const listOfReviews = await Review.findAll({ order: ['createdAt'], where: req.query });
 
-        if(listOfReviews.length == 0) {
+        if (listOfReviews.length == 0) {
             return res.status(404).json({
                 status: "error",
                 message: "There are no reviews for the selected item",
                 data: [],
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
-            })
+            });
         }
 
         res.status(200).json({
@@ -22,7 +22,7 @@ exports.getReviews = async(req, res) => {
             data: listOfReviews,
             errors: []
         });
-    }catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -40,17 +40,15 @@ exports.getReviews = async(req, res) => {
     }
 }
 
-
-
 //a way to create reviews
-exports.createReview = async(req, res) => {
-    try{
+exports.createReview = async (req, res) => {
+    try {
         const { reviewType, reviewedItemId, reviewerId, score, description } = req.body;
 
         //first need to check if the reviewer has already reviewed this topic
-        const existingReviews = await Review.findAll({ where: { reviewType: reviewType, reviewedItemId: reviewedItemId, reviewerId: reviewerId }});
+        const existingReviews = await Review.findAll({ where: { reviewType: reviewType, reviewedItemId: reviewedItemId, reviewerId: reviewerId } });
 
-        if(existingReviews.length > 0) {
+        if (existingReviews.length > 0) {
             return res.status(404).json({
                 status: "error",
                 message: "The user has already created a review for this item",
@@ -74,7 +72,7 @@ exports.createReview = async(req, res) => {
             errors: []
         })
 
-    } catch(err) {
+    } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",

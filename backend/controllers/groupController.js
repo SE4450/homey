@@ -241,6 +241,49 @@ exports.createGroup = async (req, res) => {
     }
 };
 
+exports.getGroupParticipants = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        // Find the group
+        const group = await Group.findOne({
+            where: { id: groupId },
+            include: [
+                {
+                    model: User,
+                    as: "participants",
+                    attributes: ["id", "firstName", "lastName", "email", "username"],
+                    through: { attributes: [] },
+                },
+            ],
+        });
+
+        // If no group found, return 404 error
+        if (!group) {
+            return res.status(404).json({
+                status: "error",
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Participants retrieved successfully",
+            data: group.participants,
+            errors: [],
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve participants",
+            data: null,
+            errors: [error.message],
+        });
+    }
+};
+
 exports.updateGroup = async (req, res) => {
     try {
         const { name, participants } = req.body;

@@ -9,10 +9,14 @@ import {
     Alert,
     StyleSheet,
     TouchableOpacity,
+    ActivityIndicator
 } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import ExpenseRow from "./components/expenseRow";
+import RoommateSelector from "./components/roomateSelector";
+import { useIsFocused } from "@react-navigation/native";
+import useUser from "./hooks/useUser";
 
 interface Expense {
     id: number;
@@ -52,6 +56,7 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     const [simplifiedDebts, setSimplifiedDebts] = useState<SimplifiedDebt[]>([]);
     const { get, post, error, put } = useAxios();
     const { userId } = useAuth();
+    const isFocused = useIsFocused();
 
     useEffect(() => {
         if (error) {
@@ -81,7 +86,7 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     // Fetch all users for the multi-select (excluding the current user)
     const fetchAllUsers = async () => {
         try {
-            const response = await get<any>("/api/users");
+            const response = await get<any>(`/api/groups/${groupId}/participants`);
             if (response) {
                 const users = response.data.filter((user: User) => user.id !== Number(userId));
                 setAllUsers(users);
@@ -92,9 +97,11 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     };
 
     useEffect(() => {
-        fetchAllUsers();
-        fetchExpenses();
-    }, []);
+        if (isFocused) {
+            fetchAllUsers();
+            fetchExpenses();
+        }
+    }, [isFocused]);
 
     // Handle adding a new expense – create one expense row per selected payee with split amount
     const handleAddExpense = async () => {
@@ -138,11 +145,8 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
 
     // Handle expense completion via checkmark press in ExpenseRow
     const handleCompleteExpense = async (expenseId: number) => {
-        // Wait 60 seconds then mark expense as complete
-        setTimeout(async () => {
-            await put(`/api/expenses/${expenseId}/complete`, {});
-            fetchExpenses();
-        }, 60000);
+        await put(`/api/expenses/${expenseId}/complete`, {});
+        fetchExpenses();
     };
 
     // Compute simplified debts based on expensesOwed and expensesOwe

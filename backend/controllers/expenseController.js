@@ -1,19 +1,19 @@
-const { Expense, User, Group } = require("../models"); // Ensure models are imported
+const { Expense, User, Group } = require("../models/associations"); // Ensure models are imported
 
 /**
  * Add an Expense to a Group
  */
 exports.addExpense = async (req, res) => {
     try {
-        const { groupId, description, amount, owedTo, paidBy } = req.body;
+        const { expenseName, groupId, amount, owedTo, paidBy } = req.body;
 
         // Validate required fields
-        if (!groupId || !description || !amount || !owedTo || !paidBy) {
+        if (!expenseName || !groupId || !amount || !owedTo || !paidBy) {
             return res.status(400).json({
                 status: "error",
                 message: "Missing required fields",
                 data: [],
-                errors: ["groupId, description, amount, owedTo, and paidBy are required"],
+                errors: ["groupId, amount, owedTo, and paidBy are required"],
             });
         }
 
@@ -31,13 +31,12 @@ exports.addExpense = async (req, res) => {
         // Create the expense
         const expense = await Expense.create({
             groupId,
-            description,
+            expenseName,
             amount,
             owedTo,
             paidBy,
             completed: false,
         });
-
 
         res.status(201).json({
             status: "success",
@@ -46,6 +45,7 @@ exports.addExpense = async (req, res) => {
             errors: [],
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             status: "error",
             message: "Failed to add expense",
@@ -60,35 +60,63 @@ exports.addExpense = async (req, res) => {
  */
 exports.getExpenses = async (req, res) => {
     try {
+        // Extract parameters
         const { groupId } = req.params;
-        const { owedBy, paidBy } = req.query; // Query params for filtering
+        const { owedBy, paidBy } = req.query;
 
-        // Ensure the group exists
-        const group = await Group.findByPk(groupId);
-        if (!group) {
-            return res.status(404).json({
+        // Ensure groupId is a number
+        const groupIdNum = parseInt(groupId, 10);
+        if (isNaN(groupIdNum)) {
+            return res.status(400).json({
                 status: "error",
-                message: "Group not found",
-                data: null,
-                errors: [`No group found with ID ${groupId}`],
+                message: "Invalid group ID",
+                data: [],
+                errors: ["Group ID must be a number"],
             });
         }
 
-        // Build query conditions
-        let whereClause = { groupId };
-        if (owedBy) whereClause.owedTo = owedBy;
-        if (paidBy) whereClause.paidBy = paidBy;
+        // Build the where clause
+        let whereClause = { groupId: groupIdNum };
 
-        whereClause.completed = false;
+        if (owedBy) {
+            const owedByNum = parseInt(owedBy, 10);
+            if (!isNaN(owedByNum)) {
+                whereClause.owedTo = owedByNum;
+            }
+        }
 
-        // Fetch the expenses
+        if (paidBy) {
+            const paidByNum = parseInt(paidBy, 10);
+            if (!isNaN(paidByNum)) {
+                whereClause.paidBy = paidByNum;
+            }
+        }
+
+        // Retrieve expenses
         const expenses = await Expense.findAll({
             where: whereClause,
             include: [
-                { model: User, as: "owedToUser", attributes: ["id", "firstName", "lastName"] },
-                { model: User, as: "paidByUser", attributes: ["id", "firstName", "lastName"] },
+                {
+                    model: User,
+                    as: "owedToUser",
+                    attributes: ["id", "firstName", "lastName", "email"],
+                },
+                {
+                    model: User,
+                    as: "paidByUser",
+                    attributes: ["id", "firstName", "lastName", "email"],
+                },
             ],
         });
+
+        if (!expenses || expenses.length === 0) {
+            return res.status(404).json({
+                status: "error",
+                message: "No expenses found matching the provided criteria",
+                data: [],
+                errors: [`No expenses found for group ID ${groupId}`],
+            });
+        }
 
         res.status(200).json({
             status: "success",

@@ -26,7 +26,7 @@ export default function ReviewStackScreen({ groupId, role }: ReviewScreenProps) 
             <ReviewStack.Screen name="mainProfile" component={mainProfileScreen} options={{
                 headerShown: false
             }} />
-            <ReviewStack.Screen name="editProfile" component={editProfileScreen} options={{
+            <ReviewStack.Screen name="editProfile" component={() => editProfileScreen({ groupId, role })} options={{
                 headerShown: false
             }} />
             <ReviewStack.Screen name="reviewSelection" component={reviewSelectScreen} options={{

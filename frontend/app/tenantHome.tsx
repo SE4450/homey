@@ -62,6 +62,7 @@ export default function TenantHomeScreen() {
 
     // When a group card is pressed, navigate into group details (or your group navigation screen)
     const handleNavigateToGroup = (groupId: string) => {
+        console.log("test: " + groupId);
         router.push({ pathname: "/groupNavigation", params: { groupId, role: "tenant" } });
     };
 

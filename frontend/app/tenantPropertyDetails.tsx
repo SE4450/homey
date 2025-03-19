@@ -31,9 +31,13 @@ export default function TenantPropertyDetailsScreen() {
 
     const [images, setImages] = useState<any[]>([]);
     const [loadingImages, setLoadingImages] = useState(true);
+    const [landlordRating, setLandlordRating] = useState<string>("N/A");
+    const [propertyRating, setPropertyRating] = useState<string>("N/A");
 
     useEffect(() => {
         fetchPropertyImages();
+        fetchLandlordRating();
+        fetchPropertyRating();
     }, []);
 
     useEffect(() => {
@@ -52,6 +56,42 @@ export default function TenantPropertyDetailsScreen() {
             Alert.alert("Error", "Failed to load property images.");
         } finally {
             setLoadingImages(false);
+        }
+    };
+
+    const fetchLandlordRating = async () => {
+        try {
+            const response = await get<any>("/api/reviews", { reviewType: "user", reviewedItemId: property.landlord.id });
+            if (response && response.data.length > 0) {
+                let sum = 0;
+                response.data.forEach((review: any) => {
+                    sum += review.score;
+                });
+                const avg = (sum / response.data.length).toFixed(1);
+                setLandlordRating(avg);
+            } else {
+                setLandlordRating("N/A");
+            }
+        } catch (err) {
+            setLandlordRating("N/A");
+        }
+    };
+
+    const fetchPropertyRating = async () => {
+        try {
+            const response = await get<any>("/api/reviews", { reviewType: "property", reviewedItemId: property.id });
+            if (response && response.data.length > 0) {
+                let sum = 0;
+                response.data.forEach((review: any) => {
+                    sum += review.score;
+                });
+                const avg = (sum / response.data.length).toFixed(1);
+                setPropertyRating(avg);
+            } else {
+                setPropertyRating("N/A");
+            }
+        } catch (err) {
+            setPropertyRating("N/A");
         }
     };
 
@@ -85,17 +125,47 @@ export default function TenantPropertyDetailsScreen() {
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Property Details</Text>
                             <Text style={styles.detailText}>🏠 {property.propertyType}</Text>
-                            <Text style={styles.detailText}>📍 {property.address}, {property.city}</Text>
+                            <Text style={styles.detailText}>
+                                📍 {property.address}, {property.city}
+                            </Text>
                             <Text style={styles.detailText}>💰 ${property.price} / month</Text>
                             <Text style={styles.detailText}>🛏 {property.bedrooms} Bedroom(s)</Text>
                             <Text style={styles.description}>{property.description}</Text>
+                            {/* House Rating Field */}
+                            <TouchableOpacity
+                                style={styles.reviewButton}
+                                onPress={() =>
+                                    navigation.navigate("allReviews", { reviewType: "property", itemId: property.id })
+                                }
+                            >
+                                <Text style={[styles.detailText, styles.ratingText]}>
+                                    ⭐ {propertyRating} / 5.0
+                                </Text>
+                                <Ionicons name="chevron-forward" size={20} color="gray" style={{ marginLeft: 5 }} />
+                            </TouchableOpacity>
+
                         </View>
 
                         {/* Landlord Contact Section */}
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Landlord Contact</Text>
-                            <Text style={styles.detailText}>👤 {property.landlord.firstName} {property.landlord.lastName}</Text>
+                            <Text style={styles.detailText}>
+                                👤 {property.landlord.firstName} {property.landlord.lastName}
+                            </Text>
                             <Text style={styles.detailText}>📧 {property.landlord.email}</Text>
+                            {/* Landlord Rating Field */}
+                            <TouchableOpacity
+                                style={styles.reviewButton}
+                                onPress={() =>
+                                    navigation.navigate("allReviews", { reviewType: "user", itemId: property.landlord.id })
+                                }
+                            >
+                                <Text style={[styles.detailText, styles.ratingText]}>
+                                    ⭐ {landlordRating} / 5.0
+                                </Text>
+                                <Ionicons name="chevron-forward" size={20} color="gray" style={{ marginLeft: 5 }} />
+                            </TouchableOpacity>
+
                             <Button
                                 text="Contact Landlord"
                                 onClick={handleEmailLandlord}
@@ -119,11 +189,13 @@ export default function TenantPropertyDetailsScreen() {
                         {item.description && <Text style={styles.imageDescription}>{item.description}</Text>}
                     </View>
                 )}
-                ListEmptyComponent={loadingImages ? (
-                    <ActivityIndicator size="large" color="#0000ff" />
-                ) : (
-                    <Text style={styles.noImagesText}>No images available.</Text>
-                )}
+                ListEmptyComponent={
+                    loadingImages ? (
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    ) : (
+                        <Text style={styles.noImagesText}>No images available.</Text>
+                    )
+                }
             />
         </View>
     );
@@ -155,6 +227,10 @@ const styles = StyleSheet.create({
         textAlign: "center",
         paddingRight: 35,
     },
+    reviewButton: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
     section: {
         backgroundColor: "white",
         padding: 20,
@@ -175,6 +251,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 5,
     },
+    ratingText: {
+        color: "#FFA500",
+    },
     description: {
         fontSize: 14,
         color: "#555",
@@ -183,7 +262,7 @@ const styles = StyleSheet.create({
     },
     propertyImage: {
         width: "100%",
-        height: 300, // Larger size for single-column layout
+        height: 300,
         borderRadius: 8,
     },
     imageCard: {

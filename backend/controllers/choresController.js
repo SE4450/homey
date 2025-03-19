@@ -4,14 +4,20 @@ const sequelize = require("../db.js");
 
 exports.getChores = async (req, res) => {
   try {
-    const { houseId, assignedTo } = req.query;
+    const { groupId } = req.params; // Get groupId from route parameter
+    const { assignedTo } = req.query; // Optional filter by assignee
+
+    if (!groupId) {
+      return res.status(400).json({
+        status: "error",
+        message: "groupId is required",
+        data: [],
+        errors: ["groupId must be provided as a route parameter"],
+      });
+    }
 
     // Build the filter condition
-    const whereClause = {};
-
-    if (houseId) {
-      whereClause.houseId = houseId;
-    }
+    const whereClause = { groupId };
 
     if (assignedTo) {
       whereClause.assignedTo = assignedTo;
@@ -19,7 +25,6 @@ exports.getChores = async (req, res) => {
 
     // Get all chores matching the filter
     const chores = await Chore.findAll({
-      order: ["dueDate", "ASC"],
       where: whereClause,
       include: [
         {
@@ -34,7 +39,7 @@ exports.getChores = async (req, res) => {
     if (chores.length === 0) {
       return res.status(200).json({
         status: "success",
-        message: "No chores found",
+        message: "No chores found for this group",
         data: [],
         errors: [],
       });
@@ -42,11 +47,12 @@ exports.getChores = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: `${chores.length} chore(s) found`,
+      message: `${chores.length} chore(s) found for group ${groupId}`,
       data: chores,
       errors: [],
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       status: "error",
       message: "An unexpected error occurred while fetching chores",
@@ -58,7 +64,7 @@ exports.getChores = async (req, res) => {
 
 exports.addChore = async (req, res) => {
   try {
-    const { choreName, room, assignedTo, houseId, bannerImage, dueDate } =
+    const { choreName, room, assignedTo, bannerImage, dueDate, groupId } =
       req.body;
 
     // Validate required fields
@@ -84,8 +90,8 @@ exports.addChore = async (req, res) => {
     const chore = await Chore.create({
       choreName,
       room,
+      groupId,
       assignedTo: assignedTo || null,
-      houseId: houseId || null,
       bannerImage: bannerImage || null,
       dueDate: dueDate || null,
       completed: false,
@@ -98,7 +104,7 @@ exports.addChore = async (req, res) => {
       errors: [],
     });
   } catch (err) {
-    console.error("Error adding chore:", err);
+    console.log("Error adding chore:", err);
     res.status(500).json({
       status: "error",
       message: "An unexpected error occurred while adding the chore",

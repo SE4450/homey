@@ -11,10 +11,10 @@ const {
 const { authenticateUser } = require("../middleware/authenticateUser");
 
 // Get all events
-router.get("/", authenticateUser(["tenant", "landlord"]), getEvents);
+router.get("/:groupId", authenticateUser(["tenant", "landlord"]), getEvents);
 
 // Get events within 48 hours
-router.get("/upcoming", authenticateUser(["tenant", "landlord"]), getUpcomingEvents);
+router.get("/upcoming/:groupId", authenticateUser(["tenant", "landlord"]), getUpcomingEvents);
 
 // Create a new event
 router.post("/", authenticateUser(["tenant", "landlord"]), createEvent);

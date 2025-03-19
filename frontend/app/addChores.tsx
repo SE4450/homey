@@ -39,7 +39,7 @@ interface Roommate {
   lastName: string;
 }
 
-const AddChore = () => {
+const AddChore = ({ groupId, role }: any) => {
   const [choreBanner, setChoreBanner] = useState<any>(null);
   const [chore, setChore] = useState("");
   const [room, setRoom] = useState("");
@@ -76,7 +76,7 @@ const AddChore = () => {
   const fetchRoommates = async () => {
     try {
       // Fetch users from your API
-      const response = await get<any>(`/api/users`);
+      const response = await get<any>(`/api/groups/${groupId}/participants`);
 
       if (response && response.data) {
         setRoommates(response.data);
@@ -219,6 +219,7 @@ const AddChore = () => {
         choreName: chore,
         room: room,
         bannerImage: bannerKey || null,
+        groupId,
       };
 
       // Only add assignedTo if it's provided
@@ -446,7 +447,7 @@ const AddChore = () => {
                       style={[
                         styles.dateItem,
                         dueDate &&
-                        item.toDateString() === dueDate.toDateString()
+                          item.toDateString() === dueDate.toDateString()
                           ? styles.selectedDateItem
                           : null,
                       ]}
@@ -459,7 +460,7 @@ const AddChore = () => {
                         style={[
                           styles.dateItemText,
                           dueDate &&
-                          item.toDateString() === dueDate.toDateString()
+                            item.toDateString() === dueDate.toDateString()
                             ? styles.selectedDateItemText
                             : null,
                         ]}

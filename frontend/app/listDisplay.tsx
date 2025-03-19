@@ -124,7 +124,7 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
   //function called in the useEffect to load all the users created lists
   const usersLists = async () => {
     //fetch request goes here
-    const response = await get<any>(`/api/lists?userId=${userId}`);
+    const response = await get<any>(`/api/lists/${groupId}`);
 
     //clear the array
     setLists([]);
@@ -139,8 +139,9 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
   //function to create a new list
   const createList = async () => {
     if (createdList != "") {
-      const body = { userId: userId, listName: createdList };
-      const response = await post<any>("/api/lists/createList", body);
+      const body = { userId: userId, listName: createdList, groupId };
+      const response = await post<any>(`/api/lists/createList`, body);
+      console.log(response);
 
       if (response) {
         usersLists();
@@ -239,7 +240,7 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
             <Ionicons name="arrow-back" size={18} color="#4a90e2" />
             <Text style={styles.backButtonText}>Back to Lists</Text>
           </TouchableOpacity>
-          <Lists name={listName} id={listID} houseId={userId} />
+          <Lists name={listName} id={listID} groupId={groupId} />
         </View>
       )}
     </ScrollView>

@@ -4,7 +4,19 @@ const { ValidationError, Op } = require("sequelize");
 // Get all events
 exports.getEvents = async (req, res) => {
     try {
+        const { groupId } = req.params;
+
+        if (!groupId) {
+            return res.status(400).json({
+                status: "error",
+                message: "groupId is required",
+                data: [],
+                errors: ["groupId must be provided in the request parameters"],
+            });
+        }
+
         const events = await CalendarEvent.findAll({
+            where: { groupId },
             include: [
                 {
                     model: User,
@@ -97,7 +109,7 @@ exports.getEventById = async (req, res) => {
 // Create a new event
 exports.createEvent = async (req, res) => {
     try {
-        const { title, eventDate, startTime, endTime, location, description, userId } = req.body;
+        const { title, eventDate, startTime, endTime, location, description, userId, groupId } = req.body;
 
         // Validate input fields
         const errors = [];
@@ -133,6 +145,7 @@ exports.createEvent = async (req, res) => {
 
         // Create the event
         const newEvent = await CalendarEvent.create({
+            groupId,
             title,
             eventDate,
             startTime,
@@ -252,12 +265,24 @@ exports.deleteEvent = async (req, res) => {
 
 exports.getUpcomingEvents = async (req, res) => {
     try {
+        const { groupId } = req.params;
+
+        if (!groupId) {
+            return res.status(400).json({
+                status: "error",
+                message: "groupId is required",
+                data: [],
+                errors: ["groupId must be provided in the request parameters"],
+            });
+        }
+
         const now = new Date();
         const twoDaysLater = new Date(now);
         twoDaysLater.setDate(now.getDate() + 2);
 
         const events = await CalendarEvent.findAll({
             where: {
+                groupId,
                 eventDate: {
                     [Op.between]: [now.toISOString().split('T')[0], twoDaysLater.toISOString().split('T')[0]]
                 }

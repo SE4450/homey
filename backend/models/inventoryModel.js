@@ -1,15 +1,12 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
+const Group = require("./groupModel.js");
 
 const Inventory = sequelize.define("Inventory", {
     itemId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-        allowNull: false
-    },
-    houseId: {   //this needs to be modified when the house model is created to be a foreign key
-        type: DataTypes.INTEGER,
         allowNull: false
     },
     itemName: {
@@ -19,6 +16,15 @@ const Inventory = sequelize.define("Inventory", {
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    groupId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Group,
+            key: "id",
+        },
+        onDelete: "CASCADE",
     }
 });
 

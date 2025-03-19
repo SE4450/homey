@@ -4,10 +4,28 @@ const { ValidationError } = require("sequelize");
 //get the user profile
 exports.getProfile = async (req, res) => {
     try {
-        //first get the lists for the user  query needs to be: ?userId= thid users id
-        const usersProfile = await Profile.findAll({ where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
+        const { groupId } = req.params; // Extract groupId from route parameters
+        const { userId } = req.query; // Extract userId from query parameters
 
-        if(usersProfile.length == 0) {
+        if (!groupId) {
+            return res.status(400).json({
+                status: "error",
+                message: "groupId is required",
+                data: [],
+                errors: ["groupId must be provided as a route parameter"]
+            });
+        }
+
+        // Build the where clause dynamically
+        const whereClause = { groupId };
+        if (userId) {
+            whereClause.userId = userId; // Filter by userId if it's provided
+        }
+
+        //first get the lists for the user  query needs to be: ?userId= thid users id
+        const usersProfile = await Profile.findAll({ where: whereClause }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
+
+        if (usersProfile.length == 0) {
             return res.status(404).json({
                 status: "error",
                 message: "No profile exists for the given user",
@@ -40,8 +58,6 @@ exports.getProfile = async (req, res) => {
     }
 }
 
-
-
 //create the user profile
 exports.createProfile = async (req, res) => {
     try {
@@ -73,28 +89,27 @@ exports.createProfile = async (req, res) => {
     }
 }
 
-
-
 //update the user profile
 exports.updateProfile = async (req, res) => {
     try {
-        const {  cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  } = req.body;
+        const { groupId } = req.params;
+        const { cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies, userId } = req.body;
         let userProfile = Profile;
 
-        if(cleaningHabits != null) {
-            userProfile = await Profile.update({ cleaningHabits: cleaningHabits }, { where: { id: req.params.id }});
+        if (cleaningHabits != null) {
+            userProfile = await Profile.update({ cleaningHabits: cleaningHabits }, { where: { userId, groupId } });
         }
-        if(noiseLevel != null) {
-            userProfile = await Profile.update({ noiseLevel: noiseLevel }, { where: { id: req.params.id }});
+        if (noiseLevel != null) {
+            userProfile = await Profile.update({ noiseLevel: noiseLevel }, { where: { userId, groupId } });
         }
-        if(sleepStart != null) {
-            userProfile = await Profile.update({ sleepStart: sleepStart }, { where: { id: req.params.id }});
+        if (sleepStart != null) {
+            userProfile = await Profile.update({ sleepStart: sleepStart }, { where: { userId, groupId } });
         }
-        if(sleepEnd != null) {
-            userProfile = await Profile.update({ sleepEnd: sleepEnd }, { where: { id: req.params.id }});
+        if (sleepEnd != null) {
+            userProfile = await Profile.update({ sleepEnd: sleepEnd }, { where: { userId, groupId } });
         }
-        if(alergies != null) {
-            userProfile = await Profile.update({ alergies: alergies }, { where: { id: req.params.id }});
+        if (alergies != null) {
+            userProfile = await Profile.update({ alergies: alergies }, { where: { userId, groupId } });
         }
 
         res.status(201).json({

@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-const { Group, User } = require("./associations"); // Import Group model
+const Group = require("./groupModel.js");
+const User = require("./userModel.js");
 
 const Expense = sequelize.define("Expense", {
     id: {

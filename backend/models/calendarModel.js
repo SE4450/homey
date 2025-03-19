@@ -1,6 +1,7 @@
 // calendarModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
+const Group = require("./groupModel.js");
 
 const CalendarEvent = sequelize.define("CalendarEvent", {
   id: {
@@ -38,6 +39,15 @@ const CalendarEvent = sequelize.define("CalendarEvent", {
   description: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  groupId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Group,
+      key: 'id'
+    },
+    onDelete: 'CASCADE'
   }
 }, {
   timestamps: true

@@ -319,9 +319,6 @@ exports.verify = async (req, res) => {
         user.verified = true;
         await user.save();
 
-        let id = decoded.id;
-        await Profile.create({ id });
-
         res.status(200).json({
             status: "success",
             message: `User ${decoded.id} has been verified`,

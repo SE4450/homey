@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { Provider } from "react-redux";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import { store } from "./redux/store";
@@ -41,7 +40,7 @@ interface Chore {
   };
 }
 
-export default function HomeScreen() {
+export default function HomeScreen({ groupId, role }: any) {
   const { userToken, userId } = useAuth();
   const [myActiveChores, setMyActiveChores] = useState<Chore[]>([]);
   const [roommatesActiveChores, setRoommatesActiveChores] = useState<Chore[]>(
@@ -56,7 +55,7 @@ export default function HomeScreen() {
   const fetchChores = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/chores`, {
+      const response = await axios.get(`${API_URL}/api/chores/${groupId}`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },

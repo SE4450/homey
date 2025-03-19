@@ -1,4 +1,4 @@
-const { Group, GroupParticipant, Property, User, Conversation, Participant } = require("../models/associations");
+const { Group, GroupParticipant, Property, User, Conversation, Participant, Profile } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
 const { Op } = require("sequelize");
@@ -197,12 +197,12 @@ exports.createGroup = async (req, res) => {
     try {
         const { name, propertyId, tenantIds } = req.body;
 
-        if (!name || !propertyId || !tenantIds || tenantIds.length < 2) {
+        if (!name || !propertyId || !tenantIds || tenantIds.length < 1) {
             return res.status(400).json({
                 status: "error",
                 message: "Missing required fields (name, propertyId, or tenants)",
                 data: [],
-                errors: ["Name, property, and at least one tenant are required"],
+                errors: ["Name, property, and at least two tenans are required"],
             });
         }
 
@@ -211,10 +211,17 @@ exports.createGroup = async (req, res) => {
             { transaction }
         );
 
+        const profiles = tenantIds.map((tenantId) => ({
+            userId: tenantId,
+            groupId: group.id
+        }));
+
+        await Profile.bulkCreate(profiles, { transaction });
+
         // Add tenants to the group
         const participants = tenantIds.map((tenantId) => ({
             groupId: group.id,
-            tenantId,
+            tenantId
         }));
 
         await GroupParticipant.bulkCreate(participants, { transaction });
@@ -470,6 +477,94 @@ exports.deleteGroup = async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "Failed to delete group",
+            data: null,
+            errors: [error.message],
+        });
+    }
+};
+
+exports.getLandlordInfo = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        const group = await Group.findOne({
+            where: { id: groupId },
+            include: {
+                model: User,
+                as: "landlord",
+                attributes: ["id", "firstName", "lastName", "email", "username"]
+            }
+        });
+
+        if (!group) {
+            return res.status(404).json({
+                status: "error",
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Landlord information retrieved successfully",
+            data: group.landlord,
+            errors: []
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve landlord information",
+            data: null,
+            errors: [error.message],
+        });
+    }
+};
+
+exports.getPropertyInfo = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        const group = await Group.findOne({
+            where: { id: groupId },
+            include: {
+                model: Property,
+                as: "property",
+                attributes: ["id", "name", "address", "city", "exteriorImage"]
+            }
+        });
+
+        if (!group) {
+            return res.status(404).json({
+                status: "error",
+                message: "Group not found",
+                data: null,
+                errors: [`No group found with ID ${groupId}`],
+            });
+        }
+
+        const groupJSON = group.property.toJSON();
+        console.log("test" + groupJSON.firstName);
+        const exteriorImageBase64 = groupJSON.exteriorImage ? `data:image/jpeg;base64,${groupJSON.exteriorImage.toString("base64")}` : null;
+
+        res.status(200).json({
+            status: "success",
+            message: "Property information retrieved successfully",
+            data: {
+                id: groupJSON.id,
+                city: groupJSON.city,
+                address: groupJSON.address,
+                name: groupJSON.name,
+                exteriorImage: exteriorImageBase64
+            },
+            errors: []
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to retrieve property information",
             data: null,
             errors: [error.message],
         });

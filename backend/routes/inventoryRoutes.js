@@ -3,9 +3,9 @@ const router = express.Router();
 const { getInventory, getLowItem, createInventory, deleteInventoryItem, removeQuantity } = require("../controllers/inventoryController.js");
 const { authenticateUser } = require("../middleware/authenticateUser");
 
-router.get("/", authenticateUser(["tenant", "landlord"]), getInventory);
+router.get("/:groupId", authenticateUser(["tenant", "landlord"]), getInventory);
 
-router.get("/getLowItem", authenticateUser(["tenant", "landlord"]), getLowItem);
+router.get("/getLowItem/:groupId", authenticateUser(["tenant", "landlord"]), getLowItem);
 
 router.post("/createInventory", authenticateUser(["tenant", "landlord"]), createInventory);
 

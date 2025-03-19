@@ -6,19 +6,16 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Platform,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
-import { useRouter } from "expo-router";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 
-const AddEvent = () => {
-  const router = useRouter();
+const AddEvent = ({ groupId, role }: any) => {
   const navigation = useNavigation();
   const { post, loading, error } = useAxios();
   const { userId } = useAuth();
@@ -59,6 +56,7 @@ const AddEvent = () => {
       location,
       description,
       userId,
+      groupId
     };
 
     const result = await post("/api/calendar", data);

@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
+const Group = require("./groupModel.js")
 
 const List = sequelize.define("List", {
     listId: {
@@ -16,6 +17,15 @@ const List = sequelize.define("List", {
     listName: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    groupId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Group,
+            key: "id",
+        },
+        onDelete: "CASCADE",
     }
 });
 

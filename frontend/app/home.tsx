@@ -18,6 +18,7 @@ import useUser from "./hooks/useUser";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "./context/AuthContext";
 import axios from "axios";
+import { useRouter } from "expo-router";
 
 const COLORS = {
   PRIMARY: "#4a90e2",
@@ -40,6 +41,7 @@ type RootStackParamList = {
   Inventory: undefined;
   calendar: undefined;
   Chores: undefined;
+  Expenses: undefined
   // Add other screens as needed
 };
 
@@ -86,6 +88,7 @@ type HomeScreenProps = {
 export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
   const { user, userLoading, userError } = useUser();
+  const router = useRouter();
   const { get, error } = useAxios();
   const isFocused = useIsFocused();
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -142,7 +145,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
 
     try {
       // Check if the API endpoint exists before making the request
-      const response = await axios.get(`${API_URL}/api/calendar/upcoming`, {
+      const response = await axios.get(`${API_URL}/api/calendar/upcoming/${groupId}`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
@@ -184,7 +187,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
     setInventoryAlert([]);
 
     const response = await get<any>(
-      `/api/inventory/getLowItem?houseId=${user.id}&quantity=1&quantity=0`
+      `/api/inventory/getLowItem/${groupId}?quantity=1&quantity=0`
     );
 
     if (response) {
@@ -214,7 +217,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
     try {
       // Fetch chores assigned to the user
       const choresResponse = await axios.get(
-        `${API_URL}/api/chores?assignedTo=${userId}`,
+        `${API_URL}/api/chores/${groupId}?assignedTo=${userId}`,
         {
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -242,7 +245,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       let pendingChores = 0;
       try {
         const choresResponse = await axios.get(
-          `${API_URL}/api/chores?assignedTo=${userId}`,
+          `${API_URL}/api/chores/${groupId}?assignedTo=${userId}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -263,7 +266,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       let totalOwed = 0;
       try {
         const expensesResponse = await axios.get(
-          `${API_URL}/api/expenses?paidBy=${userId}`,
+          `${API_URL}/api/expenses/${groupId}?paidBy=${userId}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -358,14 +361,14 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           <View style={styles.quickActionsRow}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate("List")}
+              onPress={() => navigation.navigate(role == "tenant" ? "List" : "Expenses")}
             >
               <Icon
-                name="format-list-bulleted"
+                name={role == "tenant" ? "format-list-bulleted" : "account-cash"}
                 size={22}
                 color={COLORS.WHITE}
               />
-              <Text style={styles.actionButtonText}>Create List</Text>
+              <Text style={styles.actionButtonText}>{role == "tenant" ? "Create List" : "Add Expense"}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
@@ -383,7 +386,9 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </TouchableOpacity>
           </View>
         </View>
-
+        <TouchableOpacity style={styles.exitGroupButton} onPress={() => router.push("/homeNavigation")}>
+          <Text style={styles.exitGroupButtonText}>Exit Group</Text>
+        </TouchableOpacity>
         {inventoryAlert.length != 0 && (
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
@@ -489,7 +494,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </View>
           </View>
         </View>
-
         <Text style={styles.lastRefreshedText}>
           Last updated: {lastRefreshed.toLocaleTimeString()}
         </Text>
@@ -561,6 +565,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: COLORS.WHITE,
+    fontSize: 13,
     fontWeight: "bold",
     marginTop: 5,
   },
@@ -720,5 +725,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
     marginBottom: 10,
+  },
+  exitGroupButton: {
+    backgroundColor: "#D32F2F",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 15,
+    alignSelf: "center",
+    width: "80%",
+  },
+  exitGroupButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

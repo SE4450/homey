@@ -4,7 +4,7 @@ import ConversationScreen from "../conversation";
 
 export type MessageStackParamList = {
     contacts: undefined;
-    conversation: { id: string; name: string };
+    conversation: { id: string; name: string, type: string };
 };
 
 const MessageStack = createStackNavigator<MessageStackParamList>();

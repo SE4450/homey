@@ -63,6 +63,7 @@ export default function ConversationScreen() {
                                 minute: "2-digit",
                             }),
                             status: null,
+                            name: `${message.users.firstName} ${message.users.lastName}`
                         };
                     });
 
@@ -138,6 +139,8 @@ export default function ConversationScreen() {
             senderType={item.sender}
             timestamp={item.timestamp}
             status={item.status}
+            type={route.params.type}
+            sender={item.name}
         />
     );
 

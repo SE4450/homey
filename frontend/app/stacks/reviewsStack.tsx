@@ -15,18 +15,13 @@ export type ReviewStackParamList = {
 
 const ReviewStack = createStackNavigator<ReviewStackParamList>();
 
-type ReviewScreenProps = {
-    groupId: string;
-    role: string;
-};
-
-export default function ReviewStackScreen({ groupId, role }: ReviewScreenProps) {
+export default function ReviewStackScreen() {
     return (
         <ReviewStack.Navigator>
             <ReviewStack.Screen name="mainProfile" component={mainProfileScreen} options={{
                 headerShown: false
             }} />
-            <ReviewStack.Screen name="editProfile" component={() => editProfileScreen({ groupId, role })} options={{
+            <ReviewStack.Screen name="editProfile" component={editProfileScreen} options={{
                 headerShown: false
             }} />
             <ReviewStack.Screen name="reviewSelection" component={reviewSelectScreen} options={{

@@ -21,12 +21,7 @@ export type ChoresStackParamList = {
 
 const ChoresStack = createStackNavigator<ChoresStackParamList>();
 
-type ChoreScreenProps = {
-  groupId: string;
-  role: string;
-};
-
-export default function ChoresStackScreen({ groupId, role }: ChoreScreenProps) {
+export default function ChoresStackScreen() {
   return (
     <ChoresStack.Navigator>
       <ChoresStack.Screen

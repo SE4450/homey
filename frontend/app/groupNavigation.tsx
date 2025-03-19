@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
+
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import HomeScreen from "./home";
-import ProfileScreen from "./profile";
 import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
@@ -33,10 +33,6 @@ export default function GroupNavigationScreen() {
   const { userToken, userId, userRole } = useAuth();
   const { get, error } = useAxios();
   const router = useRouter();
-  const { groupId, role } = useLocalSearchParams();
-  const groupIdString = groupId as string;
-  const roleString = role as string;
-
 
   useEffect(() => {
     if (error) {
@@ -82,8 +78,6 @@ export default function GroupNavigationScreen() {
             iconName = "message";
           } else if (route.name === "Inventory") {
             iconName = "inventory";
-          } else if (route.name === "Reviews") {
-            iconName = "star-rate";
           } else if (route.name === "Profile") {
             iconName = "account-circle";
           } else if (route.name === "Calendar") {
@@ -98,30 +92,14 @@ export default function GroupNavigationScreen() {
         tabBarInactiveTintColor: "grey",
       })}
     >
-      <Tab.Screen name="Home">
-        {() => <HomeScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Profile">
-        {() => <ProfileScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="List">
-        {() => <ListScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Expenses">
-        {() => <ExpenseScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Chores">
-        {() => <ChoresStackScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Messages">
-        {() => <MessageStackScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Inventory">
-        {() => <InventoryScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Reviews">
-        {() => <ReviewsScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Profile" component={ReviewsScreen} />
+      <Tab.Screen name="List" component={ListScreen} />
+      <Tab.Screen name="Expenses" component={ExpenseScreen} />
+      <Tab.Screen name="Chores" component={ChoresStackScreen} />
+      <Tab.Screen name="Messages" component={MessageStackScreen} />
+      <Tab.Screen name="Inventory" component={InventoryScreen} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} />
     </Tab.Navigator>
   );
 }

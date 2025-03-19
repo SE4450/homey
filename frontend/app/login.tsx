@@ -42,7 +42,7 @@ const LoginScreen = () => {
 
     if (response) {
       await login(response.data[0].token);
-      router.push(`/homeNavigation`);
+      router.push(`/groupNavigation`);
     }
   };
 

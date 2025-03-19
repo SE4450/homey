@@ -88,7 +88,7 @@ const EditEvent = () => {
       Alert.alert("Success", "Event updated successfully");
       navigation.goBack();
     } else if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   };
 

@@ -78,7 +78,7 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
         fetchUserMap();
     }, [error]);
@@ -100,7 +100,7 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             setExpensesOwe(oweData);
             computeSimplifiedDebts(owedData, oweData);
         } catch (fetchError) {
-            Alert.alert("Error", "Failed to fetch expenses.");
+            //Alert.alert("Error", "Failed to fetch expenses.");
         }
     };
 
@@ -119,7 +119,7 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             });
             setHistoryExpenses(merged);
         } catch (error) {
-            Alert.alert("Error", "Failed to fetch history.");
+            //Alert.alert("Error", "Failed to fetch history.");
         }
     };
 

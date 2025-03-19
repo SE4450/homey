@@ -38,7 +38,7 @@ export default function ConversationScreen() {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 
@@ -80,7 +80,7 @@ export default function ConversationScreen() {
                     setMessages(formattedMessages.reverse());
                 }
             } catch (err) {
-                Alert.alert("Error", `Failed to fetch messages in conversation:\n${err}`);
+                //Alert.alert("Error", `Failed to fetch messages in conversation:\n${err}`);
             }
         };
 

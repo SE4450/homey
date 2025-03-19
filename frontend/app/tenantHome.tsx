@@ -39,7 +39,7 @@ export default function TenantHomeScreen() {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

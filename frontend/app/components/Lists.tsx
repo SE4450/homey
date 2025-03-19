@@ -181,7 +181,7 @@ export default function Lists(props: {
       return response;
     } catch (error) {
       console.error("Error fetching roommates:", error);
-      Alert.alert("Error", "Failed to load roommates. Please try again.");
+      //Alert.alert("Error", "Failed to load roommates. Please try again.");
       return null;
     }
   };

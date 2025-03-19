@@ -61,11 +61,11 @@ export default function AddEditPropertyImageScreen() {
                     Alert.alert("Success", `Image ${mode === "add" ? "added" : "updated"} successfully!`);
                     navigation.goBack();
                 } else {
-                    Alert.alert("Error", `Failed to ${mode === "add" ? "add" : "update"} image.`);
+                    //Alert.alert("Error", `Failed to ${mode === "add" ? "add" : "update"} image.`);
                 }
             };
         } catch (error) {
-            Alert.alert("Error", "Failed to process image. Please try again.");
+            //Alert.alert("Error", "Failed to process image. Please try again.");
             setLoading(false);
         }
     };

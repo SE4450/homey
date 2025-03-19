@@ -42,7 +42,7 @@ export default function GroupProfileScreen({ groupId, role }: any) {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

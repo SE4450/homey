@@ -70,7 +70,7 @@ export default function CalendarWithEvents({ groupId, role }: any) {
 
       setItems(formattedEvents);
     } else {
-      Alert.alert("Error", error || "Failed to fetch events");
+      //Alert.alert("Error", error || "Failed to fetch events");
     }
   };
 

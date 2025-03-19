@@ -35,7 +35,7 @@ export default function AddReviewScreen() {
     // Show errors if any occur
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

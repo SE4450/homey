@@ -115,7 +115,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
 
   useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   }, [error]);
 

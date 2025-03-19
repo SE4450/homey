@@ -36,7 +36,7 @@ const RoommateSelector: React.FC<RoommateSelectorProps> = ({ groupId, onSelect }
                     );
                 }
             } catch (err) {
-                Alert.alert("Error", "Failed to fetch roommates.");
+                //Alert.alert("Error", "Failed to fetch roommates.");
             } finally {
                 setLoading(false);
             }
@@ -47,7 +47,7 @@ const RoommateSelector: React.FC<RoommateSelectorProps> = ({ groupId, onSelect }
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

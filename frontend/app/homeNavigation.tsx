@@ -26,7 +26,7 @@ export default function AppNavigator() {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

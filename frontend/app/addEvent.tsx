@@ -65,7 +65,7 @@ const AddEvent = ({ groupId, role }: any) => {
       Alert.alert("Success", "Event created successfully");
       navigation.goBack();
     } else if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   };
 

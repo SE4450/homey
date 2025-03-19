@@ -25,7 +25,7 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
 
   useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   }, [error]);
 
@@ -79,10 +79,10 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
         setConversations(formattedConversations);
       }
     } catch (err) {
-      Alert.alert(
-        "Error",
-        `Failed to fetch conversations for reason:\n\n${err}`
-      );
+      // Alert.alert(
+      //   "Error",
+      //   `Failed to fetch conversations for reason:\n\n${err}`
+      // );
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
 
   const createConversation = async () => {
     if (!newUserId) {
-      Alert.alert("Error", "Please enter a user ID to create a conversation.");
+      //Alert.alert("Error", "Please enter a user ID to create a conversation.");
       return;
     }
     try {

@@ -151,7 +151,7 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
   //useEffect that is triggered on errors
   useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   }, [error]);
 

@@ -50,7 +50,7 @@ export default function ViewEditPropertyScreen() {
         try {
             const propertyResponse = await get<any>(`/api/properties/${propertyId}`);
             if (!propertyResponse) {
-                Alert.alert("Error", "Failed to fetch property details.");
+                //Alert.alert("Error", "Failed to fetch property details.");
                 navigation.goBack();
                 return;
             }
@@ -61,7 +61,7 @@ export default function ViewEditPropertyScreen() {
                 images: extraImages,
             });
         } catch (error) {
-            Alert.alert("Error", "Failed to fetch property details.");
+            //Alert.alert("Error", "Failed to fetch property details.");
             navigation.goBack();
         } finally {
             setLoading(false);

@@ -39,7 +39,7 @@ export default function GroupNavigationScreen() {
 
   useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   }, [error]);
 

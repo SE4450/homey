@@ -38,7 +38,7 @@ export default function AddGroupScreen() {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 
@@ -54,7 +54,7 @@ export default function AddGroupScreen() {
                 }
             }
         } catch (err) {
-            Alert.alert("Error", "Failed to fetch properties.");
+            //Alert.alert("Error", "Failed to fetch properties.");
         } finally {
             setLoading(false);
         }
@@ -69,7 +69,7 @@ export default function AddGroupScreen() {
 
     const handleAddParticipant = async () => {
         if (!username.trim()) {
-            Alert.alert("Error", "Please enter a username.");
+            //Alert.alert("Error", "Please enter a username.");
             return;
         }
 

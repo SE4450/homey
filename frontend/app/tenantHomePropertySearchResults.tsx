@@ -42,7 +42,7 @@ export default function TenantHomePropertySearchResultsScreen() {
 
   useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      //Alert.alert("Error", error);
     }
   }, [error]);
 
@@ -70,7 +70,7 @@ export default function TenantHomePropertySearchResultsScreen() {
         fetchLandlordRatings(uniqueLandlordIds);
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch properties.");
+      //Alert.alert("Error", "Failed to fetch properties.");
     } finally {
       setLoading(false);
     }

@@ -38,7 +38,7 @@ export default function DisplayReviews() {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", error);
+            //Alert.alert("Error", error);
         }
     }, [error]);
 

@@ -83,7 +83,7 @@ const AddChore = ({ groupId, role }: any) => {
       }
     } catch (error) {
       console.error("Error fetching roommates:", error);
-      Alert.alert("Error", "Failed to load roommates. Please try again.");
+      //Alert.alert("Error", "Failed to load roommates. Please try again.");
     }
   };
 
@@ -203,7 +203,7 @@ const AddChore = ({ groupId, role }: any) => {
 
   const handleAddChore = async () => {
     if (!chore.trim() || !room.trim()) {
-      Alert.alert("Error", "Please enter both chore name and room");
+      //Alert.alert("Error", "Please enter both chore name and room");
       return;
     }
 
@@ -246,7 +246,7 @@ const AddChore = ({ groupId, role }: any) => {
       }
     } catch (error) {
       console.error("Error adding chore:", error);
-      Alert.alert("Error", "Failed to add chore. Please try again.");
+      //Alert.alert("Error", "Failed to add chore. Please try again.");
     } finally {
       setIsLoading(false);
     }

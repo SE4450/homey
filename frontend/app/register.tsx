@@ -29,7 +29,7 @@ const RegisterScreen = () => {
 
     useEffect(() => {
         if (error) {
-            Alert.alert("Error", "\n" + error);
+            //Alert.alert("Error", "\n" + error);
         }
     }, [error]);
 
@@ -85,7 +85,7 @@ const RegisterScreen = () => {
         }
 
         if (errors.length > 0) {
-            Alert.alert("Error", "\n" + errors.join("\n\n"));
+            //Alert.alert("Error", "\n" + errors.join("\n\n"));
             return;
         }
 

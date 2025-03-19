@@ -4,7 +4,6 @@ import editProfileScreen from "../profile";
 import reviewSelectScreen from "../reviewSelection";
 import displayReviewScreen from "../displayReviews";
 import reviewScreen from "../reviews";
-
 export type ReviewStackParamList = {
     mainProfile: undefined,
     editProfile: undefined,
@@ -12,14 +11,11 @@ export type ReviewStackParamList = {
     displayReview: undefined;
     review: { reviewName: String, reviewType: String, itemId: Number };
 };
-
 const ReviewStack = createStackNavigator<ReviewStackParamList>();
-
 type ReviewScreenProps = {
     groupId: string;
     role: string;
 };
-
 export default function ReviewStackScreen({ groupId, role }: ReviewScreenProps) {
     return (
         <ReviewStack.Navigator>

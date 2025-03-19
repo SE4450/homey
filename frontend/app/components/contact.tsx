@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-
 type ContactProps = {
     imageUri: string;
     name: string;
@@ -9,7 +8,6 @@ type ContactProps = {
     hasNewMessage: boolean;
     onPress: () => void;
 };
-
 const Contact: React.FC<ContactProps> = ({ imageUri, name, latestMessage, date, hasNewMessage, onPress }) => {
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
@@ -27,7 +25,6 @@ const Contact: React.FC<ContactProps> = ({ imageUri, name, latestMessage, date, 
         </TouchableOpacity>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
@@ -73,5 +70,4 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
     },
 });
-
 export default Contact;

@@ -1,6 +1,5 @@
 import React from "react";
 import { TextInput, StyleSheet, TextStyle, ViewStyle, KeyboardTypeOptions } from "react-native";
-
 type TextFieldProps = {
     placeholder?: string;
     customStyle?: {
@@ -13,7 +12,6 @@ type TextFieldProps = {
     disabled?: boolean;
     keyboardType?: KeyboardTypeOptions; // New optional prop for numeric input
 };
-
 const TextField: React.FC<TextFieldProps> = ({
     placeholder = "",
     customStyle = {},
@@ -36,7 +34,6 @@ const TextField: React.FC<TextFieldProps> = ({
         />
     );
 };
-
 const styles = StyleSheet.create({
     input: {
         height: 40,
@@ -51,5 +48,4 @@ const styles = StyleSheet.create({
         color: "#a0a0a0",
     },
 });
-
 export default TextField;

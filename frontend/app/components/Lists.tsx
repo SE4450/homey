@@ -9,10 +9,8 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
 import useAxios from "../hooks/useAxios";
 import Dropdown from "./dropdown";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -143,7 +141,6 @@ const styles = StyleSheet.create({
     color: "#888",
   },
 });
-
 export default function Lists(props: {
   name: String;
   id: Number;
@@ -162,16 +159,13 @@ export default function Lists(props: {
     [] as Array<{ id: number; firstName: string; lastName: string }>
   );
   const [isLoading, setIsLoading] = useState(true);
-
   const { post, get, error } = useAxios();
-
   useEffect(() => {
     // Load both data sources and then set loading to false
     Promise.all([getItems(), fetchRoommates()]).finally(() =>
       setIsLoading(false)
     );
   }, []);
-
   const fetchRoommates = async () => {
     try {
       const response = await get<any>(`/api/users`);
@@ -185,14 +179,11 @@ export default function Lists(props: {
       return null;
     }
   };
-
   const getItems = async () => {
     try {
       const body = { listId: props.id };
       const response = await get<any>("/api/lists/items", body);
-
       setListItems([]);
-
       if (response) {
         response.data.forEach(
           (item: {
@@ -230,12 +221,10 @@ export default function Lists(props: {
       return null;
     }
   };
-
   const addItem = async () => {
     if (item != "") {
       const body = { listId: props.id, item: item };
       const response = await post<any>("/api/lists/createItem", body);
-
       if (response) {
         getItems();
         setItem("");
@@ -244,7 +233,6 @@ export default function Lists(props: {
       Alert.alert("Error", "You must enter an item");
     }
   };
-
   const deleteRow = async (deleteItemId: Number) => {
     Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
       {
@@ -256,7 +244,6 @@ export default function Lists(props: {
         onPress: async () => {
           const body = { listId: props.id, rowNum: deleteItemId };
           const response = await post<any>("/api/lists/deleteItem", body);
-
           if (response) {
             getItems();
             Alert.alert("Success", "Item deleted successfully");
@@ -266,7 +253,6 @@ export default function Lists(props: {
       },
     ]);
   };
-
   const confirmPurchase = async (
     itemId: Number,
     itemName: String,
@@ -280,18 +266,14 @@ export default function Lists(props: {
         assignedTo: null,
         purchased: 1,
       };
-
       const response = await post<any>("/api/lists/updateItem", body);
-
       if (response) {
         getItems();
-
         const inventoryBody = { itemName: itemName, houseId: props.houseId };
         const inventoryResponse = await post<any>(
           "/api/inventory/createInventory",
           inventoryBody
         );
-
         if (inventoryResponse) {
           Alert.alert(
             "Success",
@@ -306,7 +288,6 @@ export default function Lists(props: {
       );
     }
   };
-
   const updateAssigment = async (itemId: Number, assignee: String) => {
     const body = {
       rowNum: itemId,
@@ -315,9 +296,7 @@ export default function Lists(props: {
       assignedTo: assignee,
       purchased: 0,
     };
-
     const response = await post<any>("/api/lists/updateItem", body);
-
     if (response) {
       // Find the user name for the success message
       const assignedUser = users.find(
@@ -326,30 +305,24 @@ export default function Lists(props: {
       const userName = assignedUser
         ? `${assignedUser.firstName} ${assignedUser.lastName}`
         : assignee;
-
       getItems();
       Alert.alert("Success", `Item assigned to ${userName}`);
     }
   };
-
   // Helper function to get full name from user ID
   const getUserFullName = (userId: string) => {
     // If userId is empty, return "Assign"
     if (!userId || userId.trim() === "") {
       return "Assign";
     }
-
     // Try to find the user by ID
     const user = users.find((user) => user.id.toString() === userId.toString());
-
     // Return the full name if found, otherwise return the ID to at least show something
     return user ? `${user.firstName} ${user.lastName}` : userId;
   };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.listTitle}>{props.name}</Text>
-
       <Text style={styles.inputLabel}>New Entry:</Text>
       <TextInput
         style={styles.textAreaFormat}
@@ -357,11 +330,9 @@ export default function Lists(props: {
         value={item}
         onChangeText={(text) => setItem(text)}
       />
-
       <TouchableOpacity style={styles.addButton} onPress={addItem}>
         <Text style={styles.addButtonText}>Add Item To List</Text>
       </TouchableOpacity>
-
       {isLoading ? (
         <Text style={styles.emptyListMessage}>Loading...</Text>
       ) : listItems.length > 0 ? (
@@ -380,7 +351,6 @@ export default function Lists(props: {
               <Text style={styles.tableCaption}>Actions</Text>
             </View>
           </View>
-
           {listItems.map((item, index) => (
             <View
               key={`row_${index}`}
@@ -399,7 +369,6 @@ export default function Lists(props: {
                   {item.item}
                 </Text>
               </View>
-
               <View style={styles.tableRow}>
                 <Dropdown
                   options={users.map(
@@ -423,7 +392,6 @@ export default function Lists(props: {
                   key={`dropdown-${item.itemId}-${item.AssignedTo}`}
                 />
               </View>
-
               <View style={styles.tableRow}>
                 <Text style={styles.tableData}>
                   {item.purchased === "Yes" ? (
@@ -433,7 +401,6 @@ export default function Lists(props: {
                   )}
                 </Text>
               </View>
-
               <View style={styles.tableRow}>
                 {item.purchased === "No" && (
                   <TouchableOpacity
@@ -445,7 +412,6 @@ export default function Lists(props: {
                     <Text style={styles.purchaseButtonText}>Purchased</Text>
                   </TouchableOpacity>
                 )}
-
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => deleteRow(item.itemId)}

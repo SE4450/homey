@@ -6,12 +6,10 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { ReviewStackParamList } from "./stacks/reviewsStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import useAxios from "./hooks/useAxios";
-
 type ReviewScreenNavigationProp = StackNavigationProp<
   ReviewStackParamList,
   "displayReview"
 >;
-
 const COLORS = {
     PRIMARY: "#4a90e2",
     SECONDARY: "#FF9800",
@@ -21,7 +19,6 @@ const COLORS = {
     LIGHT_GRAY: "#F5F5F5",
     LOGOUT: "#D32F2F",
   };
-
 const styles = StyleSheet.create({
     viewFormat: {
         alignItems: "center",
@@ -54,25 +51,20 @@ const styles = StyleSheet.create({
         marginBottom: 40,
       },
 });
-
 export default function DisplayReviews() {
     const [yourReviews, setYourReviews] = useState([] as Array<{score: number, description: String}>);
     const { get } = useAxios();
     const { userId } = useAuth();
     const isFocused = useIsFocused();
-
     //need a useEffect to get your reviews
     useEffect(() => {
         if(isFocused) {
             getUserReviews();
         }
     }, [isFocused]);
-
-
     //function to get the reviews
     const getUserReviews = async () => {
         const response = await get<any>(`/api/reviews?reviewType=user&reviewedItemId=${userId}`);
-
         if(response){
             setYourReviews([]);
             response.data.forEach((review: { score: number, description: String}) => {
@@ -80,8 +72,6 @@ export default function DisplayReviews() {
             });
         }
     }
-
-
     return(
         <ScrollView>
             <View style={styles.viewFormat}>

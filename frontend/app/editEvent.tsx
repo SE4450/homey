@@ -13,12 +13,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
-
 const EditEvent = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { put, loading, error } = useAxios();
-
   // Destructure the event parameters passed from calendar.tsx
   const {
     id,
@@ -37,12 +35,10 @@ const EditEvent = () => {
     location: string;
     description: string;
   };
-
   // Helper function to combine the event date and time string into a Date object
   const parseDateTime = (dateStr: string, timeStr: string): Date => {
     return new Date(`${dateStr}T${timeStr}:00`);
   };
-
   // Set initial states from the route parameters
   const [title, setTitle] = useState(initialTitle);
   const [eventDate, setEventDate] = useState(new Date(initialEventDate));
@@ -50,7 +46,6 @@ const EditEvent = () => {
   const [endTime, setEndTime] = useState(parseDateTime(initialEventDate, initialEndTime));
   const [location, setLocation] = useState(initialLocation);
   const [description, setDescription] = useState(initialDescription);
-
   // Hide the bottom navbar when this component is focused
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -59,20 +54,17 @@ const EditEvent = () => {
       parent?.setOptions({ tabBarStyle: { display: "flex" } });
     };
   }, [navigation]);
-
   // Helper to format a Date object into HH:MM string
   const formatTime = (date: Date): string => {
     const pad = (num: number) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
-
   // Handler for updating the event
   const handleUpdateEvent = async () => {
     if (!title || !eventDate) {
       Alert.alert("Error", "Title and Event Date are required");
       return;
     }
-
     const data = {
       title,
       eventDate: eventDate.toISOString().split("T")[0],
@@ -81,9 +73,7 @@ const EditEvent = () => {
       location,
       description,
     };
-
     const result = await put(`/api/calendar/${id}`, data);
-
     if (result) {
       Alert.alert("Success", "Event updated successfully");
       navigation.goBack();
@@ -91,7 +81,6 @@ const EditEvent = () => {
       Alert.alert("Error", error);
     }
   };
-
   return (
     <ScreenWrapper>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -191,9 +180,7 @@ const EditEvent = () => {
     </ScreenWrapper>
   );
 };
-
 export default EditEvent;
-
 const styles = StyleSheet.create({
   form: {
     padding: 20,

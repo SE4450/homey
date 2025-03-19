@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const List = sequelize.define("List", {
     listId: {
         type: DataTypes.INTEGER,
@@ -18,5 +17,4 @@ const List = sequelize.define("List", {
         allowNull: false,
     }
 });
-
 module.exports = List;

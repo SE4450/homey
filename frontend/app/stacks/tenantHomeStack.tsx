@@ -3,7 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import TenantHomeScreen from "../tenantHome";
 import TenantHomePropertySearchResultsScreen from "../tenantHomePropertySearchResults";
 import TenantHomePropertyDetailsScreen from "../tenantPropertyDetails";
-
 type Property = {
     id: number;
     name: string;
@@ -20,15 +19,12 @@ type Property = {
         email: string;
     };
 }
-
 export type TenantHomeStackParamList = {
     home: undefined;
     propertySearchResults: undefined;
     propertyDetails: { property: Property };
 };
-
 const TenantHomeStack = createStackNavigator<TenantHomeStackParamList>();
-
 export default function TenantHomeStackScreen() {
     return (
         <NavigationContainer>

@@ -18,78 +18,63 @@ import { useRouter } from "expo-router";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
-
 type LandlordHomeScreenNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "home">;
-
 export default function LandlordHomeScreen() {
     const [groups, setGroups] = useState<any>([]);
     const [properties, setProperties] = useState<any>([]);
     const [loadingState, setLoadingState] = useState(true); // Custom loading state
-
     const { user, userError } = useUser();
     const { logout } = useAuth();
     const { get, error, loading } = useAxios();
     const isFocused = useIsFocused();
     const navigation = useNavigation<LandlordHomeScreenNavigationProp>();
     const router = useRouter();
-
     useEffect(() => {
         if (isFocused) {
             loadData();
         }
     }, [isFocused]);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const loadData = async () => {
         setLoadingState(true);
         await Promise.all([fetchGroups(), fetchProperties()]);
         setLoadingState(false);
     };
-
     const fetchGroups = async () => {
         const response = await get<any>("/api/groups/landlord");
         if (response) {
             setGroups(response.data);
         }
     };
-
     const fetchProperties = async () => {
         const response = await get<any>("/api/properties");
         if (response) {
             setProperties(response.data);
         }
     };
-
     const handleNavigateToAddGroup = () => {
         navigation.navigate("addGroup");
     };
-
     const handleNavigateToAddProperty = () => {
         navigation.navigate("addProperty");
     };
-
     const handleNavigateToEditProperty = (propertyId: string) => {
         navigation.navigate("viewEditProperty", { propertyId });
     };
-
     const handleNavigateToGroup = (groupId: string) => {
         router.push({ pathname: "/groupNavigation", params: { groupId, role: "landlord" } });
     };
-
     const handleNavigateToManageGroup = (groupId: string) => {
         navigation.navigate("editGroup", { groupId });
     };
-
     const handleLogout = async () => {
         await logout();
         router.push("/login");
     };
-
     if (loadingState) {
         return (
             <View style={styles.loadingContainer}>
@@ -97,29 +82,24 @@ export default function LandlordHomeScreen() {
             </View>
         );
     }
-
     if (userError) return <Text>Error: {userError}</Text>;
     if (!user) return <Text>No user found.</Text>;
-
     // Group the groups into rows of two
     const groupRows = [];
     for (let i = 0; i < groups.length; i += 2) {
         groupRows.push(groups.slice(i, i + 2));
     }
-
     // Group properties into rows of two (for the properties section)
     const propertyRows = [];
     for (let i = 0; i < properties.length; i += 2) {
         propertyRows.push(properties.slice(i, i + 2));
     }
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
             <View style={styles.screenHeader}>
                 <Text style={styles.screenHeaderTitle}>Home</Text>
             </View>
-
             <ScrollView contentContainerStyle={styles.container}>
                 {/* Profile Section */}
                 <View style={styles.profileSection}>
@@ -136,11 +116,9 @@ export default function LandlordHomeScreen() {
                         <Text style={styles.emailText}>{user.email}</Text>
                     </View>
                 </View>
-
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                     <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
-
                 <View style={styles.mainContent}>
                     {/* Groups Section */}
                     <View style={styles.section}>
@@ -148,7 +126,6 @@ export default function LandlordHomeScreen() {
                         <TouchableOpacity style={styles.createButton} onPress={handleNavigateToAddGroup}>
                             <Text style={styles.buttonText}>Create New Group</Text>
                         </TouchableOpacity>
-
                         {/* Render groups in rows of two */}
                         <View style={styles.groupsGrid}>
                             {groupRows.map((row, rowIndex) => (
@@ -188,14 +165,12 @@ export default function LandlordHomeScreen() {
                             ))}
                         </View>
                     </View>
-
                     {/* Properties Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Manage Properties</Text>
                         <TouchableOpacity style={styles.createButton} onPress={handleNavigateToAddProperty}>
                             <Text style={styles.buttonText}>Create New Property</Text>
                         </TouchableOpacity>
-
                         {/* Render properties in rows */}
                         <View style={styles.propertiesGrid}>
                             {propertyRows.map((row, rowIndex) => (
@@ -224,7 +199,6 @@ export default function LandlordHomeScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

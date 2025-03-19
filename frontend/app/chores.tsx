@@ -20,12 +20,10 @@ import axios from "axios";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type ChoresScreenNavigationProp = StackNavigationProp<
   ChoresStackParamList,
   "chores"
 >;
-
 interface Chore {
   id: number;
   choreName: string;
@@ -40,7 +38,6 @@ interface Chore {
     lastName: string;
   };
 }
-
 export default function HomeScreen() {
   const { userToken, userId } = useAuth();
   const [myActiveChores, setMyActiveChores] = useState<Chore[]>([]);
@@ -52,7 +49,6 @@ export default function HomeScreen() {
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const navigation = useNavigation<ChoresScreenNavigationProp>();
   const isFocused = useIsFocused();
-
   const fetchChores = async () => {
     setLoading(true);
     try {
@@ -61,13 +57,11 @@ export default function HomeScreen() {
           Authorization: `Bearer ${userToken}`,
         },
       });
-
       if (response.data.status === "success") {
         // Separate chores into my active, roommates active, and completed
         const myActive: Chore[] = [];
         const roommatesActive: Chore[] = [];
         const completed: Chore[] = [];
-
         response.data.data.forEach((chore: Chore) => {
           if (chore.completed) {
             completed.push(chore);
@@ -77,7 +71,6 @@ export default function HomeScreen() {
             roommatesActive.push(chore);
           }
         });
-
         setMyActiveChores(myActive);
         setRoommatesActiveChores(roommatesActive);
         setCompletedChores(completed);
@@ -89,13 +82,11 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (userToken && isFocused) {
       fetchChores();
     }
   }, [userToken, isFocused]);
-
   // This function will get the correct thumbnail based on the stored bannerImage
   const getChoreImage = (chore: Chore) => {
     if (chore.bannerImage) {
@@ -106,7 +97,6 @@ export default function HomeScreen() {
     }
     return RANDOM_THUMBNAIL();
   };
-
   // Render a single chore card
   const renderChoreCard = (item: Chore) => (
     <TouchableOpacity
@@ -133,7 +123,6 @@ export default function HomeScreen() {
       </View>
     </TouchableOpacity>
   );
-
   // Render a section of chores (either active or completed)
   const renderChoreSection = (
     title: string,
@@ -157,7 +146,6 @@ export default function HomeScreen() {
       )}
     </View>
   );
-
   const styles = StyleSheet.create({
     addButtonText: {
       fontWeight: "700",
@@ -228,7 +216,6 @@ export default function HomeScreen() {
       flexGrow: 1,
     },
   });
-
   return (
     <Provider store={store}>
       <ScreenWrapper>
@@ -240,7 +227,6 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-
         {loading ? (
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
         ) : (

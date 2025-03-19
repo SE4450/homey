@@ -1,11 +1,9 @@
 const { Message, Conversation, Participant } = require("../models/associations");
 const { ValidationError } = require("sequelize");
-
 exports.sendMessage = async (req, res) => {
     try {
         const { conversationId, content } = req.body;
         const senderId = req.user.userId;
-
         if (!conversationId || !content || content.trim() === "") {
             return res.status(400).json({
                 status: "error",
@@ -14,7 +12,6 @@ exports.sendMessage = async (req, res) => {
                 errors: ["Both conversationId and content must be provided"]
             });
         }
-
         const conversation = await Conversation.findOne({
             where: { id: conversationId },
             include: {
@@ -24,7 +21,6 @@ exports.sendMessage = async (req, res) => {
                 attributes: []
             }
         });
-
         if (!conversation) {
             return res.status(403).json({
                 status: "error",
@@ -33,13 +29,11 @@ exports.sendMessage = async (req, res) => {
                 errors: ["User is not a participant or the conversation does not exist"]
             });
         }
-
         const newMessage = await Message.create({
             conversationId,
             senderId,
             content: content.trim()
         });
-
         res.status(201).json({
             status: "success",
             message: "Message sent successfully",
@@ -63,12 +57,10 @@ exports.sendMessage = async (req, res) => {
         });
     }
 };
-
 exports.getMessages = async (req, res) => {
     try {
         const { conversationId } = req.params;
         const loggedInUserId = req.user.userId;
-
         if (!conversationId) {
             return res.status(400).json({
                 status: "error",
@@ -77,7 +69,6 @@ exports.getMessages = async (req, res) => {
                 errors: ["conversationId must be provided in the request parameters"]
             });
         }
-
         const conversation = await Conversation.findOne({
             where: { id: conversationId },
             include: {
@@ -87,7 +78,6 @@ exports.getMessages = async (req, res) => {
                 attributes: []
             },
         });
-
         if (!conversation) {
             return res.status(403).json({
                 status: "error",
@@ -96,9 +86,7 @@ exports.getMessages = async (req, res) => {
                 errors: ["User is not a participant or the conversation does not exist"]
             });
         }
-
         const messages = await Message.findAll({ where: { conversationId }, order: [["createdAt", "ASC"]] });
-
         res.status(200).json({
             status: "success",
             message: `${messages.length} message(s) retrieved successfully`,
@@ -122,12 +110,10 @@ exports.getMessages = async (req, res) => {
         });
     }
 };
-
 exports.markMessageAsRead = async (req, res) => {
     try {
         const { messageId } = req.body;
         const loggedInUserId = req.user.userId;
-
         if (!messageId) {
             return res.status(400).json({
                 status: "error",
@@ -136,7 +122,6 @@ exports.markMessageAsRead = async (req, res) => {
                 errors: ["messageId must be provided in the request body"]
             });
         }
-
         const message = await Message.findOne({
             where: { id: messageId },
             include: {
@@ -150,7 +135,6 @@ exports.markMessageAsRead = async (req, res) => {
                 },
             },
         });
-
         if (!message) {
             return res.status(403).json({
                 status: "error",
@@ -159,14 +143,12 @@ exports.markMessageAsRead = async (req, res) => {
                 errors: ["Message does not exist or you are not a participant of the conversation"]
             });
         }
-
         const readBy = message.readBy ? JSON.parse(message.readBy) : [];
         if (!readBy.includes(loggedInUserId)) {
             readBy.push(loggedInUserId);
             message.readBy = JSON.stringify(readBy);
             await message.save();
         }
-
         res.status(200).json({
             status: "success",
             message: "Message marked as read",

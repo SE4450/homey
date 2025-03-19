@@ -7,21 +7,17 @@ import { useNavigation } from "@react-navigation/native";
 import { CalendarStackParamList } from "./stacks/calendarStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Ionicons } from '@expo/vector-icons';
-
 const COLORS = {
   PRIMARY: "#4CAF50",
   WHITE: "#FFFFFF",
   LIGHT_GRAY: "#F5F5F5",
 };
-
 type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, "calendar">;
-
 export default function CalendarWithEvents() {
   const [items, setItems] = useState({});
   const { get, error, del } = useAxios();
   const navigation = useNavigation<CalendarScreenNavigationProp>();
   const isFocused = useIsFocused();
-
   const formatTime = (timeStr: string): string => {
     const [hourStr, minute] = timeStr.split(":");
     let hour = parseInt(hourStr, 10);
@@ -30,30 +26,24 @@ export default function CalendarWithEvents() {
     if (hour === 0) hour = 12;
     return `${hour}:${minute} ${ampm}`;
   };
-
   useEffect(() => {
     if (isFocused) {
       getEvents();
     }
   }, [isFocused]);
-
   const getEvents = async () => {
     const result = await get<any>("/api/calendar");
-
     if (result && result.data) {
       const formattedEvents: any = {};
-
       // Inside getEvents() in calendar.tsx
       result.data.forEach((event: any) => {
         const date = event.eventDate;
         if (!formattedEvents[date]) {
           formattedEvents[date] = [];
         }
-
         const timeString = event.startTime
           ? `${formatTime(event.startTime)} - ${event.endTime ? formatTime(event.endTime) : "N/A"}`
           : "All Day";
-
         formattedEvents[date].push({
           id: event.id,
           name: event.title,
@@ -66,14 +56,11 @@ export default function CalendarWithEvents() {
           height: 70,
         });
       });
-
-
       setItems(formattedEvents);
     } else {
       Alert.alert("Error", error || "Failed to fetch events");
     }
   };
-
   const deleteEvent = async (id: number) => {
     Alert.alert(
       "Delete Event",
@@ -100,7 +87,6 @@ export default function CalendarWithEvents() {
       { cancelable: true }
     );
   };
-
   const renderItem = (item: any) => {
     return (
       <TouchableOpacity activeOpacity={1} style={styles.item}>
@@ -108,7 +94,6 @@ export default function CalendarWithEvents() {
         <TouchableOpacity onPress={() => deleteEvent(item.id)} style={styles.deleteIcon}>
           <Ionicons name="trash-outline" size={20} color="red" />
         </TouchableOpacity>
-
         {/* Edit Button */}
         <TouchableOpacity
           onPress={() =>
@@ -126,7 +111,6 @@ export default function CalendarWithEvents() {
         >
           <Ionicons name="pencil-outline" size={20} color="blue" />
         </TouchableOpacity>
-
         <Text style={styles.itemText}>{item.name}</Text>
         <Text style={styles.timeText}>{item.time}</Text>
         <Text style={styles.locationText}>Location: {item.location}</Text>
@@ -134,10 +118,7 @@ export default function CalendarWithEvents() {
       </TouchableOpacity>
     );
   };
-
-
   const defaultSelectedDate = Object.keys(items).length ? Object.keys(items)[0] : "2025-03-15";
-
   return (
     <View style={styles.container}>
       <Agenda
@@ -164,7 +145,6 @@ export default function CalendarWithEvents() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

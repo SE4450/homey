@@ -8,19 +8,15 @@ import useAxios from "./hooks/useAxios";
 import { Ionicons } from "@expo/vector-icons";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type LandlordHomeAddPropertyImageScreenRouteProp = RouteProp<LandlordHomeStackParamList, 'addPropertyImages'>;
 type LandlordHomeAddPropertyImageScreenProp = StackNavigationProp<LandlordHomeStackParamList, 'addPropertyImages'>;
-
 export default function AddPropertyImagesScreen() {
     const navigation = useNavigation<LandlordHomeAddPropertyImageScreenProp>();
     const route = useRoute<LandlordHomeAddPropertyImageScreenRouteProp>();
     const { post, error } = useAxios();
     const { propertyData } = route.params;
-
     const [images, setImages] = useState<{ label: string; image: string; description: string }[]>([]);
     const [loading, setLoading] = useState(false);
-
     const addImage = () => {
         if (images.length >= 10) {
             Alert.alert("Error", "You can only upload up to 10 images.");
@@ -28,19 +24,16 @@ export default function AddPropertyImagesScreen() {
         }
         setImages([...images, { label: "", image: "", description: "" }]);
     };
-
     const updateImage = (index: number, key: "label" | "image" | "description", value: string) => {
         const updatedImages = [...images];
         updatedImages[index][key] = value;
         setImages(updatedImages);
     };
-
     const handleSubmit = async () => {
         if (images.length === 0) {
             Alert.alert("Error", "You must add at least one image.");
             return;
         }
-
         for (let i = 0; i < images.length; i++) {
             const img = images[i];
             if (!img.label.trim() || !img.description.trim() || !img.image) {
@@ -48,9 +41,7 @@ export default function AddPropertyImagesScreen() {
                 return;
             }
         }
-
         setLoading(true);
-
         const processedImages = await Promise.all(
             images.map(async (img) => {
                 const response = await fetch(img.image);
@@ -65,10 +56,8 @@ export default function AddPropertyImagesScreen() {
                 });
             })
         );
-
         const body = { ...propertyData, images: processedImages };
         const apiResponse = await post("/api/properties", body);
-
         setLoading(false);
         if (apiResponse) {
             Alert.alert("Success", "Property created successfully!");
@@ -77,7 +66,6 @@ export default function AddPropertyImagesScreen() {
             Alert.alert("Error", "Failed to create property.");
         }
     };
-
     return (
         <View style={styles.container}>
             {/* 🔹 Sticky Header */}
@@ -87,7 +75,6 @@ export default function AddPropertyImagesScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Upload Additional Property Images</Text>
             </View>
-
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {images.map((img, index) => (
                     <View key={index} style={styles.imageContainer}>
@@ -112,7 +99,6 @@ export default function AddPropertyImagesScreen() {
                         />
                     </View>
                 ))}
-
                 <View style={styles.buttonContainer}>
                     <Button text="Add Image" onClick={addImage} disabled={images.length >= 10 || loading} />
                     <View style={styles.buttonSpacing} />
@@ -122,7 +108,6 @@ export default function AddPropertyImagesScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

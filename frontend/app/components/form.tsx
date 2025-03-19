@@ -1,10 +1,8 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-
 type FormProps = {
     components: React.ReactNode[]; // Array of components to render
 };
-
 const Form: React.FC<FormProps> = ({ components }) => {
     return (
         <View style={styles.container}>
@@ -16,7 +14,6 @@ const Form: React.FC<FormProps> = ({ components }) => {
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         padding: 16,
@@ -31,5 +28,4 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
 });
-
 export default Form;

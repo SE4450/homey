@@ -16,7 +16,6 @@ import TextField from "./components/textField";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
-
 const COLORS = {
   PRIMARY: "#4a90e2",
   SECONDARY: "#FF9800",
@@ -26,7 +25,6 @@ const COLORS = {
   LIGHT_GRAY: "#F5F5F5",
   LOGOUT: "#D32F2F",
 };
-
 //stylesheet for the component
 const styles = StyleSheet.create({
   profilePopup: {
@@ -105,14 +103,11 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
 });
-
 type ProfileScreenProps = {
   groupId: string;
   role: string;
 };
-
 export default function Profile({ groupId, role }: ProfileScreenProps) {
-
   const [cleaningValue, setCleaningValue] = useState("");
   const [noiseValue, setNoiseValue] = useState("");
   const [startSleepValue, setStartSleepValue] = useState("");
@@ -123,17 +118,14 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
     { label: "Medium", value: "Medium" },
     { label: "High", value: "High" },
   ];
-
   const { post, get } = useAxios();
   const [user, setUser] = useState<any>({});
   const { userId, logout } = useAuth();
   const router = useRouter();
   const navigation = useNavigation();
-
   useEffect(() => {
     getProfile();
   }, []);
-
   useEffect(() => {
     const fetchUser = async () => {
       const response = await get<any>(`/api/users/user/${userId}`);
@@ -143,16 +135,13 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
     };
     fetchUser();
   }, []);
-
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
-
   const getProfile = async () => {
     const body = { id: userId };
     const response = await get<any>("/api/profile", body);
-
     if (response) {
       if (response.data[0].cleaningHabits != null) {
         setCleaningValue(response.data[0].cleaningHabits);
@@ -171,7 +160,6 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
       }
     }
   };
-
   const updateProfile = async () => {
     const body = {
       cleaningHabits: cleaningValue,
@@ -184,15 +172,12 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
       `/api/profile/updateProfile/${userId}`,
       body
     );
-
     if (response) {
       alert("Profile updated");
-
       //route back to the main page
       navigation.goBack();
     }
   };
-
   return (
     <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
       <View style={styles.profilePopup}>

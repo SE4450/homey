@@ -1,6 +1,5 @@
 const sequelize = require("./db.js");
 const { Chore } = require("./models/associations");
-
 async function syncChoresTable() {
   try {
     // This will create the Chores table if it doesn't exist
@@ -12,5 +11,4 @@ async function syncChoresTable() {
     process.exit(1);
   }
 }
-
 syncChoresTable();

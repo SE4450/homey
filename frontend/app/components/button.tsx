@@ -6,7 +6,6 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
-
 type ButtonProps = {
   text: string;
   onClick: () => void;
@@ -17,7 +16,6 @@ type ButtonProps = {
     textStyle?: TextStyle;
   };
 };
-
 const Button: React.FC<ButtonProps> = ({
   text,
   onClick,
@@ -38,7 +36,6 @@ const Button: React.FC<ButtonProps> = ({
     </TouchableOpacity>
   );
 };
-
 const styles = StyleSheet.create({
   button: {
     backgroundColor: "#007BFF",
@@ -56,5 +53,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
 export default Button;

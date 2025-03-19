@@ -16,30 +16,23 @@ import useAxios from "./hooks/useAxios";
 import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "./components/button";
-
 type PropertyDetailsRouteProp = RouteProp<TenantHomeStackParamList, "propertyDetails">;
 type PropertyDetailsNavigationProp = StackNavigationProp<TenantHomeStackParamList, "propertyDetails">;
-
 export default function TenantPropertyDetailsScreen() {
     const route = useRoute<PropertyDetailsRouteProp>();
     const navigation = useNavigation<PropertyDetailsNavigationProp>();
     const { get, error } = useAxios();
-
     const property = route.params.property;
-
     const [images, setImages] = useState<any[]>([]);
     const [loadingImages, setLoadingImages] = useState(true);
-
     useEffect(() => {
         fetchPropertyImages();
     }, []);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const fetchPropertyImages = async () => {
         try {
             const response = await get<any>(`/api/properties/${property.id}/images`);
@@ -52,7 +45,6 @@ export default function TenantPropertyDetailsScreen() {
             setLoadingImages(false);
         }
     };
-
     const handleEmailLandlord = () => {
         if (!property.landlord?.email) return;
         const subject = encodeURIComponent(`Inquiry about ${property.name}`);
@@ -61,7 +53,6 @@ export default function TenantPropertyDetailsScreen() {
         );
         Linking.openURL(`mailto:${property.landlord.email}?subject=${subject}&body=${body}`);
     };
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
@@ -71,7 +62,6 @@ export default function TenantPropertyDetailsScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>{property.name}</Text>
             </View>
-
             <FlatList
                 ListHeaderComponent={
                     <>
@@ -84,7 +74,6 @@ export default function TenantPropertyDetailsScreen() {
                             <Text style={styles.detailText}>🛏 {property.bedrooms} Bedroom(s)</Text>
                             <Text style={styles.description}>{property.description}</Text>
                         </View>
-
                         {/* Landlord Contact Section */}
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Landlord Contact</Text>
@@ -99,7 +88,6 @@ export default function TenantPropertyDetailsScreen() {
                                 }}
                             />
                         </View>
-
                         {/* Property Image Gallery */}
                         <Text style={[styles.sectionTitle, styles.imageSectionTitle]}>Property Images</Text>
                     </>
@@ -122,7 +110,6 @@ export default function TenantPropertyDetailsScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

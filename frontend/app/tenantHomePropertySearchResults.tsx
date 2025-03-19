@@ -19,28 +19,22 @@ import Button from "./components/button";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
-
 type TenantHomePropertySearchResultsNavigationProp = StackNavigationProp<TenantHomeStackParamList, "propertySearchResults">;
-
 export default function TenantHomePropertySearchResultsScreen() {
     const navigation = useNavigation<TenantHomePropertySearchResultsNavigationProp>();
     const { get, error } = useAxios();
-
     const [city, setCity] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
     const [propertyType, setPropertyType] = useState("");
     const [bedrooms, setBedrooms] = useState("");
     const [properties, setProperties] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-
     const propertyTypes = ["Any", "Apartment", "House", "Condo", "Townhouse", "Studio", "Duplex"];
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const fetchProperties = async () => {
         setLoading(true);
         try {
@@ -50,7 +44,6 @@ export default function TenantHomePropertySearchResultsScreen() {
                 propertyType: propertyType !== "Any" ? propertyType : undefined,
                 bedrooms: bedrooms ? parseInt(bedrooms, 10) : undefined,
             });
-
             if (!response || response.data.length === 0) {
                 Alert.alert("No results", "No properties match your search.");
                 setProperties([]);
@@ -63,12 +56,10 @@ export default function TenantHomePropertySearchResultsScreen() {
             setLoading(false);
         }
     };
-
     const propertyRows = [];
     for (let i = 0; i < properties.length; i += 2) {
         propertyRows.push(properties.slice(i, i + 2));
     }
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
@@ -78,7 +69,6 @@ export default function TenantHomePropertySearchResultsScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Search Properties</Text>
             </View>
-
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={styles.container}>
                     <View style={styles.inputContainer}>
@@ -88,7 +78,6 @@ export default function TenantHomePropertySearchResultsScreen() {
                         <View style={styles.inputSpacing} />
                         <TextField placeholder="Min Rooms" keyboardType="numeric" value={bedrooms} onChangeText={setBedrooms} />
                         <View style={styles.inputSpacing} />
-
                         <Text style={styles.label}>Property Type</Text>
                         <Picker selectedValue={propertyType} onValueChange={setPropertyType} style={styles.picker}>
                             {propertyTypes.map((type) => (
@@ -96,21 +85,17 @@ export default function TenantHomePropertySearchResultsScreen() {
                             ))}
                         </Picker>
                     </View>
-
                     <Button text="Search" onClick={fetchProperties} />
-
                     {/* Loading Indicator */}
                     {loading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#0000ff" />
                         </View>
                     )}
-
                     {/* Display Search Results */}
                     {properties.length > 0 && (
                         <View>
                             <Text style={styles.subHeader}>Results</Text>
-
                             {/* Grid Layout - Two Columns */}
                             {propertyRows.map((row, rowIndex) => (
                                 <View key={rowIndex} style={styles.propertyRow}>
@@ -148,7 +133,6 @@ export default function TenantHomePropertySearchResultsScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

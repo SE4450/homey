@@ -2,7 +2,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Chores from "../chores";
 import AddChores from "../addChores";
 import ChoreDetails from "../choreDetails";
-
 export type ChoresStackParamList = {
   chores: undefined;
   addChore: undefined;
@@ -18,14 +17,11 @@ export type ChoresStackParamList = {
     assigneeName: string | null;
   };
 };
-
 const ChoresStack = createStackNavigator<ChoresStackParamList>();
-
 type ChoreScreenProps = {
   groupId: string;
   role: string;
 };
-
 export default function ChoresStackScreen({ groupId, role }: ChoreScreenProps) {
   return (
     <ChoresStack.Navigator>

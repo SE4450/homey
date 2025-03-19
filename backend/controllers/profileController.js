@@ -1,12 +1,10 @@
 const { Profile } = require("../models/associations");
 const { ValidationError } = require("sequelize");
-
 //get the user profile
 exports.getProfile = async (req, res) => {
     try {
         //first get the lists for the user  query needs to be: ?userId= thid users id
         const usersProfile = await Profile.findAll({ where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
-
         if(usersProfile.length == 0) {
             return res.status(404).json({
                 status: "error",
@@ -15,7 +13,6 @@ exports.getProfile = async (req, res) => {
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `profile found`,
@@ -39,22 +36,17 @@ exports.getProfile = async (req, res) => {
         });
     }
 }
-
-
-
 //create the user profile
 exports.createProfile = async (req, res) => {
     try {
         const { id } = req.body;
         const usersProfile = await Profile.create({ id });
-
         res.status(201).json({
             status: "success",
             message: "List created",
             data: usersProfile,
             errors: []
         });
-
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
@@ -72,15 +64,11 @@ exports.createProfile = async (req, res) => {
         });
     }
 }
-
-
-
 //update the user profile
 exports.updateProfile = async (req, res) => {
     try {
         const {  cleaningHabits, noiseLevel, sleepStart, sleepEnd, alergies  } = req.body;
         let userProfile = Profile;
-
         if(cleaningHabits != null) {
             userProfile = await Profile.update({ cleaningHabits: cleaningHabits }, { where: { id: req.params.id }});
         }
@@ -96,7 +84,6 @@ exports.updateProfile = async (req, res) => {
         if(alergies != null) {
             userProfile = await Profile.update({ alergies: alergies }, { where: { id: req.params.id }});
         }
-
         res.status(201).json({
             status: "success",
             message: "updated the users profile in the list",

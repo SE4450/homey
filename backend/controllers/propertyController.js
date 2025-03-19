@@ -2,14 +2,12 @@ const { Property, PropertyImage, User } = require("../models/associations");
 const { Op } = require("sequelize");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
-
 exports.getProperties = async (req, res) => {
     try {
         const properties = await Property.findAll({
             where: { landlordId: req.user.userId },
             include: [{ model: PropertyImage, as: "images" }],
         });
-
         if (properties.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -18,10 +16,8 @@ exports.getProperties = async (req, res) => {
                 errors: [`No properties found for landlord ${req.user.userId}`],
             });
         }
-
         const formattedProperties = properties.map((property) => {
             const propertyJSON = property.toJSON();
-
             return {
                 ...propertyJSON,
                 exteriorImage: propertyJSON.exteriorImage
@@ -29,7 +25,6 @@ exports.getProperties = async (req, res) => {
                     : null,
             };
         });
-
         res.status(200).json({
             status: "success",
             message: `${formattedProperties.length} property(s) found`,
@@ -45,14 +40,12 @@ exports.getProperties = async (req, res) => {
         });
     }
 };
-
 exports.getPropertyById = async (req, res) => {
     try {
         const property = await Property.findOne({
             where: { id: req.params.id, landlordId: req.user.userId },
             include: [{ model: PropertyImage, as: "images" }],
         });
-
         if (!property) {
             return res.status(404).json({
                 status: "error",
@@ -61,9 +54,7 @@ exports.getPropertyById = async (req, res) => {
                 errors: [`No property found with ID ${req.params.id}`],
             });
         }
-
         const propertyJSON = property.toJSON();
-
         res.status(200).json({
             status: "success",
             message: "Property retrieved successfully",
@@ -84,32 +75,25 @@ exports.getPropertyById = async (req, res) => {
         });
     }
 };
-
 exports.getPropertiesForTenants = async (req, res) => {
     try {
         const { maxPrice, city, propertyType, bedrooms } = req.query;
-
         const filters = {
             availability: true, // Always return only available properties
         };
-
         // Apply filters only if they are provided and valid
         if (maxPrice && !isNaN(parseInt(maxPrice))) {
             filters.price = { [Op.lte]: parseInt(maxPrice) };
         }
-
         if (city && city.trim() !== "") {
             filters.city = { [Op.iLike]: `%${city}%` }; // Case-insensitive city search
         }
-
         if (propertyType && propertyType !== "Any") {
             filters.propertyType = propertyType;
         }
-
         if (bedrooms && !isNaN(parseInt(bedrooms))) {
             filters.bedrooms = { [Op.gte]: parseInt(bedrooms) }; // Minimum number of bedrooms
         }
-
         const properties = await Property.findAll({
             where: filters,
             include: [
@@ -120,7 +104,6 @@ exports.getPropertiesForTenants = async (req, res) => {
                 }
             ],
         });
-
         if (properties.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -129,14 +112,11 @@ exports.getPropertiesForTenants = async (req, res) => {
                 errors: ["No properties match the search filters"],
             });
         }
-
         const formattedProperties = properties.map((property) => {
             const propertyJSON = property.toJSON();
-
             const exteriorImageBase64 = propertyJSON.exteriorImage
                 ? `data:image/jpeg;base64,${propertyJSON.exteriorImage.toString("base64")}`
                 : null;
-
             return {
                 id: propertyJSON.id,
                 name: propertyJSON.name,
@@ -157,7 +137,6 @@ exports.getPropertiesForTenants = async (req, res) => {
                 }
             };
         });
-
         res.status(200).json({
             status: "success",
             message: `${formattedProperties.length} property(s) found`,
@@ -173,7 +152,6 @@ exports.getPropertiesForTenants = async (req, res) => {
         });
     }
 };
-
 exports.createProperty = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
@@ -189,7 +167,6 @@ exports.createProperty = async (req, res) => {
             exteriorImage,
             images
         } = req.body;
-
         if (!name || !address || !city || !bedrooms || !price || !propertyType || exteriorImage === undefined) {
             return res.status(400).json({
                 status: "error",
@@ -198,9 +175,7 @@ exports.createProperty = async (req, res) => {
                 errors: ["Name, address, city, bedrooms, price, property type, and exterior image are required"],
             });
         }
-
         const base64Data = exteriorImage.split(";base64,").pop();
-
         const property = await Property.create(
             {
                 name,
@@ -216,7 +191,6 @@ exports.createProperty = async (req, res) => {
             },
             { transaction }
         );
-
         if (images && Array.isArray(images)) {
             if (images.length > 10) {
                 return res.status(400).json({
@@ -226,17 +200,14 @@ exports.createProperty = async (req, res) => {
                     errors: ["Too many images uploaded"],
                 });
             }
-
             const propertyImages = images.map(img => ({
                 propertyId: property.id,
                 label: img.label,
                 image: Buffer.from(img.image.split(";base64,").pop(), "base64"),
                 description: img.description,
             }));
-
             await PropertyImage.bulkCreate(propertyImages, { transaction });
         }
-
         await transaction.commit();
         res.status(201).json({
             status: "success",
@@ -255,14 +226,12 @@ exports.createProperty = async (req, res) => {
         });
     }
 };
-
 exports.updateProperty = async (req, res) => {
     try {
         const { name, address, city, propertyDescription, bedrooms, price, propertyType, availability, exteriorImage } = req.body;
         const property = await Property.findOne({
             where: { id: req.params.id, landlordId: req.user.userId },
         });
-
         if (!property) {
             return res.status(404).json({
                 status: "error",
@@ -271,7 +240,6 @@ exports.updateProperty = async (req, res) => {
                 errors: [`No property found with ID ${req.params.id}`],
             });
         }
-
         await property.update({
             name: name || property.name,
             address: address || property.address,
@@ -283,7 +251,6 @@ exports.updateProperty = async (req, res) => {
             availability: availability !== undefined ? availability : property.availability,
             exteriorImage: exteriorImage ? Buffer.from(exteriorImage, "base64") : property.exteriorImage,
         });
-
         res.status(200).json({
             status: "success",
             message: "Property updated successfully",
@@ -299,13 +266,11 @@ exports.updateProperty = async (req, res) => {
         });
     }
 };
-
 exports.deleteProperty = async (req, res) => {
     try {
         const property = await Property.findOne({
             where: { id: req.params.id, landlordId: req.user.userId },
         });
-
         if (!property) {
             return res.status(404).json({
                 status: "error",
@@ -314,7 +279,6 @@ exports.deleteProperty = async (req, res) => {
                 errors: [`No property found with ID ${req.params.id}`],
             });
         }
-
         await property.destroy();
         res.status(200).json({
             status: "success",

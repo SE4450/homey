@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const store = sequelize.define("store", {
     itemID: {
         type: DataTypes.INTEGER,
@@ -25,5 +24,4 @@ const store = sequelize.define("store", {
         allowNull: false
     }
 });
-
 module.exports = store;

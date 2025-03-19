@@ -5,11 +5,9 @@ import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 import { NavigationIndependentTree } from "@react-navigation/native";
 import { jwtDecode } from "jwt-decode";
-
 // Import your stack navigators
 import TenantHomeStack from "./stacks/tenantHomeStack";
 import LandlordHomeStack from "./stacks/landlordHomeStack";
-
 const COLORS = {
     PRIMARY: "#4CAF50",
     WHITE: "#FFFFFF",
@@ -17,19 +15,16 @@ const COLORS = {
     LIGHT_GRAY: "#F5F5F5",
     ERROR: "#D32F2F",
 };
-
 export default function AppNavigator() {
     const [user, setUser] = useState<any>(null);
     const { userToken, userId, userRole } = useAuth();
     const { get, error } = useAxios();
     const router = useRouter();
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     useEffect(() => {
         const fetchUser = async () => {
             if (userId) {
@@ -41,7 +36,6 @@ export default function AppNavigator() {
         };
         fetchUser();
     }, [userId]);
-
     useEffect(() => {
         if (userToken) {
             const decoded = jwtDecode<any>(userToken); // Decode only if userToken is not null
@@ -50,11 +44,9 @@ export default function AppNavigator() {
             router.push("/login");
         }
     }, [userToken]);
-
     if (!userToken) {
         return <ActivityIndicator size="large" color={COLORS.PRIMARY} />;
     }
-
     return (
         <>
             {userRole === "tenant" ? (

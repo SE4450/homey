@@ -1,12 +1,10 @@
 const { Expense, User, Group } = require("../models/associations"); // Ensure models are imported
-
 /**
  * Add an Expense to a Group
  */
 exports.addExpense = async (req, res) => {
     try {
         const { expenseName, groupId, amount, owedTo, paidBy } = req.body;
-
         // Validate required fields
         if (!expenseName || !groupId || !amount || !owedTo || !paidBy) {
             return res.status(400).json({
@@ -16,7 +14,6 @@ exports.addExpense = async (req, res) => {
                 errors: ["groupId, amount, owedTo, and paidBy are required"],
             });
         }
-
         // Ensure the group exists
         const group = await Group.findByPk(groupId);
         if (!group) {
@@ -27,7 +24,6 @@ exports.addExpense = async (req, res) => {
                 errors: [`No group found with ID ${groupId}`],
             });
         }
-
         // Create the expense
         const expense = await Expense.create({
             groupId,
@@ -37,7 +33,6 @@ exports.addExpense = async (req, res) => {
             paidBy,
             completed: false,
         });
-
         res.status(201).json({
             status: "success",
             message: "Expense added successfully",
@@ -54,7 +49,6 @@ exports.addExpense = async (req, res) => {
         });
     }
 };
-
 /**
  * Get all Expenses for a Group
  */
@@ -63,7 +57,6 @@ exports.getExpenses = async (req, res) => {
         // Extract parameters
         const { groupId } = req.params;
         const { owedTo, paidBy } = req.query;
-
         // Ensure groupId is a number
         const groupIdNum = parseInt(groupId, 10);
         if (isNaN(groupIdNum)) {
@@ -74,10 +67,8 @@ exports.getExpenses = async (req, res) => {
                 errors: ["Group ID must be a number"],
             });
         }
-
         // Build the where clause
         let whereClause = { groupId: groupIdNum };
-
         // Fix the owedTo filter
         if (owedTo) {
             const owedToNum = parseInt(owedTo, 10);
@@ -85,14 +76,12 @@ exports.getExpenses = async (req, res) => {
                 whereClause.owedTo = owedToNum;
             }
         }
-
         if (paidBy) {
             const paidByNum = parseInt(paidBy, 10);
             if (!isNaN(paidByNum)) {
                 whereClause.paidBy = paidByNum;
             }
         }
-
         // Retrieve expenses
         const expenses = await Expense.findAll({
             where: whereClause,
@@ -109,7 +98,6 @@ exports.getExpenses = async (req, res) => {
                 },
             ],
         });
-
         if (!expenses || expenses.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -118,7 +106,6 @@ exports.getExpenses = async (req, res) => {
                 errors: [`No expenses found for group ID ${groupId}`],
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${expenses.length} expense(s) found`,
@@ -134,8 +121,6 @@ exports.getExpenses = async (req, res) => {
         });
     }
 };
-
-
 exports.completeExpense = async (req, res) => {
     try {
         const expenseId = req.params.id;
@@ -165,4 +150,3 @@ exports.completeExpense = async (req, res) => {
         });
     }
 };
-

@@ -16,13 +16,10 @@ import useAxios from "./hooks/useAxios";
 import Button from "./components/button";
 import { Ionicons } from "@expo/vector-icons";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
-
 type AddGroupNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "addGroup">;
-
 export default function AddGroupScreen() {
     const navigation = useNavigation<AddGroupNavigationProp>();
     const { get, post, error } = useAxios();
-
     const [groupName, setGroupName] = useState("");
     const [properties, setProperties] = useState<any[]>([]);
     const [selectedProperty, setSelectedProperty] = useState("");
@@ -31,17 +28,14 @@ export default function AddGroupScreen() {
     const [participants, setParticipants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
-
     useEffect(() => {
         fetchProperties();
     }, []);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const fetchProperties = async () => {
         setLoading(true);
         try {
@@ -59,25 +53,21 @@ export default function AddGroupScreen() {
             setLoading(false);
         }
     };
-
     const handlePropertyChange = (propertyId: string) => {
         const property = properties.find((p) => p.id == propertyId);
         setSelectedProperty(propertyId);
         setSelectedPropertyRooms(property?.bedrooms ?? null);
         setParticipants([]); // Reset participants list when switching properties
     };
-
     const handleAddParticipant = async () => {
         if (!username.trim()) {
             Alert.alert("Error", "Please enter a username.");
             return;
         }
-
         if (selectedPropertyRooms !== null && participants.length >= selectedPropertyRooms) {
             Alert.alert("Error", `This property has a limit of ${selectedPropertyRooms} tenants.`);
             return;
         }
-
         const response = await get<any>(`/api/users?username=${username}`);
         if (response) {
             if (participants.some((user) => user.id == response.data[0].id)) {
@@ -92,11 +82,9 @@ export default function AddGroupScreen() {
         }
         setUsername("");
     };
-
     const handleRemoveParticipant = (userId: number) => {
         setParticipants(participants.filter((user) => user.id !== userId));
     };
-
     const handleCreateGroup = async () => {
         if (!groupName.trim()) {
             Alert.alert("Error", "Group name is required.");
@@ -110,16 +98,13 @@ export default function AddGroupScreen() {
             Alert.alert("Error", "Please add at least one participant.");
             return;
         }
-
         setCreating(true);
-
         try {
             const response = await post<any>("/api/groups", {
                 name: groupName,
                 propertyId: selectedProperty,
                 tenantIds: participants.map((user) => user.id),
             });
-
             if (response) {
                 Alert.alert("Success", "Group created successfully!");
                 navigation.goBack();
@@ -132,7 +117,6 @@ export default function AddGroupScreen() {
             setCreating(false);
         }
     };
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
@@ -142,7 +126,6 @@ export default function AddGroupScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Create Group</Text>
             </View>
-
             {loading ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#0000ff" />
@@ -157,7 +140,6 @@ export default function AddGroupScreen() {
                         value={groupName}
                         onChangeText={setGroupName}
                     />
-
                     {/* Property Selector */}
                     <Text style={styles.label}>Select Property</Text>
                     <Picker
@@ -169,7 +151,6 @@ export default function AddGroupScreen() {
                             <Picker.Item key={property.id} label={property.name} value={property.id} />
                         ))}
                     </Picker>
-
                     {/* Add Participants Section */}
                     <Text style={styles.label}>
                         Add Participants ({selectedPropertyRooms !== null ? `Max: ${selectedPropertyRooms}` : "Select a property first"})
@@ -190,7 +171,6 @@ export default function AddGroupScreen() {
                             <Text style={styles.addButtonText}>Add</Text>
                         </TouchableOpacity>
                     </View>
-
                     {/* Selected Participants List */}
                     {participants.length > 0 && (
                         <View style={styles.participantList}>
@@ -206,7 +186,6 @@ export default function AddGroupScreen() {
                             ))}
                         </View>
                     )}
-
                     {/* Create Group Button */}
                     <Button text={creating ? "Creating..." : "Create Group"} onClick={handleCreateGroup} disabled={creating} />
                 </ScrollView>
@@ -214,7 +193,6 @@ export default function AddGroupScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

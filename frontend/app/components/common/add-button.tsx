@@ -1,12 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
-
 // Define the expected types for the props
 interface AddButtonProps {
   buttonText?: string; // buttonText is optional
   onPress: () => void; // onPress should be a function that returns void
 }
-
 const AddButton: React.FC<AddButtonProps> = ({ buttonText, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress}>
@@ -16,9 +14,7 @@ const AddButton: React.FC<AddButtonProps> = ({ buttonText, onPress }) => {
     </TouchableOpacity>
   );
 };
-
 export default AddButton;
-
 const styles = StyleSheet.create({
   buttonContainer: {
     padding: 10,

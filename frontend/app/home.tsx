@@ -18,7 +18,6 @@ import useUser from "./hooks/useUser";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "./context/AuthContext";
 import axios from "axios";
-
 const COLORS = {
   PRIMARY: "#4a90e2",
   SECONDARY: "#FF9800",
@@ -31,7 +30,6 @@ const COLORS = {
   CARD_BG: "#FFFFFF",
   LIGHT_PRIMARY: "#E8F5E9",
 };
-
 // Define the navigation param list type
 type RootStackParamList = {
   Home: undefined;
@@ -42,10 +40,8 @@ type RootStackParamList = {
   Chores: undefined;
   // Add other screens as needed
 };
-
 // Define the navigation prop type
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
-
 // Add interfaces for Chore and ListItem
 interface Chore {
   id: number;
@@ -54,14 +50,12 @@ interface Chore {
   completed: boolean;
   dueDate?: string;
 }
-
 interface ListItem {
   itemId: number;
   item: string;
   listId: number;
   purchased: string;
 }
-
 // Update the greetings array to remove commas
 const friendlyGreetings = [
   "Welcome",
@@ -77,12 +71,10 @@ const friendlyGreetings = [
   "Good to see you",
   "Wassup",
 ];
-
 type HomeScreenProps = {
   groupId: string;
   role: string;
 };
-
 export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const [inventoryAlert, setInventoryAlert] = useState(
     [] as Array<{ itemName: String }>
@@ -111,26 +103,22 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [greeting, setGreeting] = useState("");
-
   useEffect(() => {
     if (error) {
       Alert.alert("Error", error);
     }
   }, [error]);
-
   useEffect(() => {
     if (isFocused) {
       loadData();
     }
   }, [isFocused]);
-
   const loadData = async () => {
     lowInventoryAlert();
     fetchUpcomingEvents();
     fetchAssignedItems();
     fetchHouseSummary();
   };
-
   const onRefresh = async () => {
     setRefreshing(true);
     setGreeting(getRandomGreeting());
@@ -138,10 +126,8 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
     setLastRefreshed(new Date());
     setRefreshing(false);
   };
-
   const fetchUpcomingEvents = async () => {
     setUpcomingEvents([]);
-
     try {
       // Check if the API endpoint exists before making the request
       const response = await axios.get(`${API_URL}/api/calendar/upcoming`, {
@@ -153,13 +139,11 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           return status < 500; // Resolve only if the status code is less than 500
         },
       });
-
       // If we got a 404, just treat it as empty data
       if (response.status === 404) {
         console.log("Calendar API endpoint not found, treating as empty data");
         return;
       }
-
       if (
         response &&
         response.data &&
@@ -181,14 +165,11 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       console.error("Error fetching upcoming events:", error);
     }
   };
-
   const lowInventoryAlert = async () => {
     setInventoryAlert([]);
-
     const response = await get<any>(
       `/api/inventory/getLowItem?houseId=${user.id}&quantity=1&quantity=0`
     );
-
     if (response) {
       response.data.forEach(
         (item: {
@@ -202,7 +183,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       );
     }
   };
-
   // Fetch assigned chores and list items
   useEffect(() => {
     if (userToken && isFocused) {
@@ -210,7 +190,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       fetchHouseSummary();
     }
   }, [userToken, isFocused]);
-
   const fetchAssignedItems = async () => {
     setLoading(true);
     try {
@@ -223,7 +202,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           },
         }
       );
-
       if (choresResponse.data.status === "success") {
         // Filter only active (not completed) chores
         const activeChores = choresResponse.data.data.filter(
@@ -237,7 +215,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       setLoading(false);
     }
   };
-
   const fetchHouseSummary = async () => {
     try {
       // Fetch pending chores count
@@ -251,7 +228,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             },
           }
         );
-
         if (choresResponse.data.status === "success") {
           pendingChores = choresResponse.data.data.filter(
             (chore: Chore) => !chore.completed
@@ -260,7 +236,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       } catch (choresError) {
         console.error("Error fetching chores:", choresError);
       }
-
       // Fetch expenses data
       let totalOwed = 0;
       try {
@@ -274,7 +249,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             validateStatus: (status) => status < 500,
           }
         );
-
         // If 404, treat it as no data
         if (expensesResponse.status === 404) {
           console.log(
@@ -293,7 +267,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         // If some other error occurred (>= 500), you still catch it here
         console.error("Error fetching expenses:", expensesError);
       }
-
       // Update the state with the data we were able to fetch
       setHouseSummary({
         pendingChores,
@@ -303,7 +276,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       console.error("Error in fetchHouseSummary:", error);
     }
   };
-
   // Render a to-do item (either chore or list item)
   const renderToDoItem = (title: string, description: string, type: string) => (
     <View style={styles.todoItem}>
@@ -321,24 +293,20 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
       </View>
     </View>
   );
-
   // Add this function to get a random greeting
   const getRandomGreeting = () => {
     const randomIndex = Math.floor(Math.random() * friendlyGreetings.length);
     return friendlyGreetings[randomIndex];
   };
-
   // Update the greeting whenever the screen is focused or refreshed
   useEffect(() => {
     if (isFocused) {
       setGreeting(getRandomGreeting());
     }
   }, [isFocused]);
-
   if (userLoading) return <ActivityIndicator size="large" color="#0000ff" />;
   if (userError) return <Text>Error: {userError}</Text>;
   if (!user) return <Text>No user found.</Text>;
-
   return (
     <ScrollView
       contentContainerStyle={styles.container}
@@ -354,7 +322,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             {user.firstName} {user.lastName}
           </Text>
         </Text>
-
         <View style={styles.quickActionsContainer}>
           <Text style={styles.sectionHeading}>Quick Actions</Text>
           <View style={styles.quickActionsRow}>
@@ -385,7 +352,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </TouchableOpacity>
           </View>
         </View>
-
         {inventoryAlert.length != 0 && (
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
@@ -397,7 +363,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             ))}
           </View>
         )}
-
         <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>Your To-Dos</Text>
           {loading ? (
@@ -438,7 +403,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </View>
           )}
         </View>
-
         {/* Upcoming Events Section */}
         <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>Upcoming Events</Text>
@@ -474,7 +438,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </View>
           )}
         </View>
-
         <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>House Summary</Text>
           <View style={styles.summaryCard}>
@@ -492,7 +455,6 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </View>
           </View>
         </View>
-
         <Text style={styles.lastRefreshedText}>
           Last updated: {lastRefreshed.toLocaleTimeString()}
         </Text>
@@ -500,9 +462,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
     </ScrollView>
   );
 }
-
 const TEXT_LIGHT = COLORS.TEXT + "80";
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,

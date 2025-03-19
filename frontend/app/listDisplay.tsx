@@ -11,11 +11,9 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
 import Lists from "./components/Lists";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -96,12 +94,10 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
 });
-
 type ListScreenProps = {
   groupId: string;
   role: string;
 };
-
 export default function ListDisplay({ groupId, role }: ListScreenProps) {
   const [listView, setListView] = useState(true);
   const [list, setList] = useState(false);
@@ -110,38 +106,30 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
   const [listID, setListID] = useState(0 as Number);
   //variable that will hold the names of all the user created lists
   const [lists, setLists] = useState([] as Array<{ name: String; id: Number }>);
-
   const { post, get } = useAxios();
   const { userToken, userId } = useAuth();
-
   //sample data to test
   //let data = [{name: "list1", id: 1}, {name: "list2", id: 2}, {name: "list3", id: 3}];
-
   useEffect(() => {
     usersLists();
   }, []);
-
   //function called in the useEffect to load all the users created lists
   const usersLists = async () => {
     //fetch request goes here
     const response = await get<any>(`/api/lists?userId=${userId}`);
-
     //clear the array
     setLists([]);
-
     if (response) {
       for (const list of response.data) {
         setLists((l) => [...l, { name: list.listName, id: list.listId }]);
       }
     }
   };
-
   //function to create a new list
   const createList = async () => {
     if (createdList != "") {
       const body = { userId: userId, listName: createdList };
       const response = await post<any>("/api/lists/createList", body);
-
       if (response) {
         usersLists();
       }
@@ -150,7 +138,6 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
     }
     setCreatedList("");
   };
-
   //function for the delete alert
   const deleteConfirmation = async (listId: Number, listName: String) => {
     Alert.alert("Delete List", `Do you want to delete the list ${listName}`, [
@@ -163,13 +150,10 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
       },
     ]);
   };
-
   //function to delete a list
   const deleteList = async (listId: Number) => {
     const body = { listId: listId };
-
     const response = await post<any>("/api/lists/deleteList", body);
-
     if (response) {
       usersLists();
       alert("The list has been deleted");
@@ -178,7 +162,6 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
     }
     setCreatedList("");
   };
-
   //function to display the selected list
   const displayList = async (ListName: String, ID: Number) => {
     setListName(ListName);
@@ -186,7 +169,6 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
     setListView(!listView);
     setList(!list);
   };
-
   return (
     <ScrollView style={styles.container}>
       {listView && (
@@ -206,7 +188,6 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
               <Text style={styles.createButtonText}>Create List</Text>
             </TouchableOpacity>
           </View>
-
           <View style={styles.listsContainer}>
             {lists.length > 0 ? (
               lists.map((list) => (
@@ -229,7 +210,6 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
         </View >
       )
       }
-
       {list && (
         <View>
           <TouchableOpacity

@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const Property = sequelize.define("Property",
     {
         id: {
@@ -78,5 +77,4 @@ const Property = sequelize.define("Property",
         tableName: "properties",
     }
 );
-
 module.exports = Property;

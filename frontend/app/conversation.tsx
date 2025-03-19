@@ -16,9 +16,7 @@ import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import MessageBox from "./components/messageBox";
 import { MessageStackParamList } from "./stacks/messagesStack";
-
 type ConversationScreenRouteProp = RouteProp<MessageStackParamList, 'conversation'>;
-
 export default function ConversationScreen() {
     const navigation = useNavigation();
     const [messages, setMessages] = useState<any[]>([]);
@@ -26,22 +24,18 @@ export default function ConversationScreen() {
     const { get, post, patch, error } = useAxios();
     const { userId } = useAuth();
     const route = useRoute<ConversationScreenRouteProp>();
-
     useLayoutEffect(() => {
         const parent = navigation.getParent();
         parent?.setOptions({ tabBarStyle: { display: "none" } });
-
         return () => {
             parent?.setOptions({ tabBarStyle: { display: "flex" } });
         };
     }, [navigation]);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -49,11 +43,9 @@ export default function ConversationScreen() {
                 if (response) {
                     let lastSentMessage: any = null;
                     let lastReceivedMessage: any = null;
-
                     const formattedMessages = response.data.map((message: any) => {
                         lastSentMessage = message.senderId == userId ? message : lastSentMessage;
                         lastReceivedMessage = message.senderId != userId ? message : lastReceivedMessage;
-
                         return {
                             id: message.id,
                             sender: message.senderId !== userId ? "other" : "self",
@@ -65,36 +57,28 @@ export default function ConversationScreen() {
                             status: null,
                         };
                     });
-
                     if (lastSentMessage) {
                         formattedMessages[
                             formattedMessages.findIndex((message: any) => message.id == lastSentMessage.id)
                         ].status = lastSentMessage.readBy ? "read" : "delivered";
                     }
-
                     if (lastReceivedMessage) {
                         await patch(`/api/messages/read`, { messageId: lastReceivedMessage.id });
                     }
-
                     setMessages(formattedMessages.reverse());
                 }
             } catch (err) {
                 Alert.alert("Error", `Failed to fetch messages in conversation:\n${err}`);
             }
         };
-
         const interval = setInterval(() => {
             fetchMessages();
         }, 5000);
-
         fetchMessages();
-
         return () => clearInterval(interval);
     }, []);
-
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
-
         const tempMessage = {
             id: Date.now().toString(),
             sender: "self",
@@ -105,10 +89,8 @@ export default function ConversationScreen() {
             }),
             status: "sending"
         };
-
         setMessages((prev) => [tempMessage, ...prev]);
         setNewMessage("");
-
         try {
             const response = await post<any>(`/api/messages/send`, { conversationId: route.params.id, content: tempMessage.content });
             if (response) {
@@ -131,7 +113,6 @@ export default function ConversationScreen() {
             setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
         }
     };
-
     const renderMessage = ({ item }: any) => (
         <MessageBox
             message={item.content}
@@ -140,7 +121,6 @@ export default function ConversationScreen() {
             status={item.status}
         />
     );
-
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
@@ -179,7 +159,6 @@ export default function ConversationScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

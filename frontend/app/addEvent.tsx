@@ -16,20 +16,17 @@ import { useRouter } from "expo-router";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
-
 const AddEvent = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const { post, loading, error } = useAxios();
   const { userId } = useAuth();
-
   const [title, setTitle] = useState("");
   const [eventDate, setEventDate] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-
   // Hide bottom navbar when the component is focused
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -38,19 +35,16 @@ const AddEvent = () => {
       parent?.setOptions({ tabBarStyle: { display: "flex" } });
     };
   }, [navigation]);
-
   // Helper to format a Date object into HH:MM string
   const formatTime = (date: Date): string => {
     const pad = (num: number) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
-
   const handleCreateEvent = async () => {
     if (!title || !eventDate) {
       Alert.alert("Error", "Title and Event Date are required");
       return;
     }
-
     const data = {
       title,
       eventDate: eventDate.toISOString().split("T")[0],
@@ -60,9 +54,7 @@ const AddEvent = () => {
       description,
       userId,
     };
-
     const result = await post("/api/calendar", data);
-
     if (result) {
       Alert.alert("Success", "Event created successfully");
       navigation.goBack();
@@ -70,7 +62,6 @@ const AddEvent = () => {
       Alert.alert("Error", error);
     }
   };
-
   return (
     <ScreenWrapper>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -86,7 +77,6 @@ const AddEvent = () => {
                 placeholder="Enter event title"
               />
             </View>
-
             {/* Date Picker */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Date (YYYY-MM-DD)</Text>
@@ -128,7 +118,6 @@ const AddEvent = () => {
                 </View>
               </View>
             </View>
-
             {/* Location */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Location</Text>
@@ -139,7 +128,6 @@ const AddEvent = () => {
                 placeholder="Enter location"
               />
             </View>
-
             {/* Description */}
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Description</Text>
@@ -153,7 +141,6 @@ const AddEvent = () => {
               />
             </View>
           </View>
-
           {/* Save Button */}
           <TouchableOpacity
             style={styles.saveButton}
@@ -169,9 +156,7 @@ const AddEvent = () => {
     </ScreenWrapper>
   );
 };
-
 export default AddEvent;
-
 const styles = StyleSheet.create({
   form: {
     padding: 20,

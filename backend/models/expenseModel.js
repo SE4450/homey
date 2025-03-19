@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
 const { Group, User } = require("./associations"); // Import Group model
-
 const Expense = sequelize.define("Expense", {
     id: {
         type: DataTypes.INTEGER,
@@ -50,5 +49,4 @@ const Expense = sequelize.define("Expense", {
     timestamps: true,
     tableName: "expenses",
 });
-
 module.exports = Expense;

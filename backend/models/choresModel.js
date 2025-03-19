@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
 const User = require("./userModel");
-
 const Chore = sequelize.define(
   "Chore",
   {
@@ -50,5 +49,4 @@ const Chore = sequelize.define(
     tableName: "Chores",
   }
 );
-
 module.exports = Chore;

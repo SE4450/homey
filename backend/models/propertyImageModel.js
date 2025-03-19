@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const PropertyImage = sequelize.define("PropertyImage", {
     id: {
         type: DataTypes.INTEGER,
@@ -32,5 +31,4 @@ const PropertyImage = sequelize.define("PropertyImage", {
     timestamps: true,
     tableName: "property_images" // Ensure this is explicitly set
 });
-
 module.exports = PropertyImage;

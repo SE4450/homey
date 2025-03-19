@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-
 type DropdownProps = {
     options: string[];
     customStyle?: {
@@ -12,7 +11,6 @@ type DropdownProps = {
     onOptionSelect: (selected: string) => void;
     placeholder?: string;  //this line was added
 };
-
 const Dropdown: React.FC<DropdownProps> = ({
     options,
     customStyle = {},
@@ -27,16 +25,13 @@ const Dropdown: React.FC<DropdownProps> = ({
     else {
         initalVal = placeholder;
     }
-
     const [selectedOption, setSelectedOption] = useState(initalVal);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
         setIsDropdownOpen(false);
         onOptionSelect(option);
     };
-
     return (
         <View style={[styles.container, customStyle?.containerStyle]}>
             <TouchableOpacity
@@ -64,7 +59,6 @@ const Dropdown: React.FC<DropdownProps> = ({
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         width: 200,
@@ -90,5 +84,4 @@ const styles = StyleSheet.create({
         borderBottomColor: "#ddd",
     },
 });
-
 export default Dropdown;

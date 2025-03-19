@@ -1,21 +1,17 @@
 // ExpenseRow.tsx
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-
 interface ExpenseRowProps {
   expense: any;
   role: "OwedTo" | "PaidBy";
   onComplete: (expenseId: number) => void;
 }
-
 const ExpenseRow: React.FC<ExpenseRowProps> = ({ expense, role, onComplete }) => {
   const [checkmarkOpaque, setCheckmarkOpaque] = useState(false);
-
   const handleCheckmarkPress = () => {
     setCheckmarkOpaque(true);
     onComplete(expense.id);
   };
-
   return (
     <View style={styles.row}>
       <TouchableOpacity onPress={handleCheckmarkPress}>
@@ -30,7 +26,6 @@ const ExpenseRow: React.FC<ExpenseRowProps> = ({ expense, role, onComplete }) =>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
@@ -55,5 +50,4 @@ const styles = StyleSheet.create({
     color: "#555",
   },
 });
-
 export default ExpenseRow;

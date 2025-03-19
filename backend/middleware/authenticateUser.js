@@ -1,9 +1,7 @@
 const jwt = require("jsonwebtoken");
-
 const authenticateUser = (roles) => {
     return (req, res, next) => {
         const authHeader = req.headers.authorization;
-
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.status(401).json({
                 status: "error",
@@ -12,17 +10,13 @@ const authenticateUser = (roles) => {
                 errors: ["Token is invalid or expired, please login to get a new token"],
             });
         }
-
         const token = authHeader.split(" ")[1];
-
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
             if (decoded.role === "admin") {
                 req.user = decoded;
                 return next();
             }
-
             if (!roles.includes(decoded.role)) {
                 return res.status(403).json({
                     status: "error",
@@ -66,5 +60,4 @@ const authenticateUser = (roles) => {
         }
     };
 };
-
 module.exports = { authenticateUser };

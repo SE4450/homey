@@ -20,11 +20,8 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type LandlordAddPropertyScreenNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "addProperty">;
-
 const propertyTypes = ["Apartment", "House", "Condo", "Townhouse", "Studio", "Duplex", "Other"];
-
 export default function AddPropertyScreen() {
     const [propertyData, setPropertyData] = useState({
         name: "",
@@ -37,33 +34,26 @@ export default function AddPropertyScreen() {
         propertyDescription: "",
         exteriorImage: null as string | null,
     });
-
     const navigation = useNavigation<LandlordAddPropertyScreenNavigationProp>();
-
     const handleNext = async () => {
         const { name, address, city, bedrooms, price, propertyType, exteriorImage, propertyDescription } = propertyData;
-
         if (!name || !address || !city || !bedrooms || !price || !propertyType || !exteriorImage || !propertyDescription) {
             Alert.alert("Error", "Please fill in all fields and select an exterior image.");
             return;
         }
-
         try {
             const response = await fetch(exteriorImage);
             const blob = await response.blob();
             const reader = new FileReader();
             reader.readAsDataURL(blob);
-
             reader.onloadend = () => {
                 propertyData.exteriorImage = (reader.result as string).split(",")[1];
-
                 navigation.navigate("addPropertyImages", { propertyData });
             };
         } catch (error) {
             Alert.alert("Error", "Failed to process image. Please try again.");
         }
     };
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
@@ -73,7 +63,6 @@ export default function AddPropertyScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Add a New Property</Text>
             </View>
-
             {/* Keyboard Avoiding View */}
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flexContainer}>
                 <ScrollView contentContainerStyle={styles.container}>
@@ -149,7 +138,6 @@ export default function AddPropertyScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: { flex: 1, backgroundColor: "#f5f5f5" },
     flexContainer: { flex: 1 },

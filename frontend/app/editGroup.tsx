@@ -15,34 +15,27 @@ import { Ionicons } from "@expo/vector-icons";
 import useAxios from "./hooks/useAxios";
 import Button from "./components/button";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
-
 type EditGroupRouteProp = RouteProp<LandlordHomeStackParamList, "editGroup">;
 type EditGroupNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "editGroup">;
-
 export default function EditGroupScreen() {
     const route = useRoute<EditGroupRouteProp>();
     const navigation = useNavigation<EditGroupNavigationProp>();
     const { get, put, del, error } = useAxios();
-
     const [groupName, setGroupName] = useState("");
     const [participants, setParticipants] = useState<any[]>([]);
     const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
     const { groupId } = route.params;
-
     useEffect(() => {
         fetchGroupDetails();
     }, []);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const fetchGroupDetails = async () => {
         setLoading(true);
         try {
@@ -57,17 +50,14 @@ export default function EditGroupScreen() {
             setLoading(false);
         }
     };
-
     const handleAddParticipant = async () => {
         if (!username.trim()) {
             Alert.alert("Error", "Please enter a username.");
             return;
         }
-
         const response = await get<any>(`/api/users?username=${username}`);
         if (response) {
             const user = response.data[0];
-
             if (!user) {
                 Alert.alert("Error", "User not found.");
                 return;
@@ -80,31 +70,26 @@ export default function EditGroupScreen() {
                 Alert.alert("Error", "Cannot add a landlord as a participant.");
                 return;
             }
-
             setParticipants([...participants, user]);
         } else {
             Alert.alert("Error", "User not found.");
         }
         setUsername("");
     };
-
     const handleRemoveParticipant = async (userId: number) => {
         setParticipants(participants.filter((user) => user.id !== userId));
     };
-
     const handleUpdateGroup = async () => {
         if (!groupName.trim()) {
             Alert.alert("Error", "Group name is required.");
             return;
         }
-
         setUpdating(true);
         try {
             const response = await put<any>(`/api/groups/${groupId}`, {
                 name: groupName,
                 participants: participants.map((p) => p.id),
             });
-
             if (response) {
                 Alert.alert("Success", "Group updated successfully!");
                 navigation.goBack();
@@ -117,7 +102,6 @@ export default function EditGroupScreen() {
             setUpdating(false);
         }
     };
-
     const handleDeleteGroup = async () => {
         Alert.alert("Confirm Delete", "Are you sure you want to delete this group?", [
             { text: "Cancel", style: "cancel" },
@@ -128,7 +112,6 @@ export default function EditGroupScreen() {
                     setDeleting(true);
                     try {
                         const response = await del<any>(`/api/groups/${groupId}`);
-
                         if (response) {
                             Alert.alert("Success", "Group deleted successfully!");
                             navigation.goBack();
@@ -144,7 +127,6 @@ export default function EditGroupScreen() {
             },
         ]);
     };
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
@@ -154,7 +136,6 @@ export default function EditGroupScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Edit Group</Text>
             </View>
-
             {loading ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#0000ff" />
@@ -169,7 +150,6 @@ export default function EditGroupScreen() {
                         value={groupName}
                         onChangeText={setGroupName}
                     />
-
                     {/* Add Participants Section */}
                     <Text style={styles.label}>Add Participants</Text>
                     <View style={styles.usernameInputContainer}>
@@ -183,7 +163,6 @@ export default function EditGroupScreen() {
                             <Text style={styles.addButtonText}>Add</Text>
                         </TouchableOpacity>
                     </View>
-
                     {/* Selected Participants List */}
                     {participants.length > 0 && (
                         <View style={styles.participantList}>
@@ -199,10 +178,8 @@ export default function EditGroupScreen() {
                             ))}
                         </View>
                     )}
-
                     {/* Update Group Button */}
                     <Button text={updating ? "Updating..." : "Update Group"} onClick={handleUpdateGroup} disabled={updating} />
-
                     {/* Delete Group Button */}
                     <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteGroup} disabled={deleting}>
                         <Text style={styles.deleteButtonText}>{deleting ? "Deleting..." : "Delete Group"}</Text>
@@ -212,7 +189,6 @@ export default function EditGroupScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

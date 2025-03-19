@@ -7,7 +7,6 @@ import ViewEditPropertyScreen from "../viewEditProperty";
 import AddEditPropertyImageScreen from "../addEditPropertyImage";
 import AddGroupScreen from "../addGroup";
 import EditGroupScreen from "../editGroup";
-
 export type LandlordHomeStackParamList = {
     home: undefined;
     addProperty: undefined;
@@ -17,9 +16,7 @@ export type LandlordHomeStackParamList = {
     addGroup: undefined;
     editGroup: { groupId: string };
 };
-
 const LandlordHomeStack = createStackNavigator<LandlordHomeStackParamList>();
-
 export default function LandlordHomeStackScreen() {
     return (
         <NavigationContainer>

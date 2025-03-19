@@ -17,7 +17,6 @@ import ExpenseRow from "./components/expenseRow";
 import RoommateSelector from "./components/roomateSelector";
 import { useIsFocused } from "@react-navigation/native";
 import useUser from "./hooks/useUser";
-
 interface Expense {
     id: number;
     expenseName: string;
@@ -26,25 +25,21 @@ interface Expense {
     paidBy: number;
     completed: boolean;
 }
-
 interface User {
     id: number;
     firstName: string;
     lastName: string;
 }
-
 interface SimplifiedDebt {
     userId: number;
     userName: string;
     netAmount: number;
     details: Expense[];
 }
-
 type ExpenseScreenProps = {
     groupId: string;
     role: string;
 };
-
 export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
@@ -57,23 +52,19 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     const { get, post, error, put } = useAxios();
     const { userId } = useAuth();
     const isFocused = useIsFocused();
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     // Fetch expenses where the user is the payee or the payer
     const fetchExpenses = async () => {
         try {
             const responseOwed = await get<any>(`/api/expenses/${groupId}?owedTo=${userId}`);
             const responseOwe = await get<any>(`/api/expenses/${groupId}?paidBy=${userId}`);
-
             if (responseOwed) {
                 setExpensesOwed(responseOwed.data);
             }
-
             if (responseOwe) {
                 setExpensesOwe(responseOwe.data);
             }
@@ -82,7 +73,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             Alert.alert("Error", "Failed to fetch expenses.");
         }
     };
-
     // Fetch all users for the multi-select (excluding the current user)
     const fetchAllUsers = async () => {
         try {
@@ -95,14 +85,12 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             console.error("Failed to fetch users", err);
         }
     };
-
     useEffect(() => {
         if (isFocused) {
             fetchAllUsers();
             fetchExpenses();
         }
     }, [isFocused]);
-
     // Handle adding a new expense – create one expense row per selected payee with split amount
     const handleAddExpense = async () => {
         if (!name || !amount || selectedPayees.length === 0) {
@@ -115,7 +103,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             return;
         }
         const splitAmount = totalAmount / selectedPayees.length;
-
         try {
             for (const payeeId of selectedPayees) {
                 await post("/api/expenses", {
@@ -135,24 +122,20 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             Alert.alert("Error", "Failed to add expense(s).");
         }
     };
-
     // Toggle payee selection for the multi-select
     const togglePayeeSelection = (id: number) => {
         setSelectedPayees((prev) =>
             prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
         );
     };
-
     // Handle expense completion via checkmark press in ExpenseRow
     const handleCompleteExpense = async (expenseId: number) => {
         await put(`/api/expenses/${expenseId}/complete`, {});
         fetchExpenses();
     };
-
     // Compute simplified debts based on expensesOwed and expensesOwe
     const computeSimplifiedDebts = (owed: Expense[], owe: Expense[]) => {
         const debtMap: { [key: number]: { net: number; details: Expense[] } } = {};
-
         // For expenses where you paid (owe), owedTo is the counterparty – add the amount
         owe.forEach((exp) => {
             const counterparty = exp.owedTo;
@@ -162,7 +145,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             debtMap[counterparty].net += exp.amount;
             debtMap[counterparty].details.push(exp);
         });
-
         // For expenses where you are owed (owed), paidBy is the counterparty – subtract the amount
         owed.forEach((exp) => {
             const counterparty = exp.paidBy;
@@ -172,7 +154,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             debtMap[counterparty].net -= exp.amount;
             debtMap[counterparty].details.push(exp);
         });
-
         const simplified: SimplifiedDebt[] = Object.entries(debtMap).map(([userIdStr, value]) => {
             const uid = parseInt(userIdStr, 10);
             const user = allUsers.find((u) => u.id === uid) || { firstName: "User", lastName: uid.toString() };
@@ -183,16 +164,13 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
                 details: value.details,
             };
         });
-
         setSimplifiedDebts(simplified);
     };
-
     // Render each simplified debt row with expandable details
     // Render each simplified debt row with all details visible
     const renderDebtRow = ({ item }: { item: SimplifiedDebt }) => {
         const displayAmount = Math.abs(item.netAmount).toFixed(2);
         const color = item.netAmount < 0 ? "red" : "green";
-
         return (
             <View>
                 <View style={styles.debtRow}>
@@ -211,8 +189,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
             </View>
         );
     };
-
-
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Add Expense</Text>
@@ -249,7 +225,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
                 ))}
             </View>
             <Button title="Add Expense" onPress={handleAddExpense} />
-
             <Text style={styles.sectionHeader}>Owed to You</Text>
             <FlatList
                 data={expensesOwed}
@@ -259,7 +234,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
                     <ExpenseRow expense={item} role="OwedTo" onComplete={handleCompleteExpense} />
                 )}
             />
-
             <Text style={styles.sectionHeader}>You Owe</Text>
             <FlatList
                 data={expensesOwe}
@@ -269,7 +243,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
                     <ExpenseRow expense={item} role="PaidBy" onComplete={handleCompleteExpense} />
                 )}
             />
-
             <Text style={styles.sectionHeader}>Simplified Debts</Text>
             <FlatList
                 data={simplifiedDebts}
@@ -280,7 +253,6 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         padding: 16,

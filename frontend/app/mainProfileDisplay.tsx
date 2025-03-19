@@ -13,12 +13,10 @@ import { useRouter } from "expo-router";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { ReviewStackParamList } from "./stacks/reviewsStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type ReviewScreenNavigationProp = StackNavigationProp<
   ReviewStackParamList,
   "mainProfile"
 >;
-
 const COLORS = {
   PRIMARY: "#4a90e2",
   SECONDARY: "#FF9800",
@@ -28,7 +26,6 @@ const COLORS = {
   LIGHT_GRAY: "#F5F5F5",
   LOGOUT: "#D32F2F",
 };
-
 //stylesheet for the component
 const styles = StyleSheet.create({
   profilePopup: {
@@ -118,7 +115,6 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
 });
-
 export default function MainProfileDisplay() {
   const [avgScoreValue, setAvgScoreValue] = useState(0);
   const [cleaningValue, setCleaningValue] = useState("");
@@ -126,21 +122,18 @@ export default function MainProfileDisplay() {
   const [startSleepValue, setStartSleepValue] = useState("");
   const [endSleepValue, setEndSleepValue] = useState("");
   const [allergiesValue, setAllergiesValue] = useState("");
-
   const { post, get } = useAxios();
   const [user, setUser] = useState<any>({});
   const { userId, logout } = useAuth();
   const navigation = useNavigation<ReviewScreenNavigationProp>();
   const isFocused = useIsFocused();
   const router = useRouter();
-
   useEffect(() => {
     if(isFocused) {
         getProfile();
         getAvgUserScore();
     }
   }, [isFocused]);
-
   useEffect(() => {
     //currently needed to get the user id
     const fetchUser = async () => {
@@ -151,16 +144,13 @@ export default function MainProfileDisplay() {
     };
     fetchUser();
   }, []);
-
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
-
   const getProfile = async () => {
     const body = { id: userId };
     const response = await get<any>("/api/profile", body);
-
     if (response) {
       if (response.data[0].cleaningHabits != null) {
         setCleaningValue(response.data[0].cleaningHabits);
@@ -179,11 +169,8 @@ export default function MainProfileDisplay() {
       }
     }
   };
-
   const getAvgUserScore = async() => {
-
     const response = await get<any>(`/api/reviews?reviewType=user&reviewedItemId=${userId}`);
-
     if(response){
       let avgScore = 0;
       if(response.data.length != 0) {
@@ -195,7 +182,6 @@ export default function MainProfileDisplay() {
       }
     }
   }
-
   return (
     <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
       <View style={styles.profilePopup}>
@@ -222,7 +208,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.labelText}>Allergies: {allergiesValue}</Text>
         </View>
       </View>
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.PRIMARY }]}
@@ -231,8 +216,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
-
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
@@ -241,8 +224,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.buttonText}>Understand Your Score</Text>
         </TouchableOpacity>
       </View>
-
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
@@ -251,8 +232,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.buttonText}>Review Your Roomates</Text>
         </TouchableOpacity>
       </View>
-
-
       {/* THE FOLLOWING 2 VIEWS NEED TO BE UPDATED TO HAVE THE APPROPRIATE LANDLORD ID AND HOUSE ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -262,8 +241,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.buttonText}>Review Your Landlord</Text>
         </TouchableOpacity>
       </View>
-
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.PRIMARY  }]}
@@ -272,8 +249,6 @@ export default function MainProfileDisplay() {
           <Text style={styles.buttonText}>Review Your House</Text>
         </TouchableOpacity>
       </View>
-
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}

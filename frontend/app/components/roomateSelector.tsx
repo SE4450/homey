@@ -3,24 +3,19 @@ import { View, Text, ActivityIndicator, Alert, StyleSheet } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import useAxios from "../hooks/useAxios";
 import useUser from "../hooks/useUser";
-
 interface RoommateSelectorProps {
     groupId: string;
     onSelect: (roommateId: string) => void;
 }
-
 const RoommateSelector: React.FC<RoommateSelectorProps> = ({ groupId, onSelect }) => {
     const { user, userLoading } = useUser();
     const { get, error } = useAxios();
-
     const [roommates, setRoommates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
     const [selectedRoommate, setSelectedRoommate] = useState<string | null>(null);
-
     useEffect(() => {
         if (!groupId) return;
-
         const fetchRoommates = async () => {
             setLoading(true);
             try {
@@ -41,20 +36,16 @@ const RoommateSelector: React.FC<RoommateSelectorProps> = ({ groupId, onSelect }
                 setLoading(false);
             }
         };
-
         fetchRoommates();
     }, [groupId, user]);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     if (loading || userLoading) {
         return <ActivityIndicator size="large" color="#4CAF50" />;
     }
-
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Select a Roommate</Text>
@@ -76,7 +67,6 @@ const RoommateSelector: React.FC<RoommateSelectorProps> = ({ groupId, onSelect }
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         marginBottom: 15,
@@ -99,5 +89,4 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 });
-
 export default RoommateSelector;

@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require("../db.js");
-
 const GroupParticipant = sequelize.define('GroupParticipant', {
     id: {
         type: DataTypes.INTEGER,
@@ -33,5 +32,4 @@ const GroupParticipant = sequelize.define('GroupParticipant', {
     timestamps: false,
     tableName: 'group_participants'
 });
-
 module.exports = GroupParticipant;

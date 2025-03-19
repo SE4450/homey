@@ -6,12 +6,10 @@ const transporter = require("../mail.js");
 const validator = require("validator");
 const passwordValidator = require("password-validator");
 const sequelize = require("../db.js");
-
 exports.getUsers = async (req, res) => {
     try {
         delete req.query.password;
         delete req.query.email;
-
         const users = await User.findAll({ attributes: { exclude: ["password", "email"] }, where: req.query });
         if (users.length == 0) {
             return res.status(404).json({
@@ -44,7 +42,6 @@ exports.getUsers = async (req, res) => {
         });
     }
 }
-
 exports.getUserById = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id, { attributes: { exclude: ["password", "email"] } });
@@ -79,7 +76,6 @@ exports.getUserById = async (req, res) => {
         });
     }
 }
-
 exports.getConfidentialUserInfo = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.userId, { attributes: { exclude: ["password"] } });
@@ -117,25 +113,19 @@ exports.getConfidentialUserInfo = async (req, res) => {
 exports.createUser = async (req, res) => {
     try {
         const { firstName, lastName, username, email, password, role } = req.body;
-
         const errors = [];
-
         if (!firstName || firstName.length < 2) {
             errors.push("First name must be at least 2 characters long");
         }
-
         if (!lastName || lastName.length < 2) {
             errors.push("Last name must be at least 2 characters long");
         }
-
         if (!email || !validator.isEmail(email)) {
             errors.push("Email must be a valid email address");
         }
-
         if (!username || username.length < 6) {
             errors.push("Username must be at least 6 characters long");
         }
-
         const schema = new passwordValidator();
         schema
             .is().min(8)
@@ -145,17 +135,14 @@ exports.createUser = async (req, res) => {
             .has().digits(1)
             .has().symbols(1)
             .has().not().spaces()
-
         if (!password || !schema.validate(password)) {
             const failures = schema.validate(password, { details: true }).reduce((current, rule, index) => current + `${index + 1}. ${rule.message.replace("string", "password")}\n`, "");
             errors.push(`Password validation failed:\n\n${failures}`);
         }
-
         const validRoles = ["tenant", "landlord"];
         if (!role || !validRoles.includes(role)) {
             errors.push(`Role must be one of the following: ${validRoles.join(", ")}`);
         }
-
         if (errors.length > 0) {
             return res.status(400).json({
                 status: "error",
@@ -164,9 +151,7 @@ exports.createUser = async (req, res) => {
                 errors: errors
             });
         }
-
         const transaction = await sequelize.transaction();
-
         try {
             const user = await User.create({
                 firstName,
@@ -176,10 +161,8 @@ exports.createUser = async (req, res) => {
                 password: await bcrypt.hash(password, 10),
                 role
             }, { transaction });
-
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
             const verificationLink = `${process.env.DEVELOPMENT ? "http" : "https"}://${process.env.HOST}:${process.env.EXPRESS_PORT}/api/users/verify?token=${token}`;
-
             await transporter.sendMail({
                 from: process.env.EMAIL_USER,
                 to: email,
@@ -216,16 +199,13 @@ exports.createUser = async (req, res) => {
         });
     }
 };
-
 exports.login = async (req, res) => {
     try {
         const { username, email, password } = req.body;
-
         if ((!username && !email) || !password) {
             const missingFields = [];
             if (!username && !email) missingFields.push("username or email");
             if (!password) missingFields.push("password");
-
             return res.status(400).json({
                 status: "error",
                 message: "Missing fields in request",
@@ -233,9 +213,7 @@ exports.login = async (req, res) => {
                 errors: missingFields.map(field => `Missing ${field}`),
             });
         }
-
         const user = await User.findOne({ where: username ? { username } : { email } });
-
         if (!user) {
             return res.status(401).json({
                 status: "error",
@@ -244,7 +222,6 @@ exports.login = async (req, res) => {
                 errors: ["Incorrect username/email or password"],
             });
         }
-
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -254,11 +231,9 @@ exports.login = async (req, res) => {
                 errors: ["Incorrect username/email or password"],
             });
         }
-
         if (!user.verified) {
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
             const verificationLink = `${process.env.DEVELOPMENT ? "http" : "https"}://${process.env.HOST}:${process.env.EXPRESS_PORT}/api/users/verify?token=${token}`;
-
             await transporter.sendMail({
                 from: process.env.EMAIL_USER,
                 to: user.email,
@@ -274,9 +249,7 @@ exports.login = async (req, res) => {
                 errors: ["Account is not verified"],
             });
         }
-
         const token = jwt.sign({ userId: user.id, role: user.role, verified: user.verified }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
         res.status(200).json({
             status: "success",
             message: "Login successful",
@@ -300,13 +273,11 @@ exports.login = async (req, res) => {
         });
     }
 };
-
 exports.verify = async (req, res) => {
     try {
         const { token } = req.query;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findByPk(decoded.id);
-
         if (!user) {
             return res.status(404).json({
                 status: "error",
@@ -315,13 +286,10 @@ exports.verify = async (req, res) => {
                 errors: [`User ${decoded.id} not found for given token`]
             });
         }
-
         user.verified = true;
         await user.save();
-
         let id = decoded.id;
         await Profile.create({ id });
-
         res.status(200).json({
             status: "success",
             message: `User ${decoded.id} has been verified`,

@@ -1,6 +1,5 @@
 const { CalendarEvent, User } = require("../models/associations");
 const { ValidationError, Op } = require("sequelize");
-
 // Get all events
 exports.getEvents = async (req, res) => {
     try {
@@ -13,7 +12,6 @@ exports.getEvents = async (req, res) => {
                 },
             ],
         });
-
         if (!events || events.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -22,7 +20,6 @@ exports.getEvents = async (req, res) => {
                 errors: ["No events found in the calendar"],
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${events.length} event(s) found`,
@@ -46,7 +43,6 @@ exports.getEvents = async (req, res) => {
         });
     }
 };
-
 // Get event by ID
 exports.getEventById = async (req, res) => {
     try {
@@ -60,7 +56,6 @@ exports.getEventById = async (req, res) => {
                 },
             ],
         });
-
         if (!event) {
             return res.status(404).json({
                 status: "error",
@@ -69,7 +64,6 @@ exports.getEventById = async (req, res) => {
                 errors: [`No event found with id ${id}`],
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `Event ${id} found`,
@@ -93,12 +87,10 @@ exports.getEventById = async (req, res) => {
         });
     }
 };
-
 // Create a new event
 exports.createEvent = async (req, res) => {
     try {
         const { title, eventDate, startTime, endTime, location, description, userId } = req.body;
-
         // Validate input fields
         const errors = [];
         if (!title || title.trim().length === 0) {
@@ -110,7 +102,6 @@ exports.createEvent = async (req, res) => {
         if (!userId) {
             errors.push("User ID is required.");
         }
-
         if (errors.length > 0) {
             return res.status(400).json({
                 status: "error",
@@ -119,7 +110,6 @@ exports.createEvent = async (req, res) => {
                 errors,
             });
         }
-
         // Check if user exists
         const user = await User.findByPk(userId);
         if (!user) {
@@ -130,7 +120,6 @@ exports.createEvent = async (req, res) => {
                 errors: [`User with ID ${userId} does not exist`],
             });
         }
-
         // Create the event
         const newEvent = await CalendarEvent.create({
             title,
@@ -141,7 +130,6 @@ exports.createEvent = async (req, res) => {
             description,
             userId,
         });
-
         res.status(201).json({
             status: "success",
             message: "Event created successfully",
@@ -165,15 +153,12 @@ exports.createEvent = async (req, res) => {
         });
     }
 };
-
 // Update an existing event
 exports.updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, eventDate, startTime, endTime, location, description } = req.body;
-
         const event = await CalendarEvent.findByPk(id);
-
         if (!event) {
             return res.status(404).json({
                 status: "error",
@@ -182,7 +167,6 @@ exports.updateEvent = async (req, res) => {
                 errors: [`No event found with id ${id}`],
             });
         }
-
         await event.update({
             title,
             eventDate,
@@ -191,7 +175,6 @@ exports.updateEvent = async (req, res) => {
             location,
             description,
         });
-
         res.status(200).json({
             status: "success",
             message: `Event ${id} updated successfully`,
@@ -215,14 +198,11 @@ exports.updateEvent = async (req, res) => {
         });
     }
 };
-
 // Delete an event
 exports.deleteEvent = async (req, res) => {
     try {
         const { id } = req.params;
-
         const event = await CalendarEvent.findByPk(id);
-
         if (!event) {
             return res.status(404).json({
                 status: "error",
@@ -231,9 +211,7 @@ exports.deleteEvent = async (req, res) => {
                 errors: [`No event found with id ${id}`],
             });
         }
-
         await event.destroy();
-
         res.status(200).json({
             status: "success",
             message: `Event ${id} deleted successfully`,
@@ -249,13 +227,11 @@ exports.deleteEvent = async (req, res) => {
         });
     }
 };
-
 exports.getUpcomingEvents = async (req, res) => {
     try {
         const now = new Date();
         const twoDaysLater = new Date(now);
         twoDaysLater.setDate(now.getDate() + 2);
-
         const events = await CalendarEvent.findAll({
             where: {
                 eventDate: {
@@ -268,7 +244,6 @@ exports.getUpcomingEvents = async (req, res) => {
                 attributes: ["id", "firstName", "lastName"]
             }]
         });
-
         if (!events.length) {
             return res.status(404).json({
                 status: "error",
@@ -277,7 +252,6 @@ exports.getUpcomingEvents = async (req, res) => {
                 errors: []
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${events.length} event(s) within 48 hours found`,

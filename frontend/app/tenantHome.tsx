@@ -17,60 +17,49 @@ import { useRouter, useNavigation } from "expo-router";
 import { TenantHomeStackParamList } from "./stacks/tenantHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
-
 type TenantHomeScreenNavigationProp = StackNavigationProp<TenantHomeStackParamList, "home">;
-
 export default function TenantHomeScreen() {
     const [groups, setGroups] = useState<any>([]);
     const [loadingState, setLoadingState] = useState(true); // custom loading state
-
     const { user, userLoading, userError } = useUser();
     const { logout } = useAuth();
     const { get, error } = useAxios();
     const isFocused = useIsFocused();
     const navigation = useNavigation<TenantHomeScreenNavigationProp>();
     const router = useRouter();
-
     useEffect(() => {
         if (isFocused) {
             loadData();
         }
     }, [isFocused]);
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
     }, [error]);
-
     const loadData = async () => {
         setLoadingState(true);
         await Promise.all([fetchGroups()]);
         setLoadingState(false);
     };
-
     const fetchGroups = async () => {
         const response = await get<any>("/api/groups/tenant");
         if (response) {
             setGroups(response.data);
         }
     };
-
     const handleNavigateToSearchProperties = () => {
         navigation.navigate("propertySearchResults");
     };
-
     // When a group card is pressed, navigate into group details (or your group navigation screen)
     const handleNavigateToGroup = (groupId: string) => {
         console.log("test: " + groupId);
         router.push({ pathname: "/groupNavigation", params: { groupId, role: "tenant" } });
     };
-
     const handleLogout = async () => {
         await logout();
         router.push("/login");
     };
-
     if (userLoading || loadingState) {
         return (
             <View style={styles.loadingContainer}>
@@ -80,20 +69,17 @@ export default function TenantHomeScreen() {
     }
     if (userError) return <Text>Error: {userError}</Text>;
     if (!user) return <Text>No user found.</Text>;
-
     // Group the groups into rows of two
     const groupRows = [];
     for (let i = 0; i < groups.length; i += 2) {
         groupRows.push(groups.slice(i, i + 2));
     }
-
     return (
         <View style={styles.root}>
             {/* Sticky Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Home</Text>
             </View>
-
             <ScrollView contentContainerStyle={styles.container}>
                 {/* Profile Section */}
                 <View style={styles.profileSection}>
@@ -110,11 +96,9 @@ export default function TenantHomeScreen() {
                         <Text style={styles.emailText}>{user.email}</Text>
                     </View>
                 </View>
-
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                     <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
-
                 <View style={styles.mainContent}>
                     {/* Search for Properties Section */}
                     <View style={styles.section}>
@@ -123,7 +107,6 @@ export default function TenantHomeScreen() {
                             <Text style={styles.buttonText}>Find a Property</Text>
                         </TouchableOpacity>
                     </View>
-
                     {/* Groups Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Your Groups</Text>
@@ -172,7 +155,6 @@ export default function TenantHomeScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

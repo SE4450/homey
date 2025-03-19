@@ -15,37 +15,31 @@ import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
-
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { post, loading, error } = useAxios();
   const { login } = useAuth();
   const router = useRouter();
-
   useEffect(() => {
     if (error) {
       Alert.alert("Error", error);
     }
   }, [error]);
-
   const handleLogin = async () => {
     if (!username || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-
     const body = username.includes("@")
       ? { email: username, password }
       : { username: username, password };
     const response = await post<any>("/api/users/login", body);
-
     if (response) {
       await login(response.data[0].token);
       router.push(`/homeNavigation`);
     }
   };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -120,7 +114,6 @@ const LoginScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -151,5 +144,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
 export default LoginScreen;

@@ -1,12 +1,9 @@
 const Review = require("../models/reviewModel.js");
 const { ValidationError } = require("sequelize");
-
 //a way to get the reviews 
 exports.getReviews = async(req, res) => {
     try {
-
         const listOfReviews = await Review.findAll({ order: ['createdAt'], where: req.query });
-
         if(listOfReviews.length == 0) {
             return res.status(404).json({
                 status: "error",
@@ -15,7 +12,6 @@ exports.getReviews = async(req, res) => {
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             })
         }
-
         res.status(200).json({
             status: "success",
             message: `${listOfReviews.length} lists found`,
@@ -39,17 +35,12 @@ exports.getReviews = async(req, res) => {
         });
     }
 }
-
-
-
 //a way to create reviews
 exports.createReview = async(req, res) => {
     try{
         const { reviewType, reviewedItemId, reviewerId, score, description } = req.body;
-
         //first need to check if the reviewer has already reviewed this topic
         const existingReviews = await Review.findAll({ where: { reviewType: reviewType, reviewedItemId: reviewedItemId, reviewerId: reviewerId }});
-
         if(existingReviews.length > 0) {
             return res.status(404).json({
                 status: "error",
@@ -58,7 +49,6 @@ exports.createReview = async(req, res) => {
                 errors: [`a review was found with data ${JSON.stringify(req.query)}`]
             })
         }
-
         const newReview = await Review.create({
             reviewType: reviewType,
             reviewedItemId: reviewedItemId,
@@ -66,14 +56,12 @@ exports.createReview = async(req, res) => {
             score: score,
             description: description
         });
-
         res.status(201).json({
             status: "success",
             message: "List created",
             data: newReview,
             errors: []
         })
-
     } catch(err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({

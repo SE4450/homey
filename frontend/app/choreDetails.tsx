@@ -17,7 +17,6 @@ import { RANDOM_THUMBNAIL } from "./pictures/assets";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type ChoreDetailsScreenRouteProp = RouteProp<
   ChoresStackParamList,
   "choreDetails"
@@ -26,7 +25,6 @@ type ChoreDetailsScreenNavigationProp = StackNavigationProp<
   ChoresStackParamList,
   "choreDetails"
 >;
-
 interface Chore {
   id: number;
   choreName: string;
@@ -44,7 +42,6 @@ interface Chore {
     email: string;
   };
 }
-
 const ChoreDetails = () => {
   const { userToken } = useAuth();
   const [chore, setChore] = useState<Chore | null>(null);
@@ -52,11 +49,9 @@ const ChoreDetails = () => {
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const route = useRoute<ChoreDetailsScreenRouteProp>();
   const navigation = useNavigation<ChoreDetailsScreenNavigationProp>();
-
   useEffect(() => {
     if (route.params) {
       console.log("Route params:", route.params);
-
       // Create a chore object from the route params
       const choreFromParams: Chore = {
         id: parseInt(route.params.id),
@@ -80,16 +75,13 @@ const ChoreDetails = () => {
             }
           : undefined,
       };
-
       console.log("Created chore object:", choreFromParams);
       setChore(choreFromParams);
       setLoading(false);
     }
   }, [route.params]);
-
   const handleMarkComplete = async () => {
     if (!chore) return;
-
     try {
       const response = await axios.put(
         `${API_URL}/api/chores/${chore.id}`,
@@ -103,7 +95,6 @@ const ChoreDetails = () => {
           },
         }
       );
-
       if (response.data.status === "success") {
         Alert.alert("Success", "Chore marked as complete", [
           { text: "OK", onPress: () => navigation.goBack() },
@@ -114,10 +105,8 @@ const ChoreDetails = () => {
       Alert.alert("Error", "Failed to update chore. Please try again.");
     }
   };
-
   const handleDeleteChore = async () => {
     if (!chore) return;
-
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this chore?",
@@ -136,7 +125,6 @@ const ChoreDetails = () => {
                   },
                 }
               );
-
               if (response.data.status === "success") {
                 Alert.alert("Success", "Chore deleted successfully", [
                   { text: "OK", onPress: () => navigation.goBack() },
@@ -151,7 +139,6 @@ const ChoreDetails = () => {
       ]
     );
   };
-
   if (loading) {
     return (
       <ScreenWrapper>
@@ -159,7 +146,6 @@ const ChoreDetails = () => {
       </ScreenWrapper>
     );
   }
-
   if (!chore) {
     return (
       <ScreenWrapper>
@@ -167,9 +153,7 @@ const ChoreDetails = () => {
       </ScreenWrapper>
     );
   }
-
   console.log("Rendering chore:", chore);
-
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -178,7 +162,6 @@ const ChoreDetails = () => {
             {chore?.choreName || "Unnamed Chore"}
           </Text>
           <Text style={styles.room}>Room: {chore?.room || "Unknown Room"}</Text>
-
           <Text style={styles.sectionTitle}>Status</Text>
           <View
             style={[
@@ -190,7 +173,6 @@ const ChoreDetails = () => {
               {chore?.completed ? "Completed" : "Active"}
             </Text>
           </View>
-
           {chore?.assignee || route.params.assigneeName ? (
             <>
               <Text style={styles.sectionTitle}>Assigned To</Text>
@@ -201,14 +183,12 @@ const ChoreDetails = () => {
               </Text>
             </>
           ) : null}
-
           <Text style={styles.sectionTitle}>Created</Text>
           <Text style={styles.date}>
             {chore?.createdAt
               ? new Date(chore.createdAt).toLocaleDateString()
               : "Unknown"}
           </Text>
-
           <Text style={styles.sectionTitle}>Due Date</Text>
           <Text style={styles.date}>
             {chore?.dueDate
@@ -216,7 +196,6 @@ const ChoreDetails = () => {
               : "Unknown"}
           </Text>
         </View>
-
         <View style={styles.buttonContainer}>
           {!chore.completed && (
             <TouchableOpacity
@@ -226,7 +205,6 @@ const ChoreDetails = () => {
               <Text style={styles.buttonText}>Mark as Complete</Text>
             </TouchableOpacity>
           )}
-
           <TouchableOpacity
             style={[styles.button, styles.deleteButton]}
             onPress={handleDeleteChore}
@@ -238,9 +216,7 @@ const ChoreDetails = () => {
     </ScreenWrapper>
   );
 };
-
 export default ChoreDetails;
-
 const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,

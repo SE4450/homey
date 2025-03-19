@@ -1,13 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
-
 type MessageBoxProps = {
     message: string;
     senderType?: "self" | "other";
     timestamp: string;
     status?: "sending" | "delivered" | "read";
 };
-
 const MessageBox: React.FC<MessageBoxProps> = ({ message, senderType = "self", timestamp, status }) => {
     const isSelf = senderType === "self";
     return (
@@ -31,7 +29,6 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, senderType = "self", t
         </View>
     );
 };
-
 const styles = StyleSheet.create<{
     messageContainer: ViewStyle;
     selfContainer: ViewStyle;
@@ -91,5 +88,4 @@ const styles = StyleSheet.create<{
         color: "#34C759"
     },
 });
-
 export default MessageBox;

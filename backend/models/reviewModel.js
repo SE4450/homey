@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const Review = sequelize.define("Review", {
     reviewId:{
         type: DataTypes.INTEGER,
@@ -30,5 +29,4 @@ const Review = sequelize.define("Review", {
         allowNull: true
     }
 });
-
 module.exports = Review;

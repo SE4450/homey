@@ -16,7 +16,6 @@ import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
 import validator from "validator";
 import passwordValidator from "password-validator";
-
 const RegisterScreen = () => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -26,13 +25,11 @@ const RegisterScreen = () => {
     const [role, setRole] = useState("tenant");
     const { post, loading, error } = useAxios();
     const router = useRouter();
-
     useEffect(() => {
         if (error) {
             Alert.alert("Error", "\n" + error);
         }
     }, [error]);
-
     const schema = new passwordValidator();
     schema
         .is().min(8)
@@ -42,7 +39,6 @@ const RegisterScreen = () => {
         .has().digits(1)
         .has().symbols(1)
         .has().not().spaces();
-
     const validatePassword = (password: string) => {
         const result = schema.validate(password, { details: true });
         if (Array.isArray(result) && result.length > 0) {
@@ -56,26 +52,20 @@ const RegisterScreen = () => {
             failedRules: [],
         };
     };
-
     const handleRegister = async () => {
         const errors = [];
-
         if (!firstName || firstName.length < 2) {
             errors.push("First name must be at least 2 characters");
         }
-
         if (!lastName || lastName.length < 2) {
             errors.push("Last name must be at least 2 characters");
         }
-
         if (!email || !validator.isEmail(email)) {
             errors.push("Please provide a valid email address");
         }
-
         if (!username || username.length < 6) {
             errors.push("Username must be at least 6 characters long");
         }
-
         const passwordValidation = validatePassword(password);
         if (!password || !passwordValidation.isValid) {
             const failures = passwordValidation.failedRules
@@ -83,12 +73,10 @@ const RegisterScreen = () => {
                 .join("\n");
             errors.push(`Password validation failed:\n\n${failures}`);
         }
-
         if (errors.length > 0) {
             Alert.alert("Error", "\n" + errors.join("\n\n"));
             return;
         }
-
         const body = {
             firstName,
             lastName,
@@ -97,9 +85,7 @@ const RegisterScreen = () => {
             password,
             role,
         };
-
         const response = await post("/api/users/", body);
-
         if (response) {
             Alert.alert(
                 "Registration Successful",
@@ -108,7 +94,6 @@ const RegisterScreen = () => {
             router.push("/login");
         }
     };
-
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -213,7 +198,6 @@ const RegisterScreen = () => {
         </KeyboardAvoidingView>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -313,5 +297,4 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
-
 export default RegisterScreen;

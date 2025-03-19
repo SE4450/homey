@@ -1,22 +1,17 @@
 const { Chore, User } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
-
 exports.getChores = async (req, res) => {
   try {
     const { houseId, assignedTo } = req.query;
-
     // Build the filter condition
     const whereClause = {};
-
     if (houseId) {
       whereClause.houseId = houseId;
     }
-
     if (assignedTo) {
       whereClause.assignedTo = assignedTo;
     }
-
     // Get all chores matching the filter
     const chores = await Chore.findAll({
       order: ["dueDate", "ASC"],
@@ -30,7 +25,6 @@ exports.getChores = async (req, res) => {
       ],
       order: [["createdAt", "DESC"]],
     });
-
     if (chores.length === 0) {
       return res.status(200).json({
         status: "success",
@@ -39,7 +33,6 @@ exports.getChores = async (req, res) => {
         errors: [],
       });
     }
-
     res.status(200).json({
       status: "success",
       message: `${chores.length} chore(s) found`,
@@ -55,12 +48,10 @@ exports.getChores = async (req, res) => {
     });
   }
 };
-
 exports.addChore = async (req, res) => {
   try {
     const { choreName, room, assignedTo, houseId, bannerImage, dueDate } =
       req.body;
-
     // Validate required fields
     if (!choreName || choreName.trim() === "") {
       return res.status(400).json({
@@ -70,7 +61,6 @@ exports.addChore = async (req, res) => {
         errors: ["Chore name cannot be empty"],
       });
     }
-
     if (!room || room.trim() === "") {
       return res.status(400).json({
         status: "error",
@@ -79,7 +69,6 @@ exports.addChore = async (req, res) => {
         errors: ["Room cannot be empty"],
       });
     }
-
     // Create the chore
     const chore = await Chore.create({
       choreName,
@@ -90,7 +79,6 @@ exports.addChore = async (req, res) => {
       dueDate: dueDate || null,
       completed: false,
     });
-
     res.status(201).json({
       status: "success",
       message: "Chore added successfully",
@@ -107,16 +95,13 @@ exports.addChore = async (req, res) => {
     });
   }
 };
-
 exports.updateChore = async (req, res) => {
   try {
     const { id } = req.params;
     const { choreName, room, assignedTo, completed, bannerImage, dueDate } =
       req.body;
-
     // Find the chore
     const chore = await Chore.findByPk(id);
-
     if (!chore) {
       return res.status(404).json({
         status: "error",
@@ -125,7 +110,6 @@ exports.updateChore = async (req, res) => {
         errors: [`No chore found with ID: ${id}`],
       });
     }
-
     // Update the chore
     await chore.update({
       choreName: choreName || chore.choreName,
@@ -135,7 +119,6 @@ exports.updateChore = async (req, res) => {
       bannerImage: bannerImage || chore.bannerImage,
       dueDate: dueDate !== undefined ? dueDate : chore.dueDate,
     });
-
     res.status(200).json({
       status: "success",
       message: "Chore updated successfully",
@@ -159,14 +142,11 @@ exports.updateChore = async (req, res) => {
     });
   }
 };
-
 exports.deleteChore = async (req, res) => {
   try {
     const { id } = req.params;
-
     // Find the chore
     const chore = await Chore.findByPk(id);
-
     if (!chore) {
       return res.status(404).json({
         status: "error",
@@ -175,10 +155,8 @@ exports.deleteChore = async (req, res) => {
         errors: [`No chore found with ID: ${id}`],
       });
     }
-
     // Delete the chore
     await chore.destroy();
-
     res.status(200).json({
       status: "success",
       message: "Chore deleted successfully",
@@ -194,11 +172,9 @@ exports.deleteChore = async (req, res) => {
     });
   }
 };
-
 exports.getChoreById = async (req, res) => {
   try {
     const { id } = req.params;
-
     const chore = await Chore.findByPk(id, {
       include: [
         {
@@ -208,7 +184,6 @@ exports.getChoreById = async (req, res) => {
         },
       ],
     });
-
     if (!chore) {
       return res.status(404).json({
         status: "error",
@@ -217,7 +192,6 @@ exports.getChoreById = async (req, res) => {
         errors: [`No chore found with ID: ${id}`],
       });
     }
-
     res.status(200).json({
       status: "success",
       message: "Chore found",

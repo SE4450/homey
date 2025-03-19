@@ -1,7 +1,6 @@
 // calendarModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db.js");
-
 const CalendarEvent = sequelize.define("CalendarEvent", {
   id: {
     type: DataTypes.INTEGER,
@@ -42,5 +41,4 @@ const CalendarEvent = sequelize.define("CalendarEvent", {
 }, {
   timestamps: true
 });
-
 module.exports = CalendarEvent;

@@ -1,13 +1,11 @@
 const List = require("../models/listModel.js");
 const Item = require("../models/itemModel.js");
 const { ValidationError } = require("sequelize");
-
 //way to get all of the users lists
 exports.getLists = async (req, res) => {
     try {
         //first get the lists for the user  query needs to be: ?userId= thid users id  example: http://10.0.0.236:8080/api/lists?userId=1
         const usersLists = await List.findAll({ order: ['createdAt'], where: req.query }); //req.query is what we're calling in the url ?key1=value1&key2=value2...
-
         if(usersLists.length == 0) {
             return res.status(404).json({
                 status: "error",
@@ -16,7 +14,6 @@ exports.getLists = async (req, res) => {
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${usersLists.length} lists found`,
@@ -40,19 +37,14 @@ exports.getLists = async (req, res) => {
         });
     }
 }
-
-
-
 //option to create a new list
 exports.createList = async (req, res) => {
     try {
         const {userId, listName} = req.body;
-
         const userList = await List.create({
             userId,
             listName,
         });
-
         res.status(201).json({
             status: "success",
             message: "List created",
@@ -76,28 +68,21 @@ exports.createList = async (req, res) => {
         });
     }
 }
-
-
 //option to delete a list
 exports.deleteList = async (req, res) => {
     try {
-
         const { listId } = req.body;
-
         const userList = await List.destroy({ where: { listId: listId}});
-
         if(userList) {
             //clear out an items that are in the deleted list
             await Item.destroy({ where: { listId: listId }});
         }
-
         res.status(201).json({
             status: "success",
             message: "List deleted",
             data: userList,
             errors: []
         });
-
     } catch (err) {
         if (err instanceof ValidationError) {
             return res.status(400).json({
@@ -115,15 +100,11 @@ exports.deleteList = async (req, res) => {
         });
     }
 }
-
-
-
 //option to get all items in a list
 exports.getItems = async (req, res) => {
     try {
         //the listId needs to be sent in the body for this to work
         const listItems = await Item.findAll({ order: ['createdAt'], where: req.query});
-
         if(listItems.length == 0) {
             return res.status(404).json({
                 status: "error",
@@ -132,7 +113,6 @@ exports.getItems = async (req, res) => {
                 errors: [`no lists found with data ${JSON.stringify(req.query)}`]
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${listItems.length} items found for the list`,
@@ -156,15 +136,12 @@ exports.getItems = async (req, res) => {
         });
     }
 }
-
 //option to add an item to the list
 exports.createItem = async (req, res) => {
     try {
         const { listId, item, assignedTo } = req.body;
-
         //first check if the sent item is already in the list
         const existingListItem = await Item.findAll({ where: { listId: listId, item: item }});
-
         if(existingListItem.length != 0) {
             return res.status(400).json({
                 status: "error",
@@ -173,7 +150,6 @@ exports.createItem = async (req, res) => {
                 errors:  [`The item already exists in the list`]
             });
         }
-
         else {
             const listItem = await Item.create({
                 listId: listId,
@@ -181,7 +157,6 @@ exports.createItem = async (req, res) => {
                 assignedTo: assignedTo,
                 purchased: 0
             });
-
             res.status(201).json({
                 status: "success",
                 message: "item added to list",
@@ -207,15 +182,11 @@ exports.createItem = async (req, res) => {
         });
     }
 }
-
-
-
 //option to assign someone to the item 
 exports.updateItem = async (req, res) => {
     try {
         const { rowNum, listId, item, assignedTo, purchased } = req.body;
         let listItem = Item;
-
         if(item != null) {
             listItem = await Item.update({ item: item }, { where: { listId: listId, itemId: rowNum }});
         }
@@ -225,7 +196,6 @@ exports.updateItem = async (req, res) => {
         if(purchased != null) {
             listItem = await Item.update({ purchased: purchased }, { where: { listId: listId, itemId: rowNum }});
         }
-
         res.status(201).json({
             status: "success",
             message: "updated the items in the list",
@@ -249,14 +219,11 @@ exports.updateItem = async (req, res) => {
         });
     }
 }
-
 //option to remove an item from a list
 exports.deleteItem = async (req, res) => {
     try {
         const { listId, rowNum } = req.body;
-
         let listItem = await Item.destroy({ where: { listId: listId, itemId: rowNum }});
-
         res.status(201).json({
             status: "success",
             message: "deleted the item in the list",

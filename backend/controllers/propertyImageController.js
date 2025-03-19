@@ -1,13 +1,11 @@
 const { PropertyImage, Property } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
-
 exports.uploadPropertyImage = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
         const { label, image, description } = req.body;
         const propertyId = req.params.id;
-
         if (!label || !image) {
             return res.status(400).json({
                 status: "error",
@@ -16,7 +14,6 @@ exports.uploadPropertyImage = async (req, res) => {
                 errors: ["Missing required fields"],
             });
         }
-
         // Ensure property exists
         const property = await Property.findByPk(propertyId);
         if (!property) {
@@ -27,7 +24,6 @@ exports.uploadPropertyImage = async (req, res) => {
                 errors: [`No property found with ID ${propertyId}`],
             });
         }
-
         // Store image as binary
         const newImage = await PropertyImage.create(
             {
@@ -38,7 +34,6 @@ exports.uploadPropertyImage = async (req, res) => {
             },
             { transaction }
         );
-
         await transaction.commit();
         res.status(201).json({
             status: "success",
@@ -48,7 +43,6 @@ exports.uploadPropertyImage = async (req, res) => {
         });
     } catch (err) {
         await transaction.rollback();
-
         if (err instanceof ValidationError) {
             return res.status(400).json({
                 status: "error",
@@ -57,7 +51,6 @@ exports.uploadPropertyImage = async (req, res) => {
                 errors: err.errors.map(error => error.message),
             });
         }
-
         res.status(500).json({
             status: "error",
             message: "Failed to upload image",
@@ -66,12 +59,10 @@ exports.uploadPropertyImage = async (req, res) => {
         });
     }
 };
-
 exports.getPropertyImages = async (req, res) => {
     try {
         const propertyId = req.params.id;
         const images = await PropertyImage.findAll({ where: { propertyId } });
-
         if (images.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -80,7 +71,6 @@ exports.getPropertyImages = async (req, res) => {
                 errors: [`No images found for property ID ${propertyId}`],
             });
         }
-
         // Convert images to Base64
         const formattedImages = images.map((img) => {
             const imageJSON = img.toJSON();
@@ -91,7 +81,6 @@ exports.getPropertyImages = async (req, res) => {
                     : null,
             };
         });
-
         res.status(200).json({
             status: "success",
             message: `${formattedImages.length} image(s) found`,
@@ -107,7 +96,6 @@ exports.getPropertyImages = async (req, res) => {
                 errors: err.errors.map(error => error.message),
             });
         }
-
         res.status(500).json({
             status: "error",
             message: "Failed to retrieve images",
@@ -116,12 +104,10 @@ exports.getPropertyImages = async (req, res) => {
         });
     }
 };
-
 exports.updatePropertyImage = async (req, res) => {
     try {
         const { label, image, description } = req.body;
         const { imageId } = req.params;
-
         const propertyImage = await PropertyImage.findByPk(imageId);
         if (!propertyImage) {
             return res.status(404).json({
@@ -131,13 +117,11 @@ exports.updatePropertyImage = async (req, res) => {
                 errors: [`No image found with ID ${imageId}`],
             });
         }
-
         await propertyImage.update({
             label: label || propertyImage.label,
             image: image ? Buffer.from(image, "base64") : propertyImage.image,
             description: description || propertyImage.description,
         });
-
         res.status(200).json({
             status: "success",
             message: "Image updated successfully",
@@ -153,7 +137,6 @@ exports.updatePropertyImage = async (req, res) => {
                 errors: err.errors.map(error => error.message),
             });
         }
-
         res.status(500).json({
             status: "error",
             message: "Failed to update image",
@@ -162,11 +145,9 @@ exports.updatePropertyImage = async (req, res) => {
         });
     }
 };
-
 exports.deletePropertyImage = async (req, res) => {
     try {
         const { imageId } = req.params;
-
         const propertyImage = await PropertyImage.findByPk(imageId);
         if (!propertyImage) {
             return res.status(404).json({
@@ -176,7 +157,6 @@ exports.deletePropertyImage = async (req, res) => {
                 errors: [`No image found with ID ${imageId}`],
             });
         }
-
         await propertyImage.destroy();
         res.status(200).json({
             status: "success",
@@ -193,7 +173,6 @@ exports.deletePropertyImage = async (req, res) => {
                 errors: err.errors.map(error => error.message),
             });
         }
-
         res.status(500).json({
             status: "error",
             message: "Failed to delete image",

@@ -1,7 +1,6 @@
 const { Conversation, Participant, Message, User } = require("../models/associations");
 const { ValidationError } = require("sequelize");
 const sequelize = require("../db.js");
-
 exports.getConversations = async (req, res) => {
     try {
         const conversations = await Conversation.findAll({
@@ -31,7 +30,6 @@ exports.getConversations = async (req, res) => {
                 },
             ]
         });
-
         if (!conversations || conversations.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -40,7 +38,6 @@ exports.getConversations = async (req, res) => {
                 errors: [`No conversations found for user ${req.user.userId}`]
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `${conversations.length} conversation(s) found`,
@@ -56,7 +53,6 @@ exports.getConversations = async (req, res) => {
                 errors: err.errors.map((error) => error.message)
             });
         }
-
         res.status(500).json({
             status: "error",
             message: "An unexpected error occurred while fetching conversations",
@@ -65,11 +61,9 @@ exports.getConversations = async (req, res) => {
         });
     }
 };
-
 exports.getConversationById = async (req, res) => {
     try {
         const { conversationId } = req.params;
-
         const conversation = await Conversation.findOne({
             where: { id: conversationId },
             include: [
@@ -95,7 +89,6 @@ exports.getConversationById = async (req, res) => {
                 }
             ]
         });
-
         if (!conversation) {
             return res.status(404).json({
                 status: "error",
@@ -104,7 +97,6 @@ exports.getConversationById = async (req, res) => {
                 errors: [`No conversations(s) found for user ${conversationId}`]
             });
         }
-
         res.status(200).json({
             status: "success",
             message: `Conversation ${conversationId} found`,
@@ -128,13 +120,10 @@ exports.getConversationById = async (req, res) => {
         });
     }
 };
-
 const { QueryTypes } = require("sequelize");
-
 exports.createDM = async (req, res) => {
     try {
         const { userId } = req.body;
-
         if (!userId) {
             return res.status(400).json({
                 status: "error",
@@ -143,9 +132,7 @@ exports.createDM = async (req, res) => {
                 errors: ["UserId of the other participant is required"],
             });
         }
-
         const loggedInUserId = req.user.userId;
-
         if (userId == loggedInUserId) {
             return res.status(409).json({
                 status: "error",
@@ -154,7 +141,6 @@ exports.createDM = async (req, res) => {
                 errors: ["Cannot create a DM with yourself"]
             });
         }
-
         const existingConversation = await sequelize.query(
             `
             SELECT "Conversation"."id"
@@ -174,7 +160,6 @@ exports.createDM = async (req, res) => {
                 },
             }
         );
-
         if (existingConversation.length > 0) {
             return res.status(409).json({
                 status: "error",
@@ -183,14 +168,11 @@ exports.createDM = async (req, res) => {
                 errors: ["Duplicate DM conversation detected"],
             });
         }
-
         const newConversation = await Conversation.create({ type: "dm" });
-
         await Participant.bulkCreate([
             { userId: loggedInUserId, conversationId: newConversation.id },
             { userId, conversationId: newConversation.id },
         ]);
-
         res.status(201).json({
             status: "success",
             message: "DM conversation created successfully",
@@ -214,11 +196,9 @@ exports.createDM = async (req, res) => {
         });
     }
 };
-
 exports.createGroupChat = async (req, res) => {
     try {
         const { userIds, name } = req.body;
-
         if (!Array.isArray(userIds) || userIds.length < 2) {
             return res.status(400).json({
                 status: "error",
@@ -227,7 +207,6 @@ exports.createGroupChat = async (req, res) => {
                 errors: ["At least 2 user IDs are required to create a group chat"]
             });
         }
-
         if (!name || typeof name !== "string" || name.trim() === "") {
             return res.status(400).json({
                 status: "error",
@@ -236,10 +215,8 @@ exports.createGroupChat = async (req, res) => {
                 errors: ["A valid group chat name must be provided"]
             });
         }
-
         const loggedInUserId = req.user.userId;
         userIds.push(loggedInUserId);
-
         const existingGroup = await Conversation.findOne({
             where: { type: "group" },
             include: [
@@ -252,7 +229,6 @@ exports.createGroupChat = async (req, res) => {
             group: ["Conversation.id"],
             having: sequelize.literal(`COUNT(Participant.userId) = ${userIds.length}`)
         });
-
         if (existingGroup) {
             return res.status(409).json({
                 status: "error",
@@ -261,19 +237,15 @@ exports.createGroupChat = async (req, res) => {
                 errors: ["Duplicate group chat detected"]
             });
         }
-
         const newConversation = await Conversation.create({
             type: "group",
             name: name.trim(),
         });
-
         const participantsData = userIds.map(userId => ({
             userId,
             conversationId: newConversation.id,
         }));
-
         await Participant.bulkCreate(participantsData);
-
         res.status(201).json({
             status: "success",
             message: "Group chat created successfully.",
@@ -301,12 +273,10 @@ exports.createGroupChat = async (req, res) => {
         });
     }
 };
-
 exports.addParticipant = async (req, res) => {
     try {
         const { conversationId, userId } = req.body;
         const loggedInUserId = req.user.userId;
-
         if (!conversationId || !userId) {
             return res.status(400).json({
                 status: "error",
@@ -315,7 +285,6 @@ exports.addParticipant = async (req, res) => {
                 errors: ["Both conversationId and userId must be provided"]
             });
         }
-
         const conversation = await Conversation.findOne({
             where: { id: conversationId, type: "group" },
             include: {
@@ -324,7 +293,6 @@ exports.addParticipant = async (req, res) => {
                 attributes: []
             },
         });
-
         if (!conversation) {
             return res.status(403).json({
                 status: "error",
@@ -333,9 +301,7 @@ exports.addParticipant = async (req, res) => {
                 errors: ["User is not a participant or the conversation does not exist"]
             });
         }
-
         const existingParticipant = await Participant.findOne({ where: { conversationId, userId } });
-
         if (existingParticipant) {
             return res.status(409).json({
                 status: "error",
@@ -344,12 +310,10 @@ exports.addParticipant = async (req, res) => {
                 errors: ["Duplicate participant detected"]
             });
         }
-
         const newParticipant = await Participant.create({
             conversationId,
             userId
         });
-
         res.status(201).json({
             status: "success",
             message: "Participant added successfully",
@@ -376,12 +340,10 @@ exports.addParticipant = async (req, res) => {
         });
     }
 };
-
 exports.removeParticipant = async (req, res) => {
     try {
         const { conversationId, userId } = req.body;
         const loggedInUserId = req.user.userId;
-
         if (!conversationId || !userId) {
             return res.status(400).json({
                 status: "error",
@@ -390,7 +352,6 @@ exports.removeParticipant = async (req, res) => {
                 errors: ["Both conversationId and userId must be provided"]
             });
         }
-
         const conversation = await Conversation.findOne({
             where: { id: conversationId, type: "group" },
             include: {
@@ -399,7 +360,6 @@ exports.removeParticipant = async (req, res) => {
                 attributes: []
             },
         });
-
         if (!conversation) {
             return res.status(403).json({
                 status: "error",
@@ -408,9 +368,7 @@ exports.removeParticipant = async (req, res) => {
                 errors: ["User is not a participant or the conversation does not exist"]
             });
         }
-
         const participant = await Participant.findOne({ where: { conversationId, userId } });
-
         if (!participant) {
             return res.status(404).json({
                 status: "error",
@@ -419,9 +377,7 @@ exports.removeParticipant = async (req, res) => {
                 errors: ["User is not a participant of the specified conversation"]
             });
         }
-
         await Participant.destroy({ where: { conversationId, userId } });
-
         res.status(200).json({
             status: "success",
             message: "Participant removed successfully",

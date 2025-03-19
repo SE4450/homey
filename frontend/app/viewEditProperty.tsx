@@ -22,29 +22,23 @@ import { Picker } from "@react-native-picker/picker";
 import useAxios from "./hooks/useAxios";
 import { Ionicons } from "@expo/vector-icons";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
-
 type ViewEditPropertyRouteProp = RouteProp<LandlordHomeStackParamList, "viewEditProperty">;
 type ViewEditPropertyNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "viewEditProperty">;
-
 const propertyTypes = ["Apartment", "House", "Condo", "Townhouse", "Studio", "Duplex", "Other"];
-
 export default function ViewEditPropertyScreen() {
     const route = useRoute<ViewEditPropertyRouteProp>();
     const navigation = useNavigation<ViewEditPropertyNavigationProp>();
     const { get, put, del } = useAxios();
     const { propertyId } = route.params;
     const isFocused = useIsFocused();
-
     const [property, setProperty] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-
     useEffect(() => {
         if (isFocused) {
             fetchPropertyDetails();
         }
     }, [isFocused]);
-
     const fetchPropertyDetails = async () => {
         setLoading(true);
         try {
@@ -67,7 +61,6 @@ export default function ViewEditPropertyScreen() {
             setLoading(false);
         }
     };
-
     const handleUpdateProperty = async () => {
         setUpdating(true);
         try {
@@ -87,7 +80,6 @@ export default function ViewEditPropertyScreen() {
                     availability: property.availability,
                     exteriorImage: (reader.result as string).split(",")[1],
                 };
-
                 const response = await put<any>(`/api/properties/${propertyId}`, updatedProperty);
                 setUpdating(false);
                 if (response) {
@@ -101,7 +93,6 @@ export default function ViewEditPropertyScreen() {
             Alert.alert("Error", "Failed to process image. Please try again.");
         }
     };
-
     const handleDeleteProperty = async () => {
         setUpdating(true);
         const response = await del<any>(`/api/properties/${propertyId}`);
@@ -113,7 +104,6 @@ export default function ViewEditPropertyScreen() {
             Alert.alert("Error", "Failed to delete property.");
         }
     };
-
     const handleDeleteImage = async (imageId: string) => {
         setUpdating(true);
         const response = await del<any>(`/api/properties/${propertyId}/images/${imageId}`);
@@ -125,15 +115,12 @@ export default function ViewEditPropertyScreen() {
             Alert.alert("Error", "Failed to delete image.");
         }
     };
-
     const handleEditPropertyImage = (imageData: any) => {
         navigation.navigate("addEditPropertyImage", { propertyId, imageData, mode: "update" });
     };
-
     const handleAddPropertyImage = () => {
         navigation.navigate("addEditPropertyImage", { propertyId, mode: "add" });
     };
-
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -141,7 +128,6 @@ export default function ViewEditPropertyScreen() {
             </View>
         );
     }
-
     return (
         <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <View style={styles.header}>
@@ -216,22 +202,18 @@ export default function ViewEditPropertyScreen() {
                         editable={!updating}
                     />
                 </View>
-
                 <CustomImagePicker
                     image={property.exteriorImage}
                     onImageSelected={(uri) => setProperty({ ...property, exteriorImage: uri })}
                     disabled={updating}
                 />
-
                 <Button text={updating ? "Updating..." : "Update Property"} onClick={handleUpdateProperty} disabled={updating} />
-
                 <Button
                     text="Delete Property"
                     onClick={handleDeleteProperty}
                     disabled={updating}
                     customStyle={{ buttonStyle: { backgroundColor: "red" }, textStyle: { color: "white" } }}
                 />
-
                 <Text style={styles.subHeader}>Property Images</Text>
                 {property.images?.map((img: any, index: number) => (
                     <View key={index} style={styles.imageContainer}>
@@ -244,7 +226,6 @@ export default function ViewEditPropertyScreen() {
                         </View>
                     </View>
                 ))}
-
                 {property.images?.length < 10 && (
                     <Button text="Add New Image" onClick={handleAddPropertyImage} disabled={updating} />
                 )}
@@ -252,7 +233,6 @@ export default function ViewEditPropertyScreen() {
         </KeyboardAvoidingView>
     );
 }
-
 const styles = StyleSheet.create({
     root: { flex: 1, backgroundColor: "#f5f5f5" },
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" },

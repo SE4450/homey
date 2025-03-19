@@ -1,9 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
-
 import Calendar from "../calendar";
 import AddEvent from "../addEvent";
 import EditEvent from "../editEvent";
-
 export type CalendarStackParamList = {
   calendar: undefined;
   addEvent: undefined;
@@ -17,9 +15,7 @@ export type CalendarStackParamList = {
     description: string;
   };
 };
-
 const CalendarStack = createStackNavigator<CalendarStackParamList>();
-
 export default function CalendarStackScreen() {
   return (
     <CalendarStack.Navigator>

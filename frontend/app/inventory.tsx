@@ -9,11 +9,9 @@ import {
   Alert,
 } from "react-native";
 import { useState, useEffect } from "react";
-
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
 import { useIsFocused } from "@react-navigation/native";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -121,46 +119,37 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-
 type InventoryScreenProps = {
   groupId: string;
   role: string;
 };
-
 export default function Inventory({ groupId, role }: InventoryScreenProps) {
   const [inventoryItems, setInventoryItems] = useState([] as Array<{ itemId: Number; itemName: String; quantity: Number }>);
   const [item, setItem] = useState("");
   const [newItem, setNewItem] = useState("");
-
   //fetch requests
   const { post, get, error } = useAxios();
-
   //get the userId
   const { userToken, userId } = useAuth();
-
   //variable to determine if we are in the screen
   const isFocused = useIsFocused();
-
   //call for the inventory items
   useEffect(() => {
     if (isFocused) {
       getItems();
     }
   }, [isFocused]);
-
   //useEffect that is triggered on errors
   useEffect(() => {
     if (error) {
       Alert.alert("Error", error);
     }
   }, [error]);
-
   //function to get the house inventory
   const getItems = async () => {
     //make a fetch request to get any items for the selected list
     const body = { houseId: userId }; //this will need to be changed to the houseId when we have it
     const response = await get<any>("/api/inventory", body);
-
     //clear the set list items
     setInventoryItems([]);
     if (response) {
@@ -183,25 +172,20 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
       );
     }
   };
-
   //function to add an item to the list
   const addItem = async (itemName: String) => {
     //make a fetch request to add the new item to the database
     const body = { houseId: userId, itemName: itemName };
     const response = await post<any>("/api/inventory/createInventory", body);
-
     if (response) {
       getItems();
     }
   };
-
   //function to decrement the inventory
   const removeItem = async (itemId: Number, quantity: Number) => {
     const body = { itemId: itemId, houseId: userId, quantity: quantity };
-
     //call the post request
     const response = await post<any>("/api/inventory/removeQuantity", body);
-
     if (response) {
       //if the inventory is almost empty alert the user
       if (response.message.includes("There is only one more ")) {
@@ -214,7 +198,6 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
           "/api/inventory/deleteItem",
           deleteItemBody
         );
-
         if (deleteInventoryResponse) {
           getItems();
         }
@@ -237,7 +220,6 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
       }
     }
   };
-
   // Function to add a new item from input
   const handleAddNewItem = () => {
     if (newItem.trim()) {
@@ -245,7 +227,6 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
       setNewItem("");
     }
   };
-
   return (
     <ScrollView style={styles.container}>
       {/* Add new item input */}
@@ -261,7 +242,6 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       </View>
-
       {/* Table header */}
       <View style={styles.header}>
         <View style={styles.itemColumn}>
@@ -271,7 +251,6 @@ export default function Inventory({ groupId, role }: InventoryScreenProps) {
           <Text style={styles.headerText}>Quantity</Text>
         </View>
       </View>
-
       {/* Inventory items */}
       {inventoryItems.length > 0 ? (
         inventoryItems.map((item, index) => (

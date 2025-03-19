@@ -7,12 +7,10 @@ import { useAuth } from "./context/AuthContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { MessageStackParamList } from "./stacks/messagesStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type ContactsScreenNavigationProp = StackNavigationProp<
   MessageStackParamList,
   "contacts"
 >;
-
 export default function ContactsScreen() {
   const navigation = useNavigation<ContactsScreenNavigationProp>();
   const [conversations, setConversations] = useState<any>();
@@ -21,13 +19,11 @@ export default function ContactsScreen() {
   const { get, post, error } = useAxios();
   const { userId } = useAuth();
   const isFocused = useIsFocused();
-
   useEffect(() => {
     if (error) {
       Alert.alert("Error", error);
     }
   }, [error]);
-
   const fetchConversations = async () => {
     try {
       setLoading(true);
@@ -36,12 +32,10 @@ export default function ContactsScreen() {
         const formattedConversations = response.data.map(
           (conversation: any) => {
             const latestMessage = conversation.messages[0] || null;
-
             const hasNewMessage =
               latestMessage &&
               latestMessage.senderId !== userId &&
               !latestMessage.readBy?.includes(userId);
-
             return {
               id: conversation.id,
               name: conversation.participants
@@ -73,7 +67,6 @@ export default function ContactsScreen() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
     if (isFocused) {
@@ -86,11 +79,9 @@ export default function ContactsScreen() {
       }
     };
   }, [isFocused]);
-
   const handlePress = (id: any, name: any) => {
     navigation.navigate("conversation", { id, name });
   };
-
   const createConversation = async () => {
     if (!newUserId) {
       Alert.alert("Error", "Please enter a user ID to create a conversation.");
@@ -112,7 +103,6 @@ export default function ContactsScreen() {
       Alert.alert("Error", `Failed to create conversation:\n${err}`);
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -145,7 +135,6 @@ export default function ContactsScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

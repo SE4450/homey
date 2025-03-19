@@ -26,19 +26,16 @@ import useAxios from "./hooks/useAxios";
 import { useNavigation } from "@react-navigation/native";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 type AddChoresScreenNavigationProp = StackNavigationProp<
   ChoresStackParamList,
   "addChore"
 >;
-
 // Update the Roommate interface to match your user data structure
 interface Roommate {
   id: number;
   firstName: string;
   lastName: string;
 }
-
 const AddChore = () => {
   const [choreBanner, setChoreBanner] = useState<any>(null);
   const [chore, setChore] = useState("");
@@ -54,30 +51,23 @@ const AddChore = () => {
   const { userToken, userId } = useAuth();
   const { get } = useAxios();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
   // Add a state to track the temporary date selection in the modal
   const [tempDate, setTempDate] = useState<Date | null>(null);
-
   // Add a state to track the current month for the custom date picker
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
   // Add a state to track the year picker visibility
   const [showYearPicker, setShowYearPicker] = useState(false);
-
   useEffect(() => {
     const banner = RANDOM_THUMBNAIL();
     console.log("Banner:", banner);
     setChoreBanner(banner);
-
     // Fetch roommates when component mounts
     fetchRoommates();
   }, []);
-
   const fetchRoommates = async () => {
     try {
       // Fetch users from your API
       const response = await get<any>(`/api/users`);
-
       if (response && response.data) {
         setRoommates(response.data);
       }
@@ -86,25 +76,20 @@ const AddChore = () => {
       Alert.alert("Error", "Failed to load roommates. Please try again.");
     }
   };
-
   const handleSelectRoommate = (roommate: Roommate) => {
     setAssignedTo(roommate.id);
     setSelectedRoommateName(`${roommate.firstName} ${roommate.lastName}`);
     setModalVisible(false);
   };
-
   // Generate dates for the selected month
   const generateDates = () => {
     const dates = [];
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-
     // First day of the month
     const firstDay = new Date(year, month, 1);
-
     // Last day of the month
     const lastDay = new Date(year, month + 1, 0);
-
     // Get all days in the month
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
@@ -113,15 +98,12 @@ const AddChore = () => {
         dates.push(date);
       }
     }
-
     return dates;
   };
-
   // Navigate to previous month
   const goToPreviousMonth = () => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() - 1);
-
     // Don't allow going to past months
     const today = new Date();
     if (
@@ -131,24 +113,19 @@ const AddChore = () => {
     ) {
       return;
     }
-
     setCurrentMonth(newMonth);
   };
-
   // Navigate to next month
   const goToNextMonth = () => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + 1);
-
     // Limit to 1 year in the future
     const maxDate = new Date();
     maxDate.setFullYear(maxDate.getFullYear() + 1);
-
     if (newMonth <= maxDate) {
       setCurrentMonth(newMonth);
     }
   };
-
   // Format month and year for display
   const formatMonthYear = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -156,19 +133,15 @@ const AddChore = () => {
       year: "numeric",
     });
   };
-
   // Generate years (current year to current year + 5)
   const generateYears = () => {
     const years = [];
     const currentYear = new Date().getFullYear();
-
     for (let year = currentYear; year <= currentYear + 5; year++) {
       years.push(year);
     }
-
     return years;
   };
-
   // Select a specific year
   const selectYear = (year: number) => {
     const newDate = new Date(currentMonth);
@@ -176,14 +149,12 @@ const AddChore = () => {
     setCurrentMonth(newDate);
     setShowYearPicker(false);
   };
-
   const onDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setDueDate(selectedDate);
     }
   };
-
   const formatDate = (date: Date | null) => {
     if (!date) return "Select a due date ";
     return date.toLocaleDateString("en-US", {
@@ -192,7 +163,6 @@ const AddChore = () => {
       day: "numeric",
     });
   };
-
   const formatDateShort = (date: Date) => {
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -200,13 +170,11 @@ const AddChore = () => {
       weekday: "short",
     });
   };
-
   const handleAddChore = async () => {
     if (!chore.trim() || !room.trim()) {
       Alert.alert("Error", "Please enter both chore name and room");
       return;
     }
-
     setIsLoading(true);
     try {
       // Store a reference to the image (just a number 1-5)
@@ -214,30 +182,25 @@ const AddChore = () => {
       const bannerKey = Object.keys(THUMBNAILS)
         .map((key) => parseInt(key, 10))
         .find((key) => THUMBNAILS[key] === choreBanner);
-
       const payload: any = {
         choreName: chore,
         room: room,
         bannerImage: bannerKey || null,
       };
-
       // Only add assignedTo if it's provided
       if (assignedTo !== null) {
         payload.assignedTo = assignedTo;
       }
-
       // Only add dueDate if it's provided
       if (dueDate !== null) {
         payload.dueDate = dueDate.toISOString();
       }
-
       const response = await axios.post(`${API_URL}/api/chores`, payload, {
         headers: {
           Authorization: `Bearer ${userToken}`,
           "Content-Type": "application/json",
         },
       });
-
       if (response.status === 201) {
         Alert.alert("Success", "Chore added successfully", [
           { text: "OK", onPress: () => navigation.goBack() },
@@ -250,7 +213,6 @@ const AddChore = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <ScreenWrapper>
       <KeyboardAvoidingView
@@ -263,7 +225,6 @@ const AddChore = () => {
               <Image source={choreBanner} style={styles.banner} />
             )}
           </View>
-
           <View style={styles.form}>
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Chore Name</Text>
@@ -274,7 +235,6 @@ const AddChore = () => {
                 placeholder="Enter chore name"
               />
             </View>
-
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Room</Text>
               <TextInput
@@ -284,7 +244,6 @@ const AddChore = () => {
                 placeholder="Enter room"
               />
             </View>
-
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Assign To</Text>
               <TouchableOpacity
@@ -296,7 +255,6 @@ const AddChore = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-
             <View style={styles.formItem}>
               <Text style={styles.subHeading}>Due Date</Text>
               <TouchableOpacity
@@ -308,7 +266,6 @@ const AddChore = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-
             <View style={styles.buttonContainer}>
               <AddButton
                 buttonText={isLoading ? "Adding..." : "Add Chore"}
@@ -318,7 +275,6 @@ const AddChore = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
       {/* Roommate Selection Modal */}
       <Modal
         animationType="slide"
@@ -329,7 +285,6 @@ const AddChore = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Roommate</Text>
-
             <FlatList
               data={roommates}
               keyExtractor={(item) => item.id.toString()}
@@ -347,7 +302,6 @@ const AddChore = () => {
                 </TouchableOpacity>
               )}
             />
-
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setModalVisible(false)}
@@ -357,7 +311,6 @@ const AddChore = () => {
           </View>
         </View>
       </Modal>
-
       {/* Custom Date Picker Modal for iOS */}
       {Platform.OS === "ios" && (
         <Modal
@@ -377,7 +330,6 @@ const AddChore = () => {
                   <Text style={styles.datePickerDone}>Done</Text>
                 </TouchableOpacity>
               </View>
-
               {/* Month and Year navigation */}
               <View style={styles.monthNavigator}>
                 <TouchableOpacity
@@ -386,7 +338,6 @@ const AddChore = () => {
                 >
                   <Text style={styles.monthNavButtonText}>←</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   onPress={() => setShowYearPicker(!showYearPicker)}
                   style={styles.yearSelectorButton}
@@ -395,7 +346,6 @@ const AddChore = () => {
                     {formatMonthYear(currentMonth)}
                   </Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   onPress={goToNextMonth}
                   style={styles.monthNavButton}
@@ -403,7 +353,6 @@ const AddChore = () => {
                   <Text style={styles.monthNavButtonText}>→</Text>
                 </TouchableOpacity>
               </View>
-
               {/* Year Picker */}
               {showYearPicker ? (
                 <View style={styles.yearPickerContainer}>
@@ -481,7 +430,6 @@ const AddChore = () => {
           </View>
         </Modal>
       )}
-
       {/* Standard DateTimePicker for Android */}
       {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
@@ -495,9 +443,7 @@ const AddChore = () => {
     </ScreenWrapper>
   );
 };
-
 export default AddChore;
-
 const styles = StyleSheet.create({
   addChoreContainer: {
     display: "flex",

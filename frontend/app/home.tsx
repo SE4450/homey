@@ -265,10 +265,17 @@ export default function HomeScreen() {
             headers: {
               Authorization: `Bearer ${userToken}`,
             },
+            // Let 404 pass through instead of throwing an error
+            validateStatus: (status) => status < 500,
           }
         );
 
-        if (
+        // If 404, treat it as no data
+        if (expensesResponse.status === 404) {
+          console.log(
+            "Expenses endpoint not found or no expenses for this user. Treating total owed as 0."
+          );
+        } else if (
           expensesResponse.data.status === "success" &&
           expensesResponse.data.data
         ) {
@@ -278,6 +285,7 @@ export default function HomeScreen() {
           );
         }
       } catch (expensesError) {
+        // If some other error occurred (>= 500), you still catch it here
         console.error("Error fetching expenses:", expensesError);
       }
 
@@ -513,7 +521,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   userName: {
-    fontWeight: "500",
+    fontWeight: "bold",
     color: COLORS.TEXT,
   },
   heading: {

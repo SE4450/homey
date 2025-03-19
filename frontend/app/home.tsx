@@ -21,7 +21,12 @@ const COLORS = {
   LOGOUT: "#D32F2F",
 };
 
-export default function HomeScreen() {
+type HomeScreenProps = {
+  groupId: string;
+  role: string;
+};
+
+export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const [inventoryAlert, setInventoryAlert] = useState([] as Array<{ itemName: String }>);
   const { user, userLoading, userError } = useUser();
   const { get, error } = useAxios();

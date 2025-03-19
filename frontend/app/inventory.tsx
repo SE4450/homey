@@ -122,11 +122,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Inventory() {
-  //variables
-  const [inventoryItems, setInventoryItems] = useState(
-    [] as Array<{ itemId: Number; itemName: String; quantity: Number }>
-  );
+type InventoryScreenProps = {
+  groupId: string;
+  role: string;
+};
+
+export default function Inventory({ groupId, role }: InventoryScreenProps) {
+  const [inventoryItems, setInventoryItems] = useState([] as Array<{ itemId: Number; itemName: String; quantity: Number }>);
   const [item, setItem] = useState("");
   const [newItem, setNewItem] = useState("");
 
@@ -221,15 +223,15 @@ export default function Inventory() {
           inventoryItems.map((item) =>
             item.itemId == itemId
               ? {
-                  itemId: item.itemId,
-                  itemName: item.itemName,
-                  quantity: item.quantity.valueOf() - 1,
-                }
+                itemId: item.itemId,
+                itemName: item.itemName,
+                quantity: item.quantity.valueOf() - 1,
+              }
               : {
-                  itemId: item.itemId,
-                  itemName: item.itemName,
-                  quantity: item.quantity,
-                }
+                itemId: item.itemId,
+                itemName: item.itemName,
+                quantity: item.quantity,
+              }
           )
         );
       }

@@ -106,7 +106,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Profile() {
+type ProfileScreenProps = {
+  groupId: string;
+  role: string;
+};
+
+export default function Profile({ groupId, role }: ProfileScreenProps) {
+
   const [cleaningValue, setCleaningValue] = useState("");
   const [noiseValue, setNoiseValue] = useState("");
   const [startSleepValue, setStartSleepValue] = useState("");
@@ -246,15 +252,6 @@ export default function Profile() {
         </View>
         <TouchableOpacity style={styles.updateButton} onPress={updateProfile}>
           <Text style={styles.updateButtonText}>Update Profile</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.logoutContainer}>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.LOGOUT }]}
-          onPress={handleLogout}
-        >
-          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

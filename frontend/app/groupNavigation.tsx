@@ -102,7 +102,7 @@ export default function GroupNavigationScreen() {
         {() => <HomeScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
       <Tab.Screen name="Profile">
-        {() => <ProfileScreen groupId={groupIdString} role={roleString} />}
+        {() => <ReviewsScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
       <Tab.Screen name="List">
         {() => <ListScreen groupId={groupIdString} role={roleString} />}
@@ -118,9 +118,6 @@ export default function GroupNavigationScreen() {
       </Tab.Screen>
       <Tab.Screen name="Inventory">
         {() => <InventoryScreen groupId={groupIdString} role={roleString} />}
-      </Tab.Screen>
-      <Tab.Screen name="Reviews">
-        {() => <ReviewsScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
     </Tab.Navigator>
   );

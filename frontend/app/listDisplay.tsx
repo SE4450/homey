@@ -97,7 +97,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function ListDisplay() {
+type ListScreenProps = {
+  groupId: string;
+  role: string;
+};
+
+export default function ListDisplay({ groupId, role }: ListScreenProps) {
   const [listView, setListView] = useState(true);
   const [list, setList] = useState(false);
   const [listName, setListName] = useState("" as String);
@@ -221,8 +226,9 @@ export default function ListDisplay() {
               </Text>
             )}
           </View>
-        </View>
-      )}
+        </View >
+      )
+      }
 
       {list && (
         <View>

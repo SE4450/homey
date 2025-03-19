@@ -15,21 +15,11 @@ const expenseRoutes = require("./routes/expenseRoutes.js");
 const inventoryRoutes = require("./routes/inventoryRoutes.js");
 const calendarRoutes = require("./routes/calendarRoutes.js");
 const propertyRoutes = require("./routes/propertyRoutes.js");
+const groupRoutes = require("./routes/groupRoutes.js");
 const choresRoutes = require("./routes/choresRoutes.js");
 const reviewRoutes = require("./routes/reviewRoutes.js");
 
 const app = express();
-const isDevelopment = process.env.DEVELOPMENT === "true";
-
-const server = isDevelopment
-  ? http.createServer(app)
-  : https.createServer(
-      {
-        key: fs.readFileSync("./key.pem"),
-        cert: fs.readFileSync("./cert.crt"),
-      },
-      app
-    );
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
@@ -46,6 +36,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/groups", groupRoutes);
 app.use("/api/chores", choresRoutes);
 app.use("/api/reviews", reviewRoutes);
 
@@ -58,21 +49,14 @@ const port = process.env.EXPRESS_PORT || 8080;
 if (process.env.DEVELOPMENT == "true") {
   app.listen(port, async () => {
     if (process.env.SYNC == "true") {
-      const { Chore } = require("./models/associations");
       await sequelize.sync({ force: false });
       console.log("Database synced");
     }
     console.log(`HTTP listening on port ${port}`);
   });
 } else {
-  const server = https.createServer(
-    { key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt") },
-    app
-  );
+  const server = https.createServer({ key: fs.readFileSync("./key.pem"), cert: fs.readFileSync("./cert.crt") }, app);
   server.listen(port, async () => {
-    if (process.env.SYNC == "true") {
-      await sequelize.sync({ force: false });
-    }
     console.log(`HTTPS listening on port ${port}`);
   });
 }

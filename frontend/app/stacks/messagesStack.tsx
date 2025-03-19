@@ -9,7 +9,12 @@ export type MessageStackParamList = {
 
 const MessageStack = createStackNavigator<MessageStackParamList>();
 
-export default function MessageStackScreen() {
+type MessageScreenProps = {
+    groupId: string;
+    role: string;
+};
+
+export default function MessageStackScreen({ groupId, role }: MessageScreenProps) {
     return (
         <MessageStack.Navigator>
             <MessageStack.Screen name="contacts" component={ContactsScreen} options={{

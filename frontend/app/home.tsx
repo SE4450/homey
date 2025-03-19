@@ -78,7 +78,12 @@ const friendlyGreetings = [
   "Wassup",
 ];
 
-export default function HomeScreen() {
+type HomeScreenProps = {
+  groupId: string;
+  role: string;
+};
+
+export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const [inventoryAlert, setInventoryAlert] = useState(
     [] as Array<{ itemName: String }>
   );

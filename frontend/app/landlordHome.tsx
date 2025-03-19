@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    Alert,
+    ActivityIndicator,
+} from "react-native";
 import { useAuth } from "./context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
@@ -8,6 +17,7 @@ import useUser from "./hooks/useUser";
 import { useRouter } from "expo-router";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Ionicons } from "@expo/vector-icons";
 
 type LandlordHomeScreenNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "home">;
 
@@ -18,7 +28,7 @@ export default function LandlordHomeScreen() {
 
     const { user, userError } = useUser();
     const { logout } = useAuth();
-    const { get, error } = useAxios();
+    const { get, error, loading } = useAxios();
     const isFocused = useIsFocused();
     const navigation = useNavigation<LandlordHomeScreenNavigationProp>();
     const router = useRouter();
@@ -36,13 +46,13 @@ export default function LandlordHomeScreen() {
     }, [error]);
 
     const loadData = async () => {
-        setLoadingState(true); // Start loading
-        await Promise.all([fetchGroups(), fetchProperties()]); // Wait for both calls
-        setLoadingState(false); // Finish loading only after both are complete
+        setLoadingState(true);
+        await Promise.all([fetchGroups(), fetchProperties()]);
+        setLoadingState(false);
     };
 
     const fetchGroups = async () => {
-        const response = await get<any>("/api/groups");
+        const response = await get<any>("/api/groups/landlord");
         if (response) {
             setGroups(response.data);
         }
@@ -55,12 +65,24 @@ export default function LandlordHomeScreen() {
         }
     };
 
+    const handleNavigateToAddGroup = () => {
+        navigation.navigate("addGroup");
+    };
+
     const handleNavigateToAddProperty = () => {
         navigation.navigate("addProperty");
     };
 
     const handleNavigateToEditProperty = (propertyId: string) => {
         navigation.navigate("viewEditProperty", { propertyId });
+    };
+
+    const handleNavigateToGroup = (groupId: string) => {
+        router.push({ pathname: "/groupNavigation", params: { groupId, role: "landlord" } });
+    };
+
+    const handleNavigateToManageGroup = (groupId: string) => {
+        navigation.navigate("editGroup", { groupId });
     };
 
     const handleLogout = async () => {
@@ -79,7 +101,13 @@ export default function LandlordHomeScreen() {
     if (userError) return <Text>Error: {userError}</Text>;
     if (!user) return <Text>No user found.</Text>;
 
-    // Group properties into rows of two
+    // Group the groups into rows of two
+    const groupRows = [];
+    for (let i = 0; i < groups.length; i += 2) {
+        groupRows.push(groups.slice(i, i + 2));
+    }
+
+    // Group properties into rows of two (for the properties section)
     const propertyRows = [];
     for (let i = 0; i < properties.length; i += 2) {
         propertyRows.push(properties.slice(i, i + 2));
@@ -93,6 +121,7 @@ export default function LandlordHomeScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.container}>
+                {/* Profile Section */}
                 <View style={styles.profileSection}>
                     <Image
                         style={styles.profileImage}
@@ -113,29 +142,54 @@ export default function LandlordHomeScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.mainContent}>
+                    {/* Groups Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Manage Groups</Text>
-                        <TouchableOpacity style={styles.createButton} onPress={handleNavigateToAddProperty}>
+                        <TouchableOpacity style={styles.createButton} onPress={handleNavigateToAddGroup}>
                             <Text style={styles.buttonText}>Create New Group</Text>
                         </TouchableOpacity>
 
-                        <View style={styles.groupsList}>
-                            {groups.map((group: any) => (
-                                <View key={group.id} style={styles.groupItem}>
-                                    <Text style={styles.groupName}>{group.name}</Text>
-                                    <View style={styles.groupButtons}>
-                                        <TouchableOpacity style={styles.editButton}>
-                                            <Text style={styles.buttonText}>Edit</Text>
+                        {/* Render groups in rows of two */}
+                        <View style={styles.groupsGrid}>
+                            {groupRows.map((row, rowIndex) => (
+                                <View key={rowIndex} style={styles.groupRow}>
+                                    {row.map((group: any) => (
+                                        <TouchableOpacity
+                                            key={group.id}
+                                            style={styles.groupCard}
+                                            onPress={() => handleNavigateToGroup(group.id)}
+                                        >
+                                            <Text style={styles.groupCardTitle}>{group.name}</Text>
+                                            {group.property && group.property.exteriorImage ? (
+                                                <Image
+                                                    style={styles.groupPropertyImage}
+                                                    source={{ uri: group.property.exteriorImage }}
+                                                />
+                                            ) : (
+                                                <View style={styles.noImagePlaceholder}>
+                                                    <Text style={styles.noImageText}>No Image</Text>
+                                                </View>
+                                            )}
+                                            {group.property && (
+                                                <View style={styles.groupPropertyDetails}>
+                                                    <Text style={styles.groupPropertyName}>{group.property.name}</Text>
+                                                    <Text style={styles.groupPropertyAddress}>
+                                                        {group.property.address}, {group.property.city}
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToManageGroup(group.id)}>
+                                                <Text style={styles.buttonText}>Edit Group</Text>
+                                            </TouchableOpacity>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={styles.deleteButton}>
-                                            <Text style={styles.buttonText}>Delete</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                                    ))}
+                                    {row.length === 1 && <View style={[styles.groupCard, { width: "48%" }]} />}
                                 </View>
                             ))}
                         </View>
                     </View>
 
+                    {/* Properties Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Manage Properties</Text>
                         <TouchableOpacity style={styles.createButton} onPress={handleNavigateToAddProperty}>
@@ -151,14 +205,15 @@ export default function LandlordHomeScreen() {
                                             <Image style={styles.propertyImage} source={{ uri: property.exteriorImage }} />
                                             <View style={styles.propertyDetails}>
                                                 <Text style={styles.propertyName}>{property.name}</Text>
-                                                <Text style={styles.propertyAddress}>{property.address}, {property.city}</Text>
+                                                <Text style={styles.propertyAddress}>
+                                                    {property.address}, {property.city}
+                                                </Text>
                                                 <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEditProperty(property.id)}>
                                                     <Text style={styles.buttonText}>View/Edit Details</Text>
                                                 </TouchableOpacity>
                                             </View>
                                         </View>
                                     ))}
-                                    {/* If the row has only one property, render an empty view to occupy the other half */}
                                     {row.length === 1 && <View style={[styles.propertyCard, { width: "48%" }]} />}
                                 </View>
                             ))}
@@ -198,15 +253,6 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 16,
     },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 20,
-        backgroundColor: "white",
-        borderRadius: 8,
-        marginBottom: 20,
-    },
     profileSection: {
         flexDirection: "row",
         alignItems: "center",
@@ -222,7 +268,7 @@ const styles = StyleSheet.create({
         marginRight: 15,
     },
     profileInfo: {
-        gap: 5,
+        flex: 1,
     },
     welcomeText: {
         fontSize: 18,
@@ -271,39 +317,62 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "600",
     },
-    groupsList: {
-        gap: 10,
+    // Groups Grid Styles
+    groupsGrid: {
+        // Container for group rows
     },
-    groupItem: {
+    groupRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        padding: 15,
-        backgroundColor: "#f9f9f9",
-        borderRadius: 6,
+        marginBottom: 15,
     },
-    groupName: {
+    groupCard: {
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        width: "48%",
+        marginBottom: 15,
+        elevation: 3,
+        padding: 10,
+    },
+    groupCardTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    groupPropertyImage: {
+        width: "100%",
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    noImagePlaceholder: {
+        width: "100%",
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    noImageText: {
+        color: "#666",
         fontSize: 16,
-        fontWeight: "500",
     },
-    groupButtons: {
-        flexDirection: "row",
-        gap: 10,
-    },
-    editButton: {
-        backgroundColor: "#2196F3",
-        padding: 8,
-        borderRadius: 6,
+    groupPropertyDetails: {
         alignItems: "center",
     },
-    deleteButton: {
-        backgroundColor: "#ff4444",
-        padding: 8,
-        borderRadius: 6,
-        alignItems: "center",
+    groupPropertyName: {
+        fontSize: 16,
+        fontWeight: "bold",
     },
+    groupPropertyAddress: {
+        fontSize: 14,
+        color: "#666",
+    },
+    // Properties Section (kept as before)
     propertiesGrid: {
-        // Using our grouped rows approach; rows are handled in propertyRow
+        // Using our grouped rows approach; handled in propertyRow
     },
     propertyRow: {
         flexDirection: "row",
@@ -336,5 +405,13 @@ const styles = StyleSheet.create({
     propertyCity: {
         fontSize: 14,
         color: "#666",
+    },
+    // Common editButton style for group and property cards
+    editButton: {
+        backgroundColor: "#2196F3",
+        padding: 8,
+        borderRadius: 6,
+        alignItems: "center",
+        marginTop: 10,
     },
 });

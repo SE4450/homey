@@ -9,12 +9,11 @@ import {
     Alert,
     StyleSheet,
     TouchableOpacity,
-    ActivityIndicator
+    Modal,
 } from "react-native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import ExpenseRow from "./components/expenseRow";
-import RoommateSelector from "./components/roomateSelector";
 import { useIsFocused } from "@react-navigation/native";
 import useUser from "./hooks/useUser";
 
@@ -25,6 +24,7 @@ interface Expense {
     owedTo: number;
     paidBy: number;
     completed: boolean;
+    createdAt?: string;
 }
 
 interface User {
@@ -48,38 +48,78 @@ type ExpenseScreenProps = {
 export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
-    // Replace Payee ID input with multi-select state
     const [selectedPayees, setSelectedPayees] = useState<number[]>([]);
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [expensesOwed, setExpensesOwed] = useState<Expense[]>([]);
     const [expensesOwe, setExpensesOwe] = useState<Expense[]>([]);
     const [simplifiedDebts, setSimplifiedDebts] = useState<SimplifiedDebt[]>([]);
+    const [historyVisible, setHistoryVisible] = useState(false);
+    const [historyExpenses, setHistoryExpenses] = useState<Expense[]>([]);
     const { get, post, error, put } = useAxios();
     const { userId } = useAuth();
     const isFocused = useIsFocused();
+    const [userMap, setUserMap] = useState<Record<number, string>>({});
+
+    // Fetch all users and store them in a lookup map
+    const fetchUserMap = async () => {
+        try {
+            const response = await get<any>("/api/users");
+            if (response?.data) {
+                const map = response.data.reduce((acc: Record<number, string>, user: User) => {
+                    acc[user.id] = `${user.firstName} ${user.lastName}`;
+                    return acc;
+                }, {});
+                setUserMap(map);
+            }
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        }
+    };
 
     useEffect(() => {
         if (error) {
             Alert.alert("Error", error);
         }
+        fetchUserMap();
     }, [error]);
 
-    // Fetch expenses where the user is the payee or the payer
+    // Fetch expenses where the user is the payee or the payer (excluding completed expenses)
     const fetchExpenses = async () => {
         try {
             const responseOwed = await get<any>(`/api/expenses/${groupId}?owedTo=${userId}`);
             const responseOwe = await get<any>(`/api/expenses/${groupId}?paidBy=${userId}`);
 
-            if (responseOwed) {
-                setExpensesOwed(responseOwed.data);
-            }
+            let owedData: Expense[] = responseOwed ? responseOwed.data : [];
+            let oweData: Expense[] = responseOwe ? responseOwe.data : [];
 
-            if (responseOwe) {
-                setExpensesOwe(responseOwe.data);
-            }
-            computeSimplifiedDebts(responseOwed?.data || [], responseOwe?.data || []);
+            // Filter out completed expenses for the main screen
+            owedData = owedData.filter(exp => !exp.completed);
+            oweData = oweData.filter(exp => !exp.completed);
+
+            setExpensesOwed(owedData);
+            setExpensesOwe(oweData);
+            computeSimplifiedDebts(owedData, oweData);
         } catch (fetchError) {
             Alert.alert("Error", "Failed to fetch expenses.");
+        }
+    };
+
+    // Fetch history (all expenses, including completed ones)
+    const fetchHistory = async () => {
+        try {
+            const responseOwed = await get<any>(`/api/expenses/${groupId}?owedTo=${userId}`);
+            const responseOwe = await get<any>(`/api/expenses/${groupId}?paidBy=${userId}`);
+
+            const owedData: Expense[] = responseOwed ? responseOwed.data : [];
+            const oweData: Expense[] = responseOwe ? responseOwe.data : [];
+
+            // Merge and sort by creation date (descending)
+            const merged = [...owedData, ...oweData].sort((a, b) => {
+                return new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime();
+            });
+            setHistoryExpenses(merged);
+        } catch (error) {
+            Alert.alert("Error", "Failed to fetch history.");
         }
     };
 
@@ -187,35 +227,65 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
         setSimplifiedDebts(simplified);
     };
 
-    // Render each simplified debt row with expandable details
-    // Render each simplified debt row with all details visible
-    const renderDebtRow = ({ item }: { item: SimplifiedDebt }) => {
-        const displayAmount = Math.abs(item.netAmount).toFixed(2);
-        const color = item.netAmount < 0 ? "red" : "green";
+    // Function to complete all expenses in a simplified debt row
+    const handleCompleteSimplifiedDebt = async (details: Expense[]) => {
+        try {
+            await Promise.all(details.map(exp => put(`/api/expenses/${exp.id}/complete`, {})));
+            fetchExpenses();
+        } catch (error) {
+            Alert.alert("Error", "Failed to complete all debts.");
+        }
+    };
 
+    // Simplified Debt Row component with expandable details and Complete All button
+    const SimplifiedDebtRow = ({ item, onCompleteAll }: { item: SimplifiedDebt, onCompleteAll: (details: Expense[]) => void }) => {
+        const [expanded, setExpanded] = useState(false);
         return (
-            <View>
+            <TouchableOpacity onPress={() => setExpanded(!expanded)}>
                 <View style={styles.debtRow}>
                     <Text style={{ fontWeight: "bold" }}>{item.userName}</Text>
-                    <Text style={{ color }}>
-                        {item.netAmount < 0 ? `-$${displayAmount}` : `$${displayAmount}`}
+                    <Text style={{ color: item.netAmount < 0 ? "red" : "green" }}>
+                        {item.netAmount < 0
+                            ? `-$${Math.abs(item.netAmount).toFixed(2)}`
+                            : `$${item.netAmount.toFixed(2)}`}
                     </Text>
                 </View>
-                <View style={styles.debtDetails}>
-                    {item.details.map((exp, index) => (
-                        <Text key={index} style={styles.debtDetailText}>
-                            {exp.expenseName}: ${exp.amount.toFixed(2)}
-                        </Text>
-                    ))}
-                </View>
-            </View>
+                {expanded && (
+                    <View style={styles.debtDetails}>
+                        {item.details.map((exp, index) => (
+                            <Text key={index} style={styles.debtDetailText}>
+                                {exp.expenseName}: ${exp.amount.toFixed(2)}
+                            </Text>
+                        ))}
+                        {item.netAmount > 0 && (
+                            <TouchableOpacity
+                                style={styles.completeAllButton}
+                                onPress={() => onCompleteAll(item.details)}
+                            >
+                                <Text style={styles.completeAllButtonText}>Complete All</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                )}
+            </TouchableOpacity>
         );
     };
 
-
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Add Expense</Text>
+            {/* Header row with Add Expense title and History button */}
+            <View style={styles.headerRow}>
+                <Text style={styles.header}>Add Expense</Text>
+                <TouchableOpacity
+                    onPress={() => {
+                        setHistoryVisible(true);
+                        fetchHistory();
+                    }}
+                >
+                    <Text style={styles.historyButton}>History</Text>
+                </TouchableOpacity>
+            </View>
+
             <Text>Name</Text>
             <TextInput
                 placeholder="Name"
@@ -275,8 +345,38 @@ export default function ExpensesScreen({ groupId, role }: ExpenseScreenProps) {
                 data={simplifiedDebts}
                 keyExtractor={(item) => item.userId.toString()}
                 ListEmptyComponent={<Text style={styles.emptyText}>No simplified debts.</Text>}
-                renderItem={renderDebtRow}
+                renderItem={({ item }) => (
+                    <SimplifiedDebtRow item={item} onCompleteAll={handleCompleteSimplifiedDebt} />
+                )}
             />
+
+            {/* History Modal */}
+            <Modal
+                visible={historyVisible}
+                animationType="slide"
+                onRequestClose={() => setHistoryVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalHeader}>Debt History</Text>
+                    <FlatList
+                        data={historyExpenses}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <View style={styles.historyRow}>
+                                <Text>ID: {item.id}</Text>
+                                <Text>Name: {item.expenseName}</Text>
+                                <Text>Amount: ${item.amount.toFixed(2)}</Text>
+                                <Text>Owed To: {userMap[item.owedTo] || "Landlord"}</Text>
+                                <Text>Paid By: {userMap[item.paidBy] || "Landlord"}</Text>
+                                <Text>Completed: {item.completed ? "Yes" : "No"}</Text>
+                                <Text>Date: {item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A"}</Text>
+                            </View>
+                        )}
+                        ListEmptyComponent={<Text style={styles.emptyText}>No history available.</Text>}
+                    />
+                    <Button title="Close" onPress={() => setHistoryVisible(false)} />
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -287,10 +387,19 @@ const styles = StyleSheet.create({
         backgroundColor: "#f9f9f9",
         flex: 1,
     },
+    headerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
     header: {
         fontSize: 24,
         fontWeight: "bold",
-        marginBottom: 16,
+    },
+    historyButton: {
+        fontSize: 16,
+        color: "blue",
     },
     input: {
         borderWidth: 1,
@@ -340,4 +449,33 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#555",
     },
+    completeAllButton: {
+        backgroundColor: "#cce5ff",
+        padding: 8,
+        marginTop: 8,
+        borderRadius: 4,
+        alignSelf: "flex-start",
+    },
+    completeAllButtonText: {
+        color: "#007bff",
+        fontWeight: "bold",
+    },
+    modalContainer: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: "#fff",
+    },
+    modalHeader: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 16,
+        textAlign: "center",
+    },
+    historyRow: {
+        padding: 8,
+        borderBottomWidth: 1,
+        borderColor: "#ccc",
+        marginBottom: 8,
+    },
 });
+

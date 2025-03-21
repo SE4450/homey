@@ -39,9 +39,16 @@ type RootStackParamList = {
   List: undefined;
   listDisplay: undefined;
   Inventory: undefined;
-  calendar: undefined;
-  Chores: undefined;
-  Expenses: undefined
+  Calendar: {
+    screen: "addEvent"
+  };
+  Chores: {
+    screen: "addChore";
+  };
+  Expenses: undefined;
+  Group: {
+    screen: "profile"
+  };
   // Add other screens as needed
 };
 
@@ -105,7 +112,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
   const [assignedChores, setAssignedChores] = useState<Chore[]>([]);
   const [houseSummary, setHouseSummary] = useState({
     pendingChores: 0,
-    totalOwed: 0,
+    unreadMessages: 0,
   });
   const [loading, setLoading] = useState(true);
   const { userToken, userId } = useAuth();
@@ -262,43 +269,30 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         console.error("Error fetching chores:", choresError);
       }
 
-      // Fetch expenses data
-      let totalOwed = 0;
+      let unreadMessages = 0;
       try {
-        const expensesResponse = await axios.get(
-          `${API_URL}/api/expenses/${groupId}?paidBy=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-            // Let 404 pass through instead of throwing an error
-            validateStatus: (status) => status < 500,
-          }
-        );
-
-        // If 404, treat it as no data
-        if (expensesResponse.status === 404) {
-          console.log(
-            "Expenses endpoint not found or no expenses for this user. Treating total owed as 0."
-          );
-        } else if (
-          expensesResponse.data.status === "success" &&
-          expensesResponse.data.data
-        ) {
-          totalOwed = expensesResponse.data.data.reduce(
-            (sum: number, expense: any) => sum + parseFloat(expense.amount),
-            0
-          );
+        const response = await get<any>(`/api/conversations/${groupId}`);
+        if (response) {
+          unreadMessages = response.data.reduce((count: any, conversation: any) => {
+            const lastMessage = conversation.messages[0]; // only one message per your backend limit
+            if (!lastMessage || lastMessage.senderId == userId) {
+              return count;
+            }
+            if (!lastMessage.readBy) {
+              return count + 1;
+            }
+            return count;
+          }, 0);
         }
-      } catch (expensesError) {
+      } catch (error) {
         // If some other error occurred (>= 500), you still catch it here
-        console.error("Error fetching expenses:", expensesError);
+        console.log("Error fetching messages:", error);
       }
 
       // Update the state with the data we were able to fetch
       setHouseSummary({
         pendingChores,
-        totalOwed,
+        unreadMessages
       });
     } catch (error) {
       console.error("Error in fetchHouseSummary:", error);
@@ -361,25 +355,37 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           <View style={styles.quickActionsRow}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate(role == "tenant" ? "List" : "Expenses")}
+              onPress={() => {
+                if (role == "tenant") {
+                  return navigation.navigate("Group", {
+                    screen: "profile"
+                  });
+                } else {
+                  return navigation.navigate("Expenses");
+                }
+              }}
             >
               <Icon
                 name={role == "tenant" ? "format-list-bulleted" : "account-cash"}
                 size={22}
                 color={COLORS.WHITE}
               />
-              <Text style={styles.actionButtonText}>{role == "tenant" ? "Create List" : "Add Expense"}</Text>
+              <Text style={styles.actionButtonText}>{role == "tenant" ? "Edit Profile" : "Add Expense"}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate("Chores")}
+              onPress={() => navigation.navigate("Chores", {
+                screen: "addChore",
+              })}
             >
               <Icon name="broom" size={22} color={COLORS.WHITE} />
               <Text style={styles.actionButtonText}>Add Chore</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate("calendar")}
+              onPress={() => navigation.navigate("Calendar", {
+                screen: "addEvent"
+              })}
             >
               <Icon name="calendar-plus" size={22} color={COLORS.WHITE} />
               <Text style={styles.actionButtonText}>New Event</Text>
@@ -389,7 +395,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         <TouchableOpacity style={styles.exitGroupButton} onPress={() => router.push("/homeNavigation")}>
           <Text style={styles.exitGroupButtonText}>Exit Group</Text>
         </TouchableOpacity>
-        {inventoryAlert.length != 0 && (
+        {inventoryAlert.length != 0 && role != "landlord" && (
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
             <Text style={styles.alertHeader}>Low Inventory:</Text>
@@ -401,7 +407,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           </View>
         )}
 
-        <View style={styles.cardContainer}>
+        {role != "landlord" && <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>Your To-Dos</Text>
           {loading ? (
             <ActivityIndicator size="small" color={COLORS.PRIMARY} />
@@ -439,7 +445,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
               ))}
             </View>
           )}
-        </View>
+        </View>}
 
         {/* Upcoming Events Section */}
         <View style={styles.cardContainer}>
@@ -480,16 +486,17 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>House Summary</Text>
           <View style={styles.summaryCard}>
+            {role != "landlord" &&
+              <View style={styles.summaryItem}>
+                <Icon name="broom" size={22} color={COLORS.TEXT} />
+                <Text style={styles.summaryText}>
+                  Pending Chores: {houseSummary.pendingChores}
+                </Text>
+              </View>}
             <View style={styles.summaryItem}>
-              <Icon name="broom" size={22} color={COLORS.TEXT} />
+              <Icon name="message-alert" size={22} color={COLORS.TEXT} />
               <Text style={styles.summaryText}>
-                Pending Chores: {houseSummary.pendingChores}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Icon name="cash" size={22} color={COLORS.TEXT} />
-              <Text style={styles.summaryText}>
-                Total Owed: ${houseSummary.totalOwed.toFixed(2)}
+                Unread Messages: {houseSummary.unreadMessages}
               </Text>
             </View>
           </View>
@@ -498,7 +505,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           Last updated: {lastRefreshed.toLocaleTimeString()}
         </Text>
       </View>
-    </ScrollView>
+    </ScrollView >
   );
 }
 

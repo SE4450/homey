@@ -16,6 +16,11 @@ import TextField from "./components/textField";
 import { useNavigation, useRoute, RouteProp, useIsFocused } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { GroupStackParamList } from "./stacks/groupsStack";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ProfileNavigationProp = StackNavigationProp<GroupStackParamList, "profile">;
 
 const COLORS = {
   PRIMARY: "#4a90e2",
@@ -29,6 +34,31 @@ const COLORS = {
 
 //stylesheet for the component
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  backButton: {
+    paddingLeft: 15,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+    paddingRight: 35,
+  },
   profilePopup: {
     padding: 20,
     backgroundColor: COLORS.WHITE,
@@ -129,8 +159,7 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
   const { post, get } = useAxios();
   const [user, setUser] = useState<any>({});
   const { userId, logout } = useAuth();
-  const router = useRouter();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProfileNavigationProp>();
 
   useEffect(() => {
     if (isFocused) {
@@ -186,71 +215,79 @@ export default function Profile({ groupId, role }: ProfileScreenProps) {
       alert("Profile updated");
 
       //route back to the main page
-      navigation.goBack();
+      navigation.navigate("groups");
     }
   };
 
   return (
-    <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
-      <View style={styles.profilePopup}>
-        <View>
-          <Text style={styles.userHeader}>{user.firstName} {user.lastName}</Text>
-        </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Cleaning Habits:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={data}
-            labelField="label"
-            valueField="value"
-            placeholder={cleaningValue || "Select"}
-            value={cleaningValue}
-            onChange={(item) => setCleaningValue(item.value)}
-          />
-        </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Noise Level:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={data}
-            labelField="label"
-            valueField="value"
-            placeholder={noiseValue || "Select"}
-            value={noiseValue}
-            onChange={(item) => setNoiseValue(item.value)}
-          />
-        </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Sleep Start:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="e.g. 8:00"
-            value={startSleepValue}
-            onChangeText={(text) => setStartSleepValue(text)}
-          />
-        </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Sleep End:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="e.g. 10:00"
-            value={endSleepValue}
-            onChangeText={(text) => setEndSleepValue(text)}
-          />
-        </View>
-        <View style={styles.accountFormat}>
-          <Text style={styles.labelText}>Allergies:</Text>
-          <TextInput
-            style={styles.textAreaFormat}
-            placeholder="List allergies"
-            value={allergiesValue}
-            onChangeText={(text) => setAllergiesValue(text)}
-          />
-        </View>
-        <TouchableOpacity style={styles.updateButton} onPress={updateProfile}>
-          <Text style={styles.updateButtonText}>Update Profile</Text>
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("groups")}>
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
+        <Text style={styles.headerText}>Update Profile</Text>
       </View>
-    </ScrollView>
+      <ScrollView style={{ backgroundColor: COLORS.LIGHT_GRAY }}>
+        <View style={styles.profilePopup}>
+          <View>
+            <Text style={styles.userHeader}>{user.firstName} {user.lastName}</Text>
+          </View>
+          <View style={styles.accountFormat}>
+            <Text style={styles.labelText}>Cleaning Habits:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={data}
+              labelField="label"
+              valueField="value"
+              placeholder={cleaningValue || "Select"}
+              value={cleaningValue}
+              onChange={(item) => setCleaningValue(item.value)}
+            />
+          </View>
+          <View style={styles.accountFormat}>
+            <Text style={styles.labelText}>Noise Level:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={data}
+              labelField="label"
+              valueField="value"
+              placeholder={noiseValue || "Select"}
+              value={noiseValue}
+              onChange={(item) => setNoiseValue(item.value)}
+            />
+          </View>
+          <View style={styles.accountFormat}>
+            <Text style={styles.labelText}>Sleep Start:</Text>
+            <TextInput
+              style={styles.textAreaFormat}
+              placeholder="e.g. 8:00"
+              value={startSleepValue}
+              onChangeText={(text) => setStartSleepValue(text)}
+            />
+          </View>
+          <View style={styles.accountFormat}>
+            <Text style={styles.labelText}>Sleep End:</Text>
+            <TextInput
+              style={styles.textAreaFormat}
+              placeholder="e.g. 10:00"
+              value={endSleepValue}
+              onChangeText={(text) => setEndSleepValue(text)}
+            />
+          </View>
+          <View style={styles.accountFormat}>
+            <Text style={styles.labelText}>Allergies:</Text>
+            <TextInput
+              style={styles.textAreaFormat}
+              placeholder="List allergies"
+              value={allergiesValue}
+              onChangeText={(text) => setAllergiesValue(text)}
+            />
+          </View>
+          <TouchableOpacity style={styles.updateButton} onPress={updateProfile}>
+            <Text style={styles.updateButtonText}>Update Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

@@ -48,7 +48,7 @@ exports.getInventory = async (req, res) => {
 exports.getLowItem = async (req, res) => {
     try {
         const { groupId } = req.params;
-        const inventoryItem = await Inventory.findAll({ order: ['createdAt'], where: { groupId } });
+        const inventoryItem = await Inventory.findAll({ order: ['createdAt'], where: { groupId: groupId, quantity: 1 } });
 
         if (inventoryItem == 0) {
             return res.status(204).json({

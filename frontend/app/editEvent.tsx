@@ -13,13 +13,13 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import useAxios from "./hooks/useAxios";
+import { Ionicons } from "@expo/vector-icons";
 
 const EditEvent = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { put, loading, error } = useAxios();
 
-  // Destructure the event parameters passed from calendar.tsx
   const {
     id,
     title: initialTitle,
@@ -38,12 +38,10 @@ const EditEvent = () => {
     description: string;
   };
 
-  // Helper function to combine the event date and time string into a Date object
   const parseDateTime = (dateStr: string, timeStr: string): Date => {
     return new Date(`${dateStr}T${timeStr}:00`);
   };
 
-  // Set initial states from the route parameters
   const [title, setTitle] = useState(initialTitle);
   const [eventDate, setEventDate] = useState(new Date(initialEventDate));
   const [startTime, setStartTime] = useState(parseDateTime(initialEventDate, initialStartTime));
@@ -51,22 +49,11 @@ const EditEvent = () => {
   const [location, setLocation] = useState(initialLocation);
   const [description, setDescription] = useState(initialDescription);
 
-  // Hide the bottom navbar when this component is focused
-  useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => {
-      parent?.setOptions({ tabBarStyle: { display: "flex" } });
-    };
-  }, [navigation]);
-
-  // Helper to format a Date object into HH:MM string
   const formatTime = (date: Date): string => {
     const pad = (num: number) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
-  // Handler for updating the event
   const handleUpdateEvent = async () => {
     if (!title || !eventDate) {
       Alert.alert("Error", "Title and Event Date are required");
@@ -93,108 +80,142 @@ const EditEvent = () => {
   };
 
   return (
-    <ScreenWrapper>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ marginTop: 50 }}>
-          <View style={styles.form}>
-            {/* Heading */}
-            <Text style={styles.heading}>Edit Event</Text>
-            {/* Event Title */}
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Event Title</Text>
-              <TextInput
-                value={title}
-                onChangeText={setTitle}
-                style={styles.input}
-                placeholder="Enter event title"
-              />
-            </View>
-            {/* Date and Time Pickers */}
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Date (YYYY-MM-DD)</Text>
-              <DateTimePicker
-                value={eventDate}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  if (selectedDate) {
-                    setEventDate(selectedDate);
-                    // Optionally, you can also update startTime and endTime if needed
-                  }
-                }}
-                textColor="black"
-              />
-              <View style={styles.inlineTimeContainer}>
-                <View style={styles.timeWrapper}>
-                  <Text style={styles.label}>Start</Text>
-                  <DateTimePicker
-                    value={startTime}
-                    mode="time"
-                    display="default"
-                    onChange={(event, selectedTime) => {
-                      if (selectedTime) setStartTime(selectedTime);
-                    }}
-                    textColor="black"
-                    style={styles.timePicker}
-                  />
-                </View>
-                <View style={styles.timeWrapper}>
-                  <Text style={styles.label}>End</Text>
-                  <DateTimePicker
-                    value={endTime}
-                    mode="time"
-                    display="default"
-                    onChange={(event, selectedTime) => {
-                      if (selectedTime) setEndTime(selectedTime);
-                    }}
-                    textColor="black"
-                    style={styles.timePicker}
-                  />
+    <View style={styles.root}>
+      {/* Sticky Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Edit Event</Text>
+      </View>
+
+      <ScreenWrapper>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ marginTop: 10 }}>
+            <View style={styles.form}>
+              <Text style={styles.heading}>Edit Event</Text>
+
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Event Title</Text>
+                <TextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  style={styles.input}
+                  placeholder="Enter event title"
+                />
+              </View>
+
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Date (YYYY-MM-DD)</Text>
+                <DateTimePicker
+                  value={eventDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) setEventDate(selectedDate);
+                  }}
+                  textColor="black"
+                />
+                <View style={styles.inlineTimeContainer}>
+                  <View style={styles.timeWrapper}>
+                    <Text style={styles.label}>Start</Text>
+                    <DateTimePicker
+                      value={startTime}
+                      mode="time"
+                      display="default"
+                      onChange={(event, selectedTime) => {
+                        if (selectedTime) setStartTime(selectedTime);
+                      }}
+                      textColor="black"
+                      style={styles.timePicker}
+                    />
+                  </View>
+                  <View style={styles.timeWrapper}>
+                    <Text style={styles.label}>End</Text>
+                    <DateTimePicker
+                      value={endTime}
+                      mode="time"
+                      display="default"
+                      onChange={(event, selectedTime) => {
+                        if (selectedTime) setEndTime(selectedTime);
+                      }}
+                      textColor="black"
+                      style={styles.timePicker}
+                    />
+                  </View>
                 </View>
               </View>
+
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Location</Text>
+                <TextInput
+                  value={location}
+                  onChangeText={setLocation}
+                  style={styles.input}
+                  placeholder="Enter location"
+                />
+              </View>
+
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Description</Text>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Enter description"
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
             </View>
-            {/* Location */}
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Location</Text>
-              <TextInput
-                value={location}
-                onChangeText={setLocation}
-                style={styles.input}
-                placeholder="Enter location"
-              />
-            </View>
-            {/* Description */}
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Description</Text>
-              <TextInput
-                value={description}
-                onChangeText={setDescription}
-                style={[styles.input, styles.textArea]}
-                placeholder="Enter description"
-                multiline
-                numberOfLines={4}
-              />
-            </View>
+
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleUpdateEvent}
+              disabled={loading}
+            >
+              <Text style={styles.saveButtonText}>
+                {loading ? "Updating..." : "Update Event"}
+              </Text>
+            </TouchableOpacity>
           </View>
-          {/* Update Event Button */}
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleUpdateEvent}
-            disabled={loading}
-          >
-            <Text style={styles.saveButtonText}>
-              {loading ? "Updating..." : "Update Event"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableWithoutFeedback>
-    </ScreenWrapper>
+        </TouchableWithoutFeedback>
+      </ScreenWrapper>
+    </View>
   );
 };
 
 export default EditEvent;
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  backButton: {
+    paddingLeft: 15,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+    paddingRight: 35,
+  },
   form: {
     padding: 20,
   },

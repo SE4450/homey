@@ -139,7 +139,7 @@ export default function GroupProfileScreen({ groupId, role }: any) {
                         <Text style={styles.infoText}>⭐ {userAverageRating ? `${userAverageRating.toFixed(1)} / 5` : "No Ratings Yet"}</Text>
 
                         <View style={styles.buttonRow}>
-                            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
+                            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("profile")}>
                                 <Text style={styles.buttonText}>Edit Profile</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("displayReviews", { reviewName: `${user.firstName} ${user.lastName}`, reviewType: "user", itemId: userId })}>

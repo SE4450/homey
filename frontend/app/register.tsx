@@ -16,6 +16,8 @@ import useAxios from "./hooks/useAxios";
 import { useRouter } from "expo-router";
 import validator from "validator";
 import passwordValidator from "password-validator";
+import { LogBox } from "react-native";
+LogBox.ignoreAllLogs(true); // 👈 disables all warning popups
 
 const RegisterScreen = () => {
     const [firstName, setFirstName] = useState("");

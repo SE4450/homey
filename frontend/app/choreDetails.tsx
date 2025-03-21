@@ -8,13 +8,12 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import ScreenWrapper from "./components/common/screen-wrapper";
 import { useAuth } from "./context/AuthContext";
 import { COLORS } from "./theme/theme";
-import { RANDOM_THUMBNAIL } from "./pictures/assets";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -55,9 +54,6 @@ const ChoreDetails = () => {
 
   useEffect(() => {
     if (route.params) {
-      console.log("Route params:", route.params);
-
-      // Create a chore object from the route params
       const choreFromParams: Chore = {
         id: parseInt(route.params.id),
         choreName: route.params.choreName,
@@ -70,18 +66,16 @@ const ChoreDetails = () => {
         assignedTo: route.params.assignedTo
           ? parseInt(route.params.assignedTo)
           : null,
-        // Add assignee information if available
         assignee: route.params.assigneeName
           ? {
-              id: 0, // Placeholder ID
-              firstName: route.params.assigneeName.split(" ")[0],
-              lastName: route.params.assigneeName.split(" ")[1] || "",
-              email: "", // Placeholder email
-            }
+            id: 0,
+            firstName: route.params.assigneeName.split(" ")[0],
+            lastName: route.params.assigneeName.split(" ")[1] || "",
+            email: "",
+          }
           : undefined,
       };
 
-      console.log("Created chore object:", choreFromParams);
       setChore(choreFromParams);
       setLoading(false);
     }
@@ -106,7 +100,7 @@ const ChoreDetails = () => {
 
       if (response.data.status === "success") {
         Alert.alert("Success", "Chore marked as complete", [
-          { text: "OK", onPress: () => navigation.goBack() },
+          { text: "OK", onPress: () => navigation.navigate("chores") },
         ]);
       }
     } catch (error) {
@@ -139,7 +133,7 @@ const ChoreDetails = () => {
 
               if (response.data.status === "success") {
                 Alert.alert("Success", "Chore deleted successfully", [
-                  { text: "OK", onPress: () => navigation.goBack() },
+                  { text: "OK", onPress: () => navigation.navigate("chores") },
                 ]);
               }
             } catch (error) {
@@ -154,96 +148,152 @@ const ChoreDetails = () => {
 
   if (loading) {
     return (
-      <ScreenWrapper>
-        <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-      </ScreenWrapper>
+      <View style={styles.root}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate("chores")}
+          >
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Chore Details</Text>
+        </View>
+        <ScreenWrapper>
+          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+        </ScreenWrapper>
+      </View>
     );
   }
 
   if (!chore) {
     return (
-      <ScreenWrapper>
-        <Text>Chore not found</Text>
-      </ScreenWrapper>
+      <View style={styles.root}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate("chores")}
+          >
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Chore Details</Text>
+        </View>
+        <ScreenWrapper>
+          <Text>Chore not found</Text>
+        </ScreenWrapper>
+      </View>
     );
   }
 
-  console.log("Rendering chore:", chore);
-
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
-        <View style={styles.detailsContainer}>
-          <Text style={styles.title}>
-            {chore?.choreName || "Unnamed Chore"}
-          </Text>
-          <Text style={styles.room}>Room: {chore?.room || "Unknown Room"}</Text>
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("chores")}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Chore Details</Text>
+      </View>
 
-          <Text style={styles.sectionTitle}>Status</Text>
-          <View
-            style={[
-              styles.statusBadge,
-              chore?.completed ? styles.completedBadge : styles.activeBadge,
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {chore?.completed ? "Completed" : "Active"}
+      <ScreenWrapper>
+        <View style={styles.container}>
+          <View style={styles.detailsContainer}>
+            <Text style={styles.title}>
+              {chore?.choreName || "Unnamed Chore"}
+            </Text>
+            <Text style={styles.room}>
+              Room: {chore?.room || "Unknown Room"}
+            </Text>
+
+            <Text style={styles.sectionTitle}>Status</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                chore?.completed ? styles.completedBadge : styles.activeBadge,
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {chore?.completed ? "Completed" : "Active"}
+              </Text>
+            </View>
+
+            {chore?.assignee || route.params.assigneeName ? (
+              <>
+                <Text style={styles.sectionTitle}>Assigned To</Text>
+                <Text style={styles.assignee}>
+                  {chore?.assignee
+                    ? `${chore.assignee.firstName} ${chore.assignee.lastName}`
+                    : route.params.assigneeName}
+                </Text>
+              </>
+            ) : null}
+
+            <Text style={styles.sectionTitle}>Created</Text>
+            <Text style={styles.date}>
+              {chore?.createdAt
+                ? new Date(chore.createdAt).toLocaleDateString()
+                : "Unknown"}
+            </Text>
+
+            <Text style={styles.sectionTitle}>Due Date</Text>
+            <Text style={styles.date}>
+              {chore?.dueDate
+                ? new Date(chore.dueDate).toLocaleDateString()
+                : "Unknown"}
             </Text>
           </View>
 
-          {chore?.assignee || route.params.assigneeName ? (
-            <>
-              <Text style={styles.sectionTitle}>Assigned To</Text>
-              <Text style={styles.assignee}>
-                {chore?.assignee
-                  ? `${chore.assignee.firstName} ${chore.assignee.lastName}`
-                  : route.params.assigneeName}
-              </Text>
-            </>
-          ) : null}
+          <View style={styles.buttonContainer}>
+            {!chore.completed && (
+              <TouchableOpacity
+                style={[styles.button, styles.completeButton]}
+                onPress={handleMarkComplete}
+              >
+                <Text style={styles.buttonText}>Mark as Complete</Text>
+              </TouchableOpacity>
+            )}
 
-          <Text style={styles.sectionTitle}>Created</Text>
-          <Text style={styles.date}>
-            {chore?.createdAt
-              ? new Date(chore.createdAt).toLocaleDateString()
-              : "Unknown"}
-          </Text>
-
-          <Text style={styles.sectionTitle}>Due Date</Text>
-          <Text style={styles.date}>
-            {chore?.dueDate
-              ? new Date(chore.dueDate).toLocaleDateString()
-              : "Unknown"}
-          </Text>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          {!chore.completed && (
             <TouchableOpacity
-              style={[styles.button, styles.completeButton]}
-              onPress={handleMarkComplete}
+              style={[styles.button, styles.deleteButton]}
+              onPress={handleDeleteChore}
             >
-              <Text style={styles.buttonText}>Mark as Complete</Text>
+              <Text style={styles.buttonText}>Delete Chore</Text>
             </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            style={[styles.button, styles.deleteButton]}
-            onPress={handleDeleteChore}
-          >
-            <Text style={styles.buttonText}>Delete Chore</Text>
-          </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScreenWrapper>
+      </ScreenWrapper>
+    </View>
   );
 };
 
 export default ChoreDetails;
 
 const styles = StyleSheet.create({
-  screenWrapper: {
+  root: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  backButton: {
+    paddingLeft: 15,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+    paddingRight: 35,
   },
   container: {
     flex: 1,

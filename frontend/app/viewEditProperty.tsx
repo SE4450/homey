@@ -59,6 +59,7 @@ export default function ViewEditPropertyScreen() {
             setProperty({
                 ...propertyResponse.data,
                 images: extraImages,
+                description: propertyResponse.data.propertyDescription ?? ""
             });
         } catch (error) {
             Alert.alert("Error", "Failed to fetch property details.");
@@ -211,7 +212,7 @@ export default function ViewEditPropertyScreen() {
                         placeholder="Enter property details..."
                         multiline
                         numberOfLines={4}
-                        value={property.propertyDescription}
+                        value={property.description}
                         onChangeText={(text) => setProperty({ ...property, description: text })}
                         editable={!updating}
                     />

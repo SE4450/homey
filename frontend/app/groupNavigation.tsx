@@ -110,16 +110,16 @@ export default function GroupNavigationScreen() {
       <Tab.Screen name="Expenses">
         {() => <ExpenseScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
-      <Tab.Screen name="Chores">
+      <Tab.Screen name="Chores" options={{ headerShown: false }}>
         {() => <ChoresStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
-      <Tab.Screen name="Messages">
+      <Tab.Screen name="Messages" options={{ headerShown: false }}>
         {() => <MessageStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
       <Tab.Screen name="Group" options={{ headerShown: false }} >
         {() => <GroupStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
-      <Tab.Screen name="Calendar">
+      <Tab.Screen name="Calendar" options={{ headerShown: false }}>
         {() => <CalendarStackScreen groupId={groupIdString} role={roleString} />}
       </Tab.Screen>
 

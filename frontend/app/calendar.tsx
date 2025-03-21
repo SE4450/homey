@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { Agenda } from "react-native-calendars";
 import useAxios from "./hooks/useAxios";
 import { useIsFocused } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { CalendarStackParamList } from "./stacks/calendarStack";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const COLORS = {
   PRIMARY: "#4CAF50",
@@ -14,7 +20,10 @@ const COLORS = {
   LIGHT_GRAY: "#F5F5F5",
 };
 
-type CalendarScreenNavigationProp = StackNavigationProp<CalendarStackParamList, "calendar">;
+type CalendarScreenNavigationProp = StackNavigationProp<
+  CalendarStackParamList,
+  "calendar"
+>;
 
 export default function CalendarWithEvents({ groupId, role }: any) {
   const [items, setItems] = useState({});
@@ -39,26 +48,26 @@ export default function CalendarWithEvents({ groupId, role }: any) {
 
   const getEvents = async () => {
     const result = await get<any>(`/api/calendar/${groupId}`);
-
-    if (result && result.data) {
+    if (result.message == "No calendar events found") {
+      return;
+    }
+    if (result && result.data?.length > 0) {
       const formattedEvents: any = {};
-
-      // Inside getEvents() in calendar.tsx
       result.data.forEach((event: any) => {
         const date = event.eventDate;
         if (!formattedEvents[date]) {
           formattedEvents[date] = [];
         }
-
         const timeString = event.startTime
-          ? `${formatTime(event.startTime)} - ${event.endTime ? formatTime(event.endTime) : "N/A"}`
+          ? `${formatTime(event.startTime)} - ${event.endTime ? formatTime(event.endTime) : "N/A"
+          }`
           : "All Day";
 
         formattedEvents[date].push({
           id: event.id,
           name: event.title,
-          eventDate: event.eventDate, // Add this line so eventDate is passed along
-          startTime: event.startTime, // Optionally include these if needed by editEvent
+          eventDate: event.eventDate,
+          startTime: event.startTime,
           endTime: event.endTime,
           time: timeString,
           location: event.location || "No location",
@@ -66,8 +75,6 @@ export default function CalendarWithEvents({ groupId, role }: any) {
           height: 70,
         });
       });
-
-
       setItems(formattedEvents);
     } else {
       Alert.alert("Error", error || "Failed to fetch events");
@@ -75,97 +82,116 @@ export default function CalendarWithEvents({ groupId, role }: any) {
   };
 
   const deleteEvent = async (id: number) => {
-    Alert.alert(
-      "Delete Event",
-      "Are you sure you want to delete this event?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          onPress: async () => {
-            try {
-              await del(`/api/calendar/${id}`);
-              Alert.alert("Success", "Event deleted successfully");
-              getEvents(); // Refresh after deletion
-            } catch (err) {
-              Alert.alert("Error", "Failed to delete event");
-            }
-          },
-          style: "destructive",
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const renderItem = (item: any) => {
-    return (
-      <TouchableOpacity activeOpacity={1} style={styles.item}>
-        {/* Delete Button */}
-        <TouchableOpacity onPress={() => deleteEvent(item.id)} style={styles.deleteIcon}>
-          <Ionicons name="trash-outline" size={20} color="red" />
-        </TouchableOpacity>
-
-        {/* Edit Button */}
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("editEvent", {
-              id: item.id,
-              title: item.name,
-              eventDate: item.eventDate,
-              startTime: item.startTime,
-              endTime: item.endTime,
-              location: item.location,
-              description: item.description,
-            })
+    Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        onPress: async () => {
+          try {
+            await del(`/api/calendar/${id}`);
+            Alert.alert("Success", "Event deleted successfully");
+            getEvents();
+          } catch (err) {
+            Alert.alert("Error", "Failed to delete event");
           }
-          style={styles.editIcon}
-        >
-          <Ionicons name="pencil-outline" size={20} color="blue" />
-        </TouchableOpacity>
-
-        <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.timeText}>{item.time}</Text>
-        <Text style={styles.locationText}>Location: {item.location}</Text>
-        <Text style={styles.descriptionText}>Description: {item.description}</Text>
-      </TouchableOpacity>
-    );
+        },
+        style: "destructive",
+      },
+    ]);
   };
 
+  const renderItem = (item: any) => (
+    <TouchableOpacity activeOpacity={1} style={styles.item}>
+      <TouchableOpacity
+        onPress={() => deleteEvent(item.id)}
+        style={styles.deleteIcon}
+      >
+        <Ionicons name="trash-outline" size={20} color="red" />
+      </TouchableOpacity>
 
-  const defaultSelectedDate = Object.keys(items).length ? Object.keys(items)[0] : "2025-03-15";
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("editEvent", {
+            id: item.id,
+            title: item.name,
+            eventDate: item.eventDate,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            location: item.location,
+            description: item.description,
+          })
+        }
+        style={styles.editIcon}
+      >
+        <Ionicons name="pencil-outline" size={20} color="blue" />
+      </TouchableOpacity>
+
+      <Text style={styles.itemText}>{item.name}</Text>
+      <Text style={styles.timeText}>{item.time}</Text>
+      <Text style={styles.locationText}>Location: {item.location}</Text>
+      <Text style={styles.descriptionText}>Description: {item.description}</Text>
+    </TouchableOpacity>
+  );
+
+  const defaultSelectedDate = Object.keys(items).length
+    ? Object.keys(items)[0]
+    : "2025-03-15";
 
   return (
-    <View style={styles.container}>
-      <Agenda
-        items={items}
-        selected={defaultSelectedDate}
-        renderItem={renderItem}
-        theme={{
-          agendaDayTextColor: COLORS.PRIMARY,
-          agendaDayNumColor: COLORS.PRIMARY,
-          agendaTodayColor: COLORS.PRIMARY,
-          selectedDayBackgroundColor: COLORS.PRIMARY,
-          dotColor: COLORS.PRIMARY,
-          todayTextColor: COLORS.PRIMARY,
-          backgroundColor: COLORS.LIGHT_GRAY,
-        }}
-        style={styles.agenda}
-      />
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate("addEvent")}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Calendar</Text>
+      </View>
+
+      <View style={styles.container}>
+        <Agenda
+          items={items}
+          selected={defaultSelectedDate}
+          renderItem={renderItem}
+          theme={{
+            agendaDayTextColor: COLORS.PRIMARY,
+            agendaDayNumColor: COLORS.PRIMARY,
+            agendaTodayColor: COLORS.PRIMARY,
+            selectedDayBackgroundColor: COLORS.PRIMARY,
+            dotColor: COLORS.PRIMARY,
+            todayTextColor: COLORS.PRIMARY,
+            backgroundColor: COLORS.LIGHT_GRAY,
+          }}
+          style={styles.agenda}
+        />
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate("addEvent")}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: COLORS.LIGHT_GRAY,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.LIGHT_GRAY,
@@ -192,6 +218,12 @@ const styles = StyleSheet.create({
     top: 10,
     zIndex: 10,
   },
+  deleteIcon: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 10,
+  },
   itemText: {
     color: COLORS.PRIMARY,
     fontWeight: "bold",
@@ -211,12 +243,6 @@ const styles = StyleSheet.create({
     color: "#777",
     fontSize: 14,
     marginTop: 2,
-  },
-  deleteIcon: {
-    position: "absolute",
-    right: 10,
-    top: 10,
-    zIndex: 10,
   },
   fab: {
     position: "absolute",

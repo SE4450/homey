@@ -39,7 +39,7 @@ type RootStackParamList = {
   List: undefined;
   listDisplay: undefined;
   Inventory: undefined;
-  calendar: {
+  Calendar: {
     screen: "addEvent"
   };
   Chores: {
@@ -275,7 +275,10 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         if (response) {
           unreadMessages = response.data.reduce((count: any, conversation: any) => {
             const lastMessage = conversation.messages[0]; // only one message per your backend limit
-            if (lastMessage.readBy) {
+            if (!lastMessage || lastMessage.senderId == userId) {
+              return count;
+            }
+            if (!lastMessage.readBy) {
               return count + 1;
             }
             return count;
@@ -367,7 +370,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
                 size={22}
                 color={COLORS.WHITE}
               />
-              <Text style={styles.actionButtonText}>{role == "tenant" ? "Update Profile" : "Add Expense"}</Text>
+              <Text style={styles.actionButtonText}>{role == "tenant" ? "Edit Profile" : "Add Expense"}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
@@ -380,7 +383,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate("calendar", {
+              onPress={() => navigation.navigate("Calendar", {
                 screen: "addEvent"
               })}
             >
@@ -392,7 +395,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         <TouchableOpacity style={styles.exitGroupButton} onPress={() => router.push("/homeNavigation")}>
           <Text style={styles.exitGroupButtonText}>Exit Group</Text>
         </TouchableOpacity>
-        {inventoryAlert.length != 0 && (
+        {inventoryAlert.length != 0 && role != "landlord" && (
           <View style={styles.alertContainer}>
             <Text style={styles.alertHeading}>Alerts</Text>
             <Text style={styles.alertHeader}>Low Inventory:</Text>
@@ -404,7 +407,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
           </View>
         )}
 
-        <View style={styles.cardContainer}>
+        {role != "landlord" && <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>Your To-Dos</Text>
           {loading ? (
             <ActivityIndicator size="small" color={COLORS.PRIMARY} />
@@ -442,7 +445,7 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
               ))}
             </View>
           )}
-        </View>
+        </View>}
 
         {/* Upcoming Events Section */}
         <View style={styles.cardContainer}>
@@ -483,16 +486,17 @@ export default function HomeScreen({ groupId, role }: HomeScreenProps) {
         <View style={styles.cardContainer}>
           <Text style={styles.sectionHeading}>House Summary</Text>
           <View style={styles.summaryCard}>
-            <View style={styles.summaryItem}>
-              <Icon name="broom" size={22} color={COLORS.TEXT} />
-              <Text style={styles.summaryText}>
-                Pending Chores: {houseSummary.pendingChores}
-              </Text>
-            </View>
+            {role != "landlord" &&
+              <View style={styles.summaryItem}>
+                <Icon name="broom" size={22} color={COLORS.TEXT} />
+                <Text style={styles.summaryText}>
+                  Pending Chores: {houseSummary.pendingChores}
+                </Text>
+              </View>}
             <View style={styles.summaryItem}>
               <Icon name="message-alert" size={22} color={COLORS.TEXT} />
               <Text style={styles.summaryText}>
-                Unread Messages: ${houseSummary.unreadMessages}
+                Unread Messages: {houseSummary.unreadMessages}
               </Text>
             </View>
           </View>

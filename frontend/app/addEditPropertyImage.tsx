@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+    View,
+    Text,
+    ScrollView,
+    StyleSheet,
+    Alert,
+    ActivityIndicator,
+    TouchableOpacity,
+} from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Button from "./components/button";
@@ -9,19 +17,36 @@ import useAxios from "./hooks/useAxios";
 import { Ionicons } from "@expo/vector-icons";
 import { LandlordHomeStackParamList } from "./stacks/landlordHomeStack";
 
-type AddEditPropertyImageRouteProp = RouteProp<LandlordHomeStackParamList, "addEditPropertyImage">;
-type AddEditPropertyImageNavigationProp = StackNavigationProp<LandlordHomeStackParamList, "addEditPropertyImage">;
+type AddEditPropertyImageRouteProp = RouteProp<
+    LandlordHomeStackParamList,
+    "addEditPropertyImage"
+>;
+type AddEditPropertyImageNavigationProp = StackNavigationProp<
+    LandlordHomeStackParamList,
+    "addEditPropertyImage"
+>;
 
 export default function AddEditPropertyImageScreen() {
     const route = useRoute<AddEditPropertyImageRouteProp>();
     const navigation = useNavigation<AddEditPropertyImageNavigationProp>();
     const { post, put } = useAxios();
 
-    const { propertyId, mode, imageData } = route.params as { propertyId: string; mode: string; imageData: { label: string, description: string, image: string, id: string } };
+    const { propertyId, mode, imageData } = route.params as {
+        propertyId: string;
+        mode: string;
+        imageData: {
+            label: string;
+            description: string;
+            image: string;
+            id: string;
+        };
+    };
 
     const [image, setImage] = useState<string>(imageData?.image || "");
     const [label, setLabel] = useState<string>(imageData?.label || "");
-    const [description, setDescription] = useState<string>(imageData?.description || "");
+    const [description, setDescription] = useState<string>(
+        imageData?.description || ""
+    );
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
@@ -50,15 +75,24 @@ export default function AddEditPropertyImageScreen() {
                 let apiResponse;
 
                 if (mode === "add") {
-                    apiResponse = await post(`/api/properties/${propertyId}/images`, body);
+                    apiResponse = await post(
+                        `/api/properties/${propertyId}/images`,
+                        body
+                    );
                 } else if (mode === "update") {
-                    apiResponse = await put(`/api/properties/${propertyId}/images/${imageData.id}`, body);
+                    apiResponse = await put(
+                        `/api/properties/${propertyId}/images/${imageData.id}`,
+                        body
+                    );
                 }
 
                 setLoading(false);
 
                 if (apiResponse) {
-                    Alert.alert("Success", `Image ${mode === "add" ? "added" : "updated"} successfully!`);
+                    Alert.alert(
+                        "Success",
+                        `Image ${mode === "add" ? "added" : "updated"} successfully!`
+                    );
                     navigation.goBack();
                 } else {
                     Alert.alert("Error", `Failed to ${mode === "add" ? "add" : "update"} image.`);
@@ -71,38 +105,78 @@ export default function AddEditPropertyImageScreen() {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} disabled={loading}>
-                <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
+        <View style={styles.root}>
+            {/* Sticky Header */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                    disabled={loading}
+                >
+                    <Ionicons name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+                <Text style={styles.headerText}>
+                    {mode === "add" ? "Add Property Image" : "Edit Property Image"}
+                </Text>
+            </View>
 
-            <Text style={styles.headerText}>{mode === "add" ? "Add New Property Image" : "Edit Property Image"}</Text>
-
-            <TextField
-                placeholder="Label (e.g., Kitchen, Bedroom)"
-                value={label}
-                onChangeText={setLabel}
-                disabled={loading}
-            />
-            <TextField
-                placeholder="Description"
-                value={description}
-                onChangeText={setDescription}
-                disabled={loading}
-            />
-            <CustomImagePicker image={image} onImageSelected={setImage} disabled={loading} />
-
-            <Button
-                text={loading ? "Submitting..." : mode === "add" ? "Add Image" : "Update Image"}
-                onClick={handleSubmit}
-                disabled={loading}
-            />
-        </ScrollView>
+            <ScrollView contentContainerStyle={styles.container}>
+                <TextField
+                    placeholder="Label (e.g., Kitchen, Bedroom)"
+                    value={label}
+                    onChangeText={setLabel}
+                    disabled={loading}
+                />
+                <TextField
+                    placeholder="Description"
+                    value={description}
+                    onChangeText={setDescription}
+                    disabled={loading}
+                />
+                <CustomImagePicker
+                    image={image}
+                    onImageSelected={setImage}
+                    disabled={loading}
+                />
+                <Button
+                    text={loading ? "Submitting..." : mode === "add" ? "Add Image" : "Update Image"}
+                    onClick={handleSubmit}
+                    disabled={loading}
+                />
+            </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flexGrow: 1, padding: 16, justifyContent: "center", backgroundColor: "#f5f5f5" },
-    backButton: { position: "absolute", top: 40, left: 16, padding: 10 },
-    headerText: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+    root: {
+        flex: 1,
+        backgroundColor: "#f5f5f5",
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingTop: 50,
+        paddingBottom: 10,
+        backgroundColor: "white",
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        elevation: 3,
+        zIndex: 100,
+    },
+    backButton: {
+        paddingLeft: 15,
+    },
+    headerText: {
+        fontSize: 22,
+        fontWeight: "bold",
+        flex: 1,
+        textAlign: "center",
+        paddingRight: 35,
+    },
+    container: {
+        flexGrow: 1,
+        padding: 16,
+        justifyContent: "center",
+    },
 });

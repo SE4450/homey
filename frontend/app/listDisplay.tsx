@@ -15,6 +15,8 @@ import { useIsFocused } from "@react-navigation/native";
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
 import Lists from "./components/Lists";
+import { LogBox } from "react-native";
+LogBox.ignoreAllLogs(true); // 👈 disables all warning popups
 
 const styles = StyleSheet.create({
   container: {

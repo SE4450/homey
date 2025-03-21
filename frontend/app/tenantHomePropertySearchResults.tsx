@@ -63,11 +63,11 @@ export default function TenantHomePropertySearchResultsScreen() {
       } else {
         setProperties(response.data);
         // Extract all unique landlord IDs from the fetched properties
-        const uniqueLandlordIds = Array.from(
-          new Set(response.data.map((prop: any) => prop.landlord.id))
+        const uniquePropertyIds = Array.from(
+          new Set(response.data.map((prop: any) => prop.id))
         ) as number[];
         // Fetch all landlord reviews in one backend call
-        fetchLandlordRatings(uniqueLandlordIds);
+        fetchPropertyRatings(uniquePropertyIds);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch properties.");
@@ -76,10 +76,10 @@ export default function TenantHomePropertySearchResultsScreen() {
     }
   };
 
-  const fetchLandlordRatings = async (landlordIds: number[]) => {
+  const fetchPropertyRatings = async (propertyIds: number[]) => {
     try {
       // Assuming the backend supports an array for reviewedItemId:
-      const response = await get<any>("/api/reviews", { reviewType: "user", reviewedItemId: landlordIds });
+      const response = await get<any>("/api/reviews", { reviewType: "property", reviewedItemId: propertyIds });
       const ratingsMap: { [key: number]: string } = {};
       if (response && response.data.length > 0) {
         // Group reviews by landlord id
@@ -92,7 +92,7 @@ export default function TenantHomePropertySearchResultsScreen() {
           reviewsByLandlord[id].push(review);
         });
         // Calculate average rating for each landlord
-        for (const id of landlordIds) {
+        for (const id of propertyIds) {
           if (reviewsByLandlord[id] && reviewsByLandlord[id].length > 0) {
             const sum = reviewsByLandlord[id].reduce((acc, curr) => acc + curr.score, 0);
             ratingsMap[id] = (sum / reviewsByLandlord[id].length).toFixed(1);
@@ -101,7 +101,7 @@ export default function TenantHomePropertySearchResultsScreen() {
           }
         }
       } else {
-        landlordIds.forEach((id) => {
+        propertyIds.forEach((id) => {
           ratingsMap[id] = "N/A";
         });
       }
@@ -109,7 +109,7 @@ export default function TenantHomePropertySearchResultsScreen() {
     } catch (err) {
       // On error, set all ratings to "N/A"
       const ratingsMap: { [key: number]: string } = {};
-      landlordIds.forEach((id) => (ratingsMap[id] = "N/A"));
+      propertyIds.forEach((id) => (ratingsMap[id] = "No ratings"));
       setLandlordRatings(ratingsMap);
     }
   };
@@ -122,7 +122,6 @@ export default function TenantHomePropertySearchResultsScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Sticky Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="black" />

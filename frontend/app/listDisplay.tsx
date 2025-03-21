@@ -50,12 +50,12 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: "center",
     marginBottom: 24,
+    marginTop: 10
   },
   createButtonText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
-    marginTop: 10
   },
   listsContainer: {
     marginTop: 10,

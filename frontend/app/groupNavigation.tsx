@@ -7,7 +7,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import HomeScreen from "./home";
-import ProfileScreen from "./profile";
 import ListScreen from "./listDisplay";
 import ExpenseScreen from "./expenses";
 import MessageStackScreen from "./stacks/messagesStack";
@@ -73,9 +72,6 @@ export default function GroupNavigationScreen() {
             case "Home":
               iconName = "home";
               break;
-            case "Profile":
-              iconName = "account-circle";
-              break;
             case "List":
               iconName = "shopping-cart";
               break;
@@ -105,6 +101,7 @@ export default function GroupNavigationScreen() {
         },
         tabBarActiveTintColor: "#4CAF50",
         tabBarInactiveTintColor: "grey",
+        tabBarLabelStyle: { fontSize: 7 }
       })}
     >
       <Tab.Screen name="Home">
@@ -129,9 +126,6 @@ export default function GroupNavigationScreen() {
       {/* Show additional tabs only for tenants */}
       {roleString == "tenant" && (
         <>
-          <Tab.Screen name="Profile">
-            {() => <ProfileScreen groupId={groupIdString} role={roleString} />}
-          </Tab.Screen>
           <Tab.Screen name="List">
             {() => <ListScreen groupId={groupIdString} role={roleString} />}
           </Tab.Screen>

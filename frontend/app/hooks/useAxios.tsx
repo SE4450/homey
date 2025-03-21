@@ -9,7 +9,10 @@ const useAxios = () => {
   const router = useRouter();
 
   const axiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.EXPO_PUBLIC_API_URL
+    baseURL: process.env.EXPO_PUBLIC_API_URL,
+    validateStatus: (status) => {
+      return status < 500;
+    }
   });
 
   const formatErrors = (errors: string[]): string => {

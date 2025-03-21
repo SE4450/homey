@@ -32,7 +32,6 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      console.log(groupId);
       const response = await get<any>(`/api/conversations/${groupId}`);
       if (response) {
         const formattedConversations = response.data.map(

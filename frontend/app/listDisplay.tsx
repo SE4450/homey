@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
+    marginTop: 10
   },
   listsContainer: {
     marginTop: 10,
@@ -122,7 +123,7 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
     if (isFocused) {
       usersLists();
     }
-  }, []);
+  }, [isFocused]);
 
   //function called in the useEffect to load all the users created lists
   const usersLists = async () => {

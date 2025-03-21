@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useIsFocused } from "@react-navigation/native";
 import useAxios from "../app/hooks/useAxios";
 import { useAuth } from "../app/context/AuthContext";
 import Lists from "./components/Lists";
@@ -110,6 +110,7 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
   const [listID, setListID] = useState(0 as Number);
   //variable that will hold the names of all the user created lists
   const [lists, setLists] = useState([] as Array<{ name: String; id: Number }>);
+  const isFocused = useIsFocused();
 
   const { post, get } = useAxios();
   const { userToken, userId } = useAuth();
@@ -118,7 +119,9 @@ export default function ListDisplay({ groupId, role }: ListScreenProps) {
   //let data = [{name: "list1", id: 1}, {name: "list2", id: 2}, {name: "list3", id: 3}];
 
   useEffect(() => {
-    usersLists();
+    if (isFocused) {
+      usersLists();
+    }
   }, []);
 
   //function called in the useEffect to load all the users created lists

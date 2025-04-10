@@ -3,12 +3,13 @@ import { createStackNavigator } from "@react-navigation/stack";
 import GroupProfileScreen from "../groupProfileScreen";
 import AddReviewScreen from "../addReview";
 import DisplayReviews from "../displayReviews";
+import Profile from "../profile";
 
 export type GroupStackParamList = {
     groups: undefined,
     displayReviews: { reviewName: String, reviewType: String, itemId: any };
     addReview: { reviewName: String, reviewType: String, itemId: any };
-    Profile: undefined,
+    profile: undefined,
 };
 
 const GroupStack = createStackNavigator<GroupStackParamList>();
@@ -28,6 +29,9 @@ export default function GroupStackScreen({ groupId, role }: GroupScreenProps) {
                 headerShown: false
             }} />
             <GroupStack.Screen name="displayReviews" component={DisplayReviews} options={{
+                headerShown: false
+            }} />
+            <GroupStack.Screen name="profile" component={() => Profile({ groupId, role })} options={{
                 headerShown: false
             }} />
         </GroupStack.Navigator>

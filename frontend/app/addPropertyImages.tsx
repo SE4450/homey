@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, StyleSheet, ScrollView, View, Text, TouchableOpacity } from "react-native";
+import { Alert, StyleSheet, ScrollView, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import Button from "./components/button";
 import TextField from "./components/textField";
@@ -79,16 +79,27 @@ export default function AddPropertyImagesScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            {/* 🔹 Sticky Header */}
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 70}
+        >
+            {/* Sticky Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} disabled={loading}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                    disabled={loading}
+                >
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Upload Additional Property Images</Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
                 {images.map((img, index) => (
                     <View key={index} style={styles.imageContainer}>
                         <TextField
@@ -114,12 +125,20 @@ export default function AddPropertyImagesScreen() {
                 ))}
 
                 <View style={styles.buttonContainer}>
-                    <Button text="Add Image" onClick={addImage} disabled={images.length >= 10 || loading} />
+                    <Button
+                        text="Add Image"
+                        onClick={addImage}
+                        disabled={images.length >= 10 || loading}
+                    />
                     <View style={styles.buttonSpacing} />
-                    <Button text={loading ? "Submitting..." : "Submit Property"} onClick={handleSubmit} disabled={loading} />
+                    <Button
+                        text={loading ? "Submitting..." : "Submit Property"}
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    />
                 </View>
             </ScrollView>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -138,20 +157,16 @@ const styles = StyleSheet.create({
         borderBottomColor: "#ddd",
         elevation: 3,
         zIndex: 100,
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
     },
     backButton: {
-        padding: 10,
-        marginRight: 10,
+        paddingLeft: 15,
     },
     headerText: {
         fontSize: 22,
         fontWeight: "bold",
         flex: 1,
         textAlign: "center",
+        paddingRight: 35,
     },
     scrollContent: {
         flexGrow: 1,

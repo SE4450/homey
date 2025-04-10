@@ -17,6 +17,7 @@ import { IMAGES, RANDOM_THUMBNAIL, THUMBNAILS } from "./pictures/assets";
 import { useAuth } from "./context/AuthContext";
 import axios from "axios";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -62,7 +63,6 @@ export default function HomeScreen({ groupId, role }: any) {
       });
 
       if (response.data.status === "success") {
-        // Separate chores into my active, roommates active, and completed
         const myActive: Chore[] = [];
         const roommatesActive: Chore[] = [];
         const completed: Chore[] = [];
@@ -95,7 +95,6 @@ export default function HomeScreen({ groupId, role }: any) {
     }
   }, [userToken, isFocused]);
 
-  // This function will get the correct thumbnail based on the stored bannerImage
   const getChoreImage = (chore: Chore) => {
     if (chore.bannerImage) {
       const key = parseInt(chore.bannerImage, 10);
@@ -106,7 +105,6 @@ export default function HomeScreen({ groupId, role }: any) {
     return RANDOM_THUMBNAIL();
   };
 
-  // Render a single chore card
   const renderChoreCard = (item: Chore) => (
     <TouchableOpacity
       onPress={() =>
@@ -133,7 +131,6 @@ export default function HomeScreen({ groupId, role }: any) {
     </TouchableOpacity>
   );
 
-  // Render a section of chores (either active or completed)
   const renderChoreSection = (
     title: string,
     chores: Chore[],
@@ -151,125 +148,156 @@ export default function HomeScreen({ groupId, role }: any) {
           showsVerticalScrollIndicator={false}
           columnWrapperStyle={styles.choreList}
           renderItem={({ item }) => renderChoreCard(item)}
-          scrollEnabled={false} // Disable scrolling for nested FlatList
+          scrollEnabled={false}
         />
       )}
     </View>
   );
 
-  const styles = StyleSheet.create({
-    addButtonText: {
-      fontWeight: "700",
-      color: COLORS.TEXT,
-    },
-    addChoreButton: {
-      position: "absolute",
-      backgroundColor: COLORS.WHITE,
-      paddingHorizontal: 25,
-      paddingVertical: 12,
-      borderRadius: 18,
-      bottom: 0,
-      left: 70,
-    },
-    banner: {
-      width: "150%",
-      height: 200,
-      resizeMode: "contain",
-    },
-    bannerContainer: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      position: "relative",
-    },
-    sectionContainer: {
-      marginBottom: 20,
-    },
-    choreName: {
-      fontSize: 14,
-      fontWeight: "600",
-      marginLeft: 6,
-    },
-    room: {
-      fontSize: 10,
-      fontWeight: "600",
-      marginLeft: 6,
-    },
-    subHeading: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: COLORS.TEXT,
-      marginBottom: 12,
-      marginTop: 10,
-    },
-    choreBanner: {
-      height: 140,
-      width: 140,
-    },
-    choreCard: {
-      backgroundColor: COLORS.WHITE,
-      marginBottom: 12,
-      padding: 8,
-      borderRadius: 18,
-    },
-    choreList: {
-      justifyContent: "space-between",
-    },
-    noChoresText: {
-      fontSize: 16,
-      textAlign: "center",
-      marginTop: 10,
-      marginBottom: 20,
-      color: COLORS.TEXT,
-    },
-    scrollContainer: {
-      paddingBottom: 150,
-      flexGrow: 1,
-    },
-  });
-
   return (
     <Provider store={store}>
-      <ScreenWrapper>
-        <View style={styles.bannerContainer}>
-          <Image source={IMAGES.HOMEY_BANNER} style={styles.banner} />
-          <TouchableOpacity onPress={() => navigation.navigate("addChore")}>
-            <View style={styles.addChoreButton}>
-              <Text style={styles.addButtonText}>Add Chore</Text>
-            </View>
-          </TouchableOpacity>
+      <View style={styles.root}>
+        {/* Sticky Header outside ScreenWrapper */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Chores</Text>
         </View>
 
-        {loading ? (
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-        ) : (
-          <FlatList
-            data={[1]} // Just need one item to render all sections
-            keyExtractor={() => "main"}
-            renderItem={() => (
-              <View>
-                {renderChoreSection(
-                  "MY ACTIVE CHORES",
-                  myActiveChores,
-                  "You have no active chores. Add a new chore!"
-                )}
-                {renderChoreSection(
-                  "ROOMMATES' ACTIVE CHORES",
-                  roommatesActiveChores,
-                  "Your roommates have no active chores."
-                )}
-                {renderChoreSection(
-                  "COMPLETED CHORES",
-                  completedChores,
-                  "No completed chores yet."
-                )}
+        <ScreenWrapper>
+          <View style={styles.bannerContainer}>
+            <Image source={IMAGES.HOMEY_BANNER} style={styles.banner} />
+            <TouchableOpacity onPress={() => navigation.navigate("addChore")}>
+              <View style={styles.addChoreButton}>
+                <Text style={styles.addButtonText}>Add Chore</Text>
               </View>
-            )}
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={true}
-          />
-        )}
-      </ScreenWrapper>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+          ) : (
+            <FlatList
+              data={[1]}
+              keyExtractor={() => "main"}
+              renderItem={() => (
+                <View>
+                  {renderChoreSection(
+                    "MY ACTIVE CHORES",
+                    myActiveChores,
+                    "You have no active chores. Add a new chore!"
+                  )}
+                  {renderChoreSection(
+                    "ROOMMATES' ACTIVE CHORES",
+                    roommatesActiveChores,
+                    "Your roommates have no active chores."
+                  )}
+                  {renderChoreSection(
+                    "COMPLETED CHORES",
+                    completedChores,
+                    "No completed chores yet."
+                  )}
+                </View>
+              )}
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={true}
+            />
+          )}
+        </ScreenWrapper>
+      </View>
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  backButton: {
+    paddingLeft: 15,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+  },
+  addButtonText: {
+    fontWeight: "700",
+    color: COLORS.TEXT,
+  },
+  addChoreButton: {
+    position: "absolute",
+    backgroundColor: COLORS.WHITE,
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 18,
+    bottom: 0,
+    left: 70,
+  },
+  banner: {
+    width: "150%",
+    height: 200,
+    resizeMode: "contain",
+  },
+  bannerContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  choreName: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+  room: {
+    fontSize: 10,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+  subHeading: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.TEXT,
+    marginBottom: 12,
+    marginTop: 10,
+  },
+  choreBanner: {
+    height: 140,
+    width: 140,
+  },
+  choreCard: {
+    backgroundColor: COLORS.WHITE,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 18,
+  },
+  choreList: {
+    justifyContent: "space-between",
+  },
+  noChoresText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 20,
+    color: COLORS.TEXT,
+  },
+  scrollContainer: {
+    paddingBottom: 150,
+    flexGrow: 1,
+  },
+});

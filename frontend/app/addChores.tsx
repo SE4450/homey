@@ -26,6 +26,7 @@ import useAxios from "./hooks/useAxios";
 import { useNavigation } from "@react-navigation/native";
 import { ChoresStackParamList } from "./stacks/choresStack";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Ionicons } from '@expo/vector-icons';
 
 type AddChoresScreenNavigationProp = StackNavigationProp<
   ChoresStackParamList,
@@ -253,253 +254,290 @@ const AddChore = ({ groupId, role }: any) => {
   };
 
   return (
-    <ScreenWrapper>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-          <View style={styles.addChoreContainer}>
-            {choreBanner && (
-              <Image source={choreBanner} style={styles.banner} />
-            )}
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Chore Name</Text>
-              <TextInput
-                value={chore}
-                onChangeText={(e: string) => setChore(e)}
-                style={styles.input}
-                placeholder="Enter chore name"
-              />
-            </View>
-
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Room</Text>
-              <TextInput
-                value={room}
-                onChangeText={(e: string) => setRoom(e)}
-                style={styles.input}
-                placeholder="Enter room"
-              />
-            </View>
-
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Assign To</Text>
-              <TouchableOpacity
-                style={styles.dropdownButton}
-                onPress={() => setModalVisible(true)}
-              >
-                <Text style={styles.dropdownButtonText}>
-                  {selectedRoommateName || "Select a roommate (optional)"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.formItem}>
-              <Text style={styles.subHeading}>Due Date</Text>
-              <TouchableOpacity
-                style={styles.dropdownButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={styles.dropdownButtonText}>
-                  {formatDate(dueDate)}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <AddButton
-                buttonText={isLoading ? "Adding..." : "Add Chore"}
-                onPress={handleAddChore}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Roommate Selection Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Roommate</Text>
-
-            <FlatList
-              data={roommates}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.roommateItem,
-                    assignedTo === item.id && styles.selectedRoommateItem,
-                  ]}
-                  onPress={() => handleSelectRoommate(item)}
-                >
-                  <Text style={styles.roommateName}>
-                    ID {item.id}, {item.firstName} {item.lastName}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Custom Date Picker Modal for iOS */}
-      {Platform.OS === "ios" && (
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={showDatePicker}
-          onRequestClose={() => setShowDatePicker(false)}
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
-          <View style={styles.datePickerModalContainer}>
-            <View style={styles.datePickerContainer}>
-              <View style={styles.datePickerHeader}>
-                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Text style={styles.datePickerCancel}>Cancel</Text>
-                </TouchableOpacity>
-                <Text style={styles.datePickerTitle}>Select Due Date</Text>
-                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Text style={styles.datePickerDone}>Done</Text>
-                </TouchableOpacity>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Add Chore</Text>
+      </View>
+
+      <ScreenWrapper>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+            <View style={styles.addChoreContainer}>
+              {choreBanner && (
+                <Image source={choreBanner} style={styles.banner} />
+              )}
+            </View>
+
+            <View style={styles.form}>
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Chore Name</Text>
+                <TextInput
+                  value={chore}
+                  onChangeText={(e: string) => setChore(e)}
+                  style={styles.input}
+                  placeholder="Enter chore name"
+                />
               </View>
 
-              {/* Month and Year navigation */}
-              <View style={styles.monthNavigator}>
-                <TouchableOpacity
-                  onPress={goToPreviousMonth}
-                  style={styles.monthNavButton}
-                >
-                  <Text style={styles.monthNavButtonText}>←</Text>
-                </TouchableOpacity>
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Room</Text>
+                <TextInput
+                  value={room}
+                  onChangeText={(e: string) => setRoom(e)}
+                  style={styles.input}
+                  placeholder="Enter room"
+                />
+              </View>
 
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Assign To</Text>
                 <TouchableOpacity
-                  onPress={() => setShowYearPicker(!showYearPicker)}
-                  style={styles.yearSelectorButton}
+                  style={styles.dropdownButton}
+                  onPress={() => setModalVisible(true)}
                 >
-                  <Text style={styles.monthYearText}>
-                    {formatMonthYear(currentMonth)}
+                  <Text style={styles.dropdownButtonText}>
+                    {selectedRoommateName || "Select a roommate (optional)"}
                   </Text>
                 </TouchableOpacity>
+              </View>
 
+              <View style={styles.formItem}>
+                <Text style={styles.subHeading}>Due Date</Text>
                 <TouchableOpacity
-                  onPress={goToNextMonth}
-                  style={styles.monthNavButton}
+                  style={styles.dropdownButton}
+                  onPress={() => setShowDatePicker(true)}
                 >
-                  <Text style={styles.monthNavButtonText}>→</Text>
+                  <Text style={styles.dropdownButtonText}>
+                    {formatDate(dueDate)}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Year Picker */}
-              {showYearPicker ? (
-                <View style={styles.yearPickerContainer}>
-                  <FlatList
-                    data={generateYears()}
-                    keyExtractor={(item) => item.toString()}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        style={[
-                          styles.yearItem,
-                          currentMonth.getFullYear() === item
-                            ? styles.selectedYearItem
-                            : null,
-                        ]}
-                        onPress={() => selectYear(item)}
-                      >
-                        <Text
-                          style={[
-                            styles.yearItemText,
-                            currentMonth.getFullYear() === item
-                              ? styles.selectedYearItemText
-                              : null,
-                          ]}
-                        >
-                          {item}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    numColumns={3}
-                    contentContainerStyle={styles.yearGrid}
-                  />
-                </View>
-              ) : (
-                /* Date list */
-                <FlatList
-                  data={generateDates()}
-                  keyExtractor={(item) => item.toISOString()}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={[
-                        styles.dateItem,
-                        dueDate &&
-                          item.toDateString() === dueDate.toDateString()
-                          ? styles.selectedDateItem
-                          : null,
-                      ]}
-                      onPress={() => {
-                        setDueDate(item);
-                        setShowDatePicker(false);
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.dateItemText,
-                          dueDate &&
-                            item.toDateString() === dueDate.toDateString()
-                            ? styles.selectedDateItemText
-                            : null,
-                        ]}
-                      >
-                        {formatDateShort(item)}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  ListEmptyComponent={
-                    <View style={styles.emptyDatesContainer}>
-                      <Text style={styles.emptyDatesText}>
-                        No available dates in this month
-                      </Text>
-                    </View>
-                  }
+              <View style={styles.buttonContainer}>
+                <AddButton
+                  buttonText={isLoading ? "Adding..." : "Add Chore"}
+                  onPress={handleAddChore}
                 />
-              )}
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        {/* Roommate Selection Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Select Roommate</Text>
+
+              <FlatList
+                data={roommates}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.roommateItem,
+                      assignedTo === item.id && styles.selectedRoommateItem,
+                    ]}
+                    onPress={() => handleSelectRoommate(item)}
+                  >
+                    <Text style={styles.roommateName}>
+                      ID {item.id}, {item.firstName} {item.lastName}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
-      )}
 
-      {/* Standard DateTimePicker for Android */}
-      {Platform.OS === "android" && showDatePicker && (
-        <DateTimePicker
-          value={dueDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={onDateChange}
-          minimumDate={new Date()}
-        />
-      )}
-    </ScreenWrapper>
+        {/* Custom Date Picker Modal for iOS */}
+        {Platform.OS === "ios" && (
+          <Modal
+            transparent={true}
+            animationType="slide"
+            visible={showDatePicker}
+            onRequestClose={() => setShowDatePicker(false)}
+          >
+            <View style={styles.datePickerModalContainer}>
+              <View style={styles.datePickerContainer}>
+                <View style={styles.datePickerHeader}>
+                  <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                    <Text style={styles.datePickerCancel}>Cancel</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.datePickerTitle}>Select Due Date</Text>
+                  <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                    <Text style={styles.datePickerDone}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Month and Year navigation */}
+                <View style={styles.monthNavigator}>
+                  <TouchableOpacity
+                    onPress={goToPreviousMonth}
+                    style={styles.monthNavButton}
+                  >
+                    <Text style={styles.monthNavButtonText}>←</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => setShowYearPicker(!showYearPicker)}
+                    style={styles.yearSelectorButton}
+                  >
+                    <Text style={styles.monthYearText}>
+                      {formatMonthYear(currentMonth)}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={goToNextMonth}
+                    style={styles.monthNavButton}
+                  >
+                    <Text style={styles.monthNavButtonText}>→</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Year Picker */}
+                {showYearPicker ? (
+                  <View style={styles.yearPickerContainer}>
+                    <FlatList
+                      data={generateYears()}
+                      keyExtractor={(item) => item.toString()}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={[
+                            styles.yearItem,
+                            currentMonth.getFullYear() === item
+                              ? styles.selectedYearItem
+                              : null,
+                          ]}
+                          onPress={() => selectYear(item)}
+                        >
+                          <Text
+                            style={[
+                              styles.yearItemText,
+                              currentMonth.getFullYear() === item
+                                ? styles.selectedYearItemText
+                                : null,
+                            ]}
+                          >
+                            {item}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      numColumns={3}
+                      contentContainerStyle={styles.yearGrid}
+                    />
+                  </View>
+                ) : (
+                  /* Date list */
+                  <FlatList
+                    data={generateDates()}
+                    keyExtractor={(item) => item.toISOString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          styles.dateItem,
+                          dueDate &&
+                            item.toDateString() === dueDate.toDateString()
+                            ? styles.selectedDateItem
+                            : null,
+                        ]}
+                        onPress={() => {
+                          setDueDate(item);
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.dateItemText,
+                            dueDate &&
+                              item.toDateString() === dueDate.toDateString()
+                              ? styles.selectedDateItemText
+                              : null,
+                          ]}
+                        >
+                          {formatDateShort(item)}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    ListEmptyComponent={
+                      <View style={styles.emptyDatesContainer}>
+                        <Text style={styles.emptyDatesText}>
+                          No available dates in this month
+                        </Text>
+                      </View>
+                    }
+                  />
+                )}
+              </View>
+            </View>
+          </Modal>
+        )}
+
+        {/* Standard DateTimePicker for Android */}
+        {Platform.OS === "android" && showDatePicker && (
+          <DateTimePicker
+            value={dueDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+            minimumDate={new Date()}
+          />
+        )}
+      </ScreenWrapper>
+    </View>
   );
 };
 
 export default AddChore;
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  backButton: {
+    paddingLeft: 15,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+    paddingRight: 35,
+  },
   addChoreContainer: {
     display: "flex",
     justifyContent: "center",

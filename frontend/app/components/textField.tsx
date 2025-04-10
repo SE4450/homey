@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 8,
         fontSize: 16,
+        marginBottom: 10
     },
     disabledInput: {
         backgroundColor: "#e0e0e0",

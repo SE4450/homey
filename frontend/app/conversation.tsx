@@ -10,7 +10,7 @@ import {
     Platform,
     KeyboardAvoidingView
 } from "react-native";
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
@@ -145,28 +145,30 @@ export default function ConversationScreen() {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={styles.backButton}
-                >
-                    <MaterialIcons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{route.params.name}</Text>
-            </View>
-            <FlatList
-                data={messages}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderMessage}
-                inverted
-                contentContainerStyle={styles.messageList}
-            />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 95 : 70}
-                style={styles.keyboardAvoidingView}
-            >
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // adjust as needed
+        >
+            <View style={styles.root}>
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerText}>Chore Details</Text>
+                </View>
+                <FlatList
+                    data={messages}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderMessage}
+                    inverted
+                    // Adding extra bottom padding so last messages aren't hidden by the input area
+                    contentContainerStyle={[styles.messageList, { paddingBottom: 60 }]}
+                    style={{ flex: 1 }}
+                />
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
@@ -178,15 +180,37 @@ export default function ConversationScreen() {
                         <Text style={styles.sendButtonText}>Send</Text>
                     </TouchableOpacity>
                 </View>
-            </KeyboardAvoidingView>
-        </View>
+            </View>
+        </KeyboardAvoidingView>
     );
+
 }
 
 const styles = StyleSheet.create({
-    container: {
+    root: {
         flex: 1,
-        backgroundColor: "#F5F5F5",
+        backgroundColor: "#f5f5f5",
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingTop: 50,
+        paddingBottom: 10,
+        backgroundColor: "white",
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        elevation: 3,
+        zIndex: 100,
+    },
+    backButton: {
+        paddingLeft: 15,
+    },
+    headerText: {
+        fontSize: 22,
+        fontWeight: "bold",
+        flex: 1,
+        textAlign: "center",
+        paddingRight: 35,
     },
     headerContainer: {
         backgroundColor: "#E4E6EB",
@@ -194,12 +218,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         position: "relative",
-    },
-    backButton: {
-        position: "absolute",
-        left: 10,
-        top: "50%",
-        transform: [{ translateY: -4 }],
     },
     headerTitle: {
         fontSize: 18,

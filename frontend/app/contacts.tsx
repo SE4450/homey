@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, Alert, Button } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import Contact from "./components/contact";
-import TextField from "./components/textField";
 import useAxios from "./hooks/useAxios";
 import { useAuth } from "./context/AuthContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { MessageStackParamList } from "./stacks/messagesStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type ContactsScreenNavigationProp = StackNavigationProp<MessageStackParamList, "contacts">;
+type ContactsScreenNavigationProp = StackNavigationProp<
+  MessageStackParamList,
+  "contacts"
+>;
+
 type ContactScreenProps = {
   groupId: string;
   role: string;
@@ -32,13 +43,11 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      console.log(groupId);
       const response = await get<any>(`/api/conversations/${groupId}`);
       if (response) {
         const formattedConversations = response.data.map(
           (conversation: any) => {
             const latestMessage = conversation.messages[0] || null;
-
             const hasNewMessage =
               latestMessage &&
               latestMessage.senderId !== userId &&
@@ -50,13 +59,19 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
                 .filter((p: any) => p.userId !== userId)
                 .map((p: any) => {
                   if (conversation.type == "group") {
-                    if (conversation.participants.some((participant: any) => participant.role == "landlord") && conversation.participants.length > 2) {
+                    if (
+                      conversation.participants.some(
+                        (participant: any) =>
+                          participant.role === "landlord"
+                      ) &&
+                      conversation.participants.length > 2
+                    ) {
                       return "Tenants and Landlord Groupchat";
                     } else {
                       return "Tenants Groupchat";
                     }
                   } else {
-                    return `${p.users.firstName} ${p.users.lastName}`
+                    return `${p.users.firstName} ${p.users.lastName}`;
                   }
                 })
                 .slice(0, 1)
@@ -95,9 +110,7 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
       intervalId = setInterval(fetchConversations, 5000);
     }
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
   }, [isFocused]);
 
@@ -128,55 +141,59 @@ export default function ContactsScreen({ groupId, role }: ContactScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={conversations}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <Contact
-            imageUri={item.imageUri}
-            name={item.name}
-            latestMessage={item.latestMessage}
-            date={item.date}
-            onPress={() => handlePress(item.id, item.name, item.type)}
-            hasNewMessage={item.hasNewMessage}
-          />
-        )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Contacts</Text>
+      </View>
+
+      <View style={styles.container}>
+        <FlatList
+          data={conversations}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <Contact
+              imageUri={item.imageUri}
+              name={item.name}
+              latestMessage={item.latestMessage}
+              date={item.date}
+              onPress={() => handlePress(item.id, item.name, item.type)}
+              hasNewMessage={item.hasNewMessage}
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: "#f8f8f8",
   },
-  loadingIndicator: {
-    flex: 1,
-    justifyContent: "center",
+  header: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 3,
+    zIndex: 100,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+  },
+  container: {
+    flex: 1,
   },
   separator: {
     height: 1,
     backgroundColor: "#eee",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 10,
-  },
-  textFieldContainer: {
-    flex: 1,
-    marginRight: 10,
-  },
-  textField: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    fontSize: 16,
   },
 });
